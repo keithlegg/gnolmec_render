@@ -158,129 +158,7 @@ Vector4 rotate_points ( Matrix4 m, Vector3 v) {
 }
 
 
-/*
-void setup_frustum (float project_scale, float SX, float SY)
-// * project_scale is the projection scaling factor used in the perspective
-//   projection. It's the value you multiply x and y with before you divide
-//   them by z. (usually I use 256 for this value).
-//
-//  * SX and SY are the size of the viewport you want to draw at (320,200 anyone?)
-{
-  float angle_horizontal =  atan2(SX/2,project_scale)-0.0001;
-  float angle_vertical   =  atan2(SY/2,project_scale)-0.0001;
-  float sh               =  sin(angle_horizontal);
-  float sv               =  sin(angle_vertical);
-  float ch               =  cos(angle_horizontal);
-  float cv               =  cos(angle_vertical);
-  // left
-  sides[0].normal.x=ch;
-  sides[0].normal.y=0;
-  sides[0].normal.z=sh;
-  sides[0].distance = 0;
-  // right
-  sides[1].normal.x=-ch;
-  sides[1].normal.y=0;
-  sides[1].normal.z=sh;
-  sides[1].distance = 0;
-  // top
-  sides[2].normal.x=0;
-  sides[2].normal.y=cv;
-  sides[2].normal.z=sv;
-  sides[2].distance = 0;
-  // bottom
-  sides[3].normal.x=0;
-  sides[3].normal.y=-cv;
-  sides[3].normal.z=sv;
-  sides[3].distance = 0;
-  // z-near clipping plane
-  znear.normal.x=0;
-  znear.normal.y=0;
-  znear.normal.z=1;
-  znear.distance = -10;
-}
-
-*/
-
-/*
-
-
-  //http://www.cubic.org/docs/3dclip.htm
-
-
-	struct tvector
-	{
-	  float x,y,z;             // standard vector
-	};
-
-	struct plane
-	{
-	  tvector  normal;         // normalized Normal-Vector of the plane
-	  float    distance;       // shortest distance from plane to Origin
-	};
-
-	struct frustum
-	{
-	  plane sides[4];          // represent the 4 sides of the frustum
-	  plane znear;             // the z-near plane
-	}
-
-/*
-Just as an example: If you want to construct a plane from 3 points do it this way:
-
-plane p;                      // plane to construct from a,b and c
-tvector a,b,c;                // points to build a plane from
-{
-   // build normal vector
-   tvector q,v;
-   q.x = b.x - a.x;    v.x = b.x - c.x;
-   q.y = b.y - a.y;    v.x = b.y - c.y;
-   q.z = b.y - a.y;    v.x = b.z - c.z;
-   p.normal = crossproduct (q,v);
-   normalize_vector (q.normal);
-
-   // calculate distance to origin
-   p.distance = dotproduct (p.normal, a);  // you could also use b or c
-}
-
-*/
-
-/*
-//http://www.scratchapixel.com/lessons/3d-advanced-lessons/perspective-and-orthographic-projection-matrix/perspective-projection-matrix/
-
-template<typename T> 
-void setperspectivepmat(const T &near, const T &far, const T &fov, Matrix4<T> &mat) { 
-
-   T scale = T(1) / tan(degtorad(fov * 0.5)); 
-    mat[0][0] = mat[1][1] = scale; 
-    mat[2][2] = - far / (far - near); 
-    mat[3][2] = - far * near / (far - near); 
-    mat[2][3] = - 1; mat[3][3] = 0; 
-   }
-
-
-
-template<typename T> void projectverts(const Matrix4<T> &mat, const Point3<T> *verts, const unsigned &nverts) { 
-   // create an image unsigned width = 640; 
-   unsigned char *buffer = new unsigned char [width * width]; 
-   memset(buffer, 0x0, width * width); for (int i = 0; i < nverts; ++i) { Point3<T> ps = verts[i] * mat; if (ps.x < -1 || ps.x > 1 || ps.y < -1 || ps.y > 1) continue; // convert projected point coordinates to pixel coordinates unsigned px = std::min(unsigned((ps.x + 1) * 0.5 * width), width - 1); unsigned py = std::min(unsigned((1-(ps.y + 1) * 0.5) * width), width - 1); buffer[py * width + px] = 255; } // save to ppm std::ofstream ofs;eee ofs.open("./untitled.ppm"); ofs << "P5\n" << width << " " << width << "\n255\n"; ofs.write((char*)buffer, width * width); ofs.close(); delete [] buffer; }
-
-
-
-Point3 operator * (const Matrix4<T> &mat) const { Point3<T> pt( x * mat[0][0] + y * mat[1][0] + z * mat[2][0] + mat[3][0], x * mat[0][1] + y * mat[1][1] + z * mat[2][1] + mat[3][1], x * mat[0][2] + y * mat[1][2] + z * mat[2][2] + mat[3][2]); T w = x * mat[0][3] + y * mat[1][3] + z * mat[2][3] + mat[3][3]; return (w != 1) ? pt / w : pt; }
-
-*/
-
-
 void render_model( int width, int height, char* filename ,float RX, float RY, float RZ ,char* outfilename){
-
-
-/***********************/
-
-
-   /***********************/
-
-
-
 
    cout << "# Begin Rendering ..." << endl;
 
@@ -340,10 +218,6 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
    Vector4 vprj[4];       //3 and 4 sided -  projected point coordinates
    Vector3 v1,v2,v3,v4;   //retrieved point data (xyz)
    Matrix4 rotate_obj;    //4X4 rotation matrix 
-
-
-   //Matrix4 camera;       //4X4 camera matrix
-
 
 
    int i =0;
@@ -535,54 +409,16 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
 int main(int argc, char *argv[])
 {
 
-  /*
-   if(argc < 2) {
-       cout<< "  USAGE\n";
-       cout<< "  \n";
-       cout << "  int width, int height, char* filename ,float RX, float RY, float RZ ,char* outfilename\n";
-       exit(0);
-   }
-   */
-   
-   //Node M;
-  /*
-   Node N;
-   N.setNodeName("frank");
-   N.set_xyz( 11, 12, 13);
-   Node X(N);
-   X.set_xyz( 11, 12, 13);
-   X.setNodeName("bob");
-
-   //cout << X.get_x();
- 
-   //cout << N.GetNodeName() ;
-
-   Node M = N.GetParentNode();
-   cout << M.get_x();
- 
-   //cout<< N.GetParentNode();
-
-  */
-
-
     //model MOBJ;
     //MOBJ.make_cube(1);
     //MOBJ.save_obj("mycube.obj");
-    
-   
+  
   
     //( int width, int height, char* filename ,float RX, float RY, float RZ ,char* outfilename){
-    //render_model(atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), atof(argv[5]), atof(argv[6]) ,  argv[7]);
+    render_model(atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), atof(argv[5]), atof(argv[6]) ,  argv[7]);
 
-
-     //render_model(256,256,"mycube.obj",0,0,0,"foo.bmp");
-     render_model(256,256,"mycube.obj", 0, 90 ,0,"foo.bmp");
-
-
-
-    //READ BMP DATA  
-    //int w, h, i, j;
-    //pixelrgb* img = read_bmp("foo.bmp", &w, &h);
+    //render_model(256,256,"mycube.obj",0,0,0,"foo.bmp");
+    //render_model(256,256,"mycube.obj", 0, 90 ,0,"foo.bmp");
     
 
    return 0;

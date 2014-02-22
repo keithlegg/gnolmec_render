@@ -5,16 +5,6 @@
 #include <cmath>
 
 
-
-/*
-class RGBType {
-	   double r;
-	   double g;
-	   double b;
-};
-*/
-
-
 class framebuffer {
 
    int pix_iterator;
