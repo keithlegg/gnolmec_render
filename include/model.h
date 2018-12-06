@@ -122,81 +122,81 @@ class model {
 
 
    }
-   /**********************/
-   void save_obj( char* filename){
-	ofstream myfile;
-	myfile.open (filename);
+    /**********************/
+    void save_obj( char* filename){
+        ofstream myfile;
+        myfile.open (filename);
 
-	myfile << "#Exported with Keith's little graphics tool\n";
-	myfile << "#number of verticies "<< vertex_count  <<"\n";
-	myfile << "#number of faces     "<< face_count <<"\n";
-	myfile <<"\n";
+        myfile << "#Exported with Keith's little graphics tool\n";
+        myfile << "#number of verticies "<< vertex_count  <<"\n";
+        myfile << "#number of faces     "<< face_count <<"\n";
+        myfile <<"\n";
 
-        for (int xx=0;xx<vertex_count;xx++){
-            myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] <<"\n";
+              for (int xx=0;xx<vertex_count;xx++){
+                  myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] <<"\n";
 
-        }
+              }
 
-	myfile <<"\n";
-        for (int xx=0;xx<face_count;xx++){
+        myfile <<"\n";
+              for (int xx=0;xx<face_count;xx++){
 
-          if ( is_three_sided )
-          { 
-            myfile << "f " << faces3[xx][0] <<" "<< faces3[xx][1] <<" "<< faces3[xx][2] <<"\n";
-          }
-          if ( is_four_sided )
-          { 
-            myfile << "f " << faces[xx][0] <<" "<< faces[xx][1] <<" "<< faces[xx][2]<<" "<< faces[xx][3] <<"\n";
-          }
+                if ( is_three_sided )
+                { 
+                  myfile << "f " << faces3[xx][0] <<" "<< faces3[xx][1] <<" "<< faces3[xx][2] <<"\n";
+                }
+                if ( is_four_sided )
+                { 
+                  myfile << "f " << faces[xx][0] <<" "<< faces[xx][1] <<" "<< faces[xx][2]<<" "<< faces[xx][3] <<"\n";
+                }
 
-        }
+              }
 
-        
-	myfile.close();
-   }
+              
+        myfile.close();
+     }
 
    /**********************/
      void load_obj(char* filename){
-	  ifstream fin;
-	  fin.open(filename); // open a file
-	  if (!fin.good()){ 
-	    cout << "NO FILE! "<< filename << endl;
+    ifstream fin;
+    fin.open(filename); // open a file
+    if (!fin.good()){ 
+      cout << "NO FILE! "<< filename << endl;
             exit (EXIT_FAILURE); // exit if file not found
-	  }
+    }
 
-	  while (!fin.eof())
-	  {
-	    char buf[MAX_CHARS_PER_LINE];
-	    fin.getline(buf, MAX_CHARS_PER_LINE);
+    while (!fin.eof())
+    {
+      char buf[MAX_CHARS_PER_LINE];
+      fin.getline(buf, MAX_CHARS_PER_LINE);
             calcfac=0;
 
-	    int n = 0; 
-	    const char* token[MAX_TOKENS_PER_LINE] = {};
-	    token[0] = strtok(buf, DELIMITER);
-	    if (token[0]) 
-	    {
-	      for (n = 1; n < MAX_TOKENS_PER_LINE; n++)
-	      {
-		token[n] = strtok(0, DELIMITER);
+      int n = 0; 
+      const char* token[MAX_TOKENS_PER_LINE] = {};
+      token[0] = strtok(buf, DELIMITER);
+      if (token[0]) 
+      {
+        for (n = 1; n < MAX_TOKENS_PER_LINE; n++)
+        {
+    token[n] = strtok(0, DELIMITER);
 
                //calculate if 3 or 4 sided faces 
- 	       if (!strcmp(token[0],f_chr))
+         if (!strcmp(token[0],f_chr))
                {
                  calcfac++;
                }////
  
-		if (!token[n]) break;  
-	      }
+    if (!token[n]) break;  
+        }
               //cout << calcfac << endl;
               if(calcfac==5){is_four_sided = true;}
               if(calcfac==4){is_three_sided = true ;}
-	    }
+      }
             
             /******************************/
 
-	    // process the tokens
-	    for (int i = 1; i < n; i++){
-	       if (!strcmp(token[0],v_chr))
+      // process the tokens
+      for (int i = 1; i < n; i++){
+         if (!strcmp(token[0],v_chr))
                {
                    if (vtx_cnt<=2){
                      vtx_tmp.push_back( atof(token[i]) );
@@ -208,7 +208,7 @@ class model {
 
                      obj_pts[vertex_count].set(vtx_tmp[0],vtx_tmp[1],vtx_tmp[2]);
 
-		     vtx_tmp.clear();
+         vtx_tmp.clear();
                      vertex_count++;
                    }
 
@@ -216,44 +216,44 @@ class model {
 
                }
                //face tokens
-	       if (!strcmp(token[0],f_chr))
+         if (!strcmp(token[0],f_chr))
                {
                    //is_three_sided
 
 
                    //4 sided
                    if (is_four_sided){
-		           if (fac_cnt<=3){
-		             fac_tmp.push_back( atof(token[i]) );
-		           }  
-	 
-		           if (fac_cnt==4){
-		             fac_tmp.push_back( atof(token[i]) );
-		             fac_cnt=0;
-		             //cout << fac_tmp[0]<<" "<<fac_tmp[1]<<" "<<fac_tmp[2]<<" " <<fac_tmp[3]<< endl;
+               if (fac_cnt<=3){
+                 fac_tmp.push_back( atof(token[i]) );
+               }  
+   
+               if (fac_cnt==4){
+                 fac_tmp.push_back( atof(token[i]) );
+                 fac_cnt=0;
+                 //cout << fac_tmp[0]<<" "<<fac_tmp[1]<<" "<<fac_tmp[2]<<" " <<fac_tmp[3]<< endl;
 
-		             faces[face_count].set(fac_tmp[0], fac_tmp[1], fac_tmp[2],fac_tmp[3]);
+                 faces[face_count].set(fac_tmp[0], fac_tmp[1], fac_tmp[2],fac_tmp[3]);
 
-			     fac_tmp.clear();
-		             face_count++;
-		           }
+           fac_tmp.clear();
+                 face_count++;
+               }
                    }
 
                    if (is_three_sided){
-		           //3 SIDED
-		           if (fac_cnt<=2){
-		             fac_tmp.push_back( atof(token[i]) );
-		           }
-		           if (fac_cnt==3){
-		             fac_tmp.push_back( atof(token[i]) );
-		             fac_cnt=0;
+               //3 SIDED
+               if (fac_cnt<=2){
+                 fac_tmp.push_back( atof(token[i]) );
+               }
+               if (fac_cnt==3){
+                 fac_tmp.push_back( atof(token[i]) );
+                 fac_cnt=0;
                              
-		             //0 indexed  (may NOT be zero indexed?)
-		             faces3[face_count].set(fac_tmp[0]-1, fac_tmp[1]-1, fac_tmp[2]-1);
+                 //0 indexed  (may NOT be zero indexed?)
+                 faces3[face_count].set(fac_tmp[0]-1, fac_tmp[1]-1, fac_tmp[2]-1);
 
-			     fac_tmp.clear();
-		             face_count++;
-		           }
+           fac_tmp.clear();
+                 face_count++;
+               }
                    }
 
                    /*******/
@@ -262,7 +262,7 @@ class model {
 
 
            }//iterate tokens
-	    
+      
        }//iterate each line
 
    }//load object

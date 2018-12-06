@@ -7,7 +7,7 @@ bmp_draw:$(OBJ)
 	rm -f $(OBJ)
 
 main.o:
-	g++ -c main.cpp $(INC)
+	g++ -c Matrices.cpp main.cpp $(INC)
 
 clean:
 	rm -f $(OBJ) bmp_draw
