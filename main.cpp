@@ -1,17 +1,20 @@
 #include <iostream>
 #include <stdio.h>
 
+#include "include/Vectors.h"
 
-#include "inc/Vectors.h"
-#include "inc/Matrices.h"
+#include "include/framebuffer.h"
+#include "include/model.h"
 
-#include "inc/framebuffer.h"
-#include "inc/model.h"
 
-//#include "node.h"
+//YES YES, I KNOW YOU ARE SUPPOSED TO INLCUDE .H., NOT CPP! 
+//but it is the only way this works.... mission: go figure out why!??
+#include "Matrices.cpp"
 
 
 using namespace std;
+
+
 
 int pix_iterator;//index to a pixel on the framebuffer
 
@@ -24,14 +27,15 @@ int pix_iterator;//index to a pixel on the framebuffer
 
 /***********************/
 
-
+/*
  //RGB color struct
  struct pixelrgb {
      double r;
      double g;
      double b;
  };
-   
+*/
+
    
 /*
 
@@ -165,7 +169,7 @@ Vector4 rotate_points ( Matrix4 m, Vector3 v) {
 }
 
 
-void render_model( int width, int height, char* filename ,float RX, float RY, float RZ ,char* outfilename){
+void render_model( int width, int height, char* objfilename ,float RX, float RY, float RZ ,char* outfilename){
 
    cout << "# Begin Rendering ..." << endl;
 
@@ -177,11 +181,12 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
 
    int n = width * height;
 
-   framebuffer::RGBType* pixels;
+   framebuffer::RGBType* output_image;
    framebuffer lineart( width, height );
-   pixels = lineart.rgbdata;
+   output_image = lineart.rgbdata;
 
    /***********/
+   short flat_color = 180; //background grey color 
 
    //fill each pixel with a color (negative color?)
    for (int x = 0; x < width; x++)
@@ -190,9 +195,14 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
         {  
             pix_iterator = y * width + x;     
 
-            pixels[pix_iterator].r = y/2;       
-            pixels[pix_iterator].g = 255;//-y/3;
-            pixels[pix_iterator].b = x*(y/2);
+            //funky moire pattern 
+            // output_image[pix_iterator].r = y/2;       
+            // output_image[pix_iterator].g = 255;//-y/3;
+            // output_image[pix_iterator].b = x*(y/2);
+
+            output_image[pix_iterator].r = flat_color;       
+            output_image[pix_iterator].g = flat_color;
+            output_image[pix_iterator].b = flat_color;
 
         }
    }
@@ -211,7 +221,7 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
 
    //containers for 3d objects 
    model OBJ;
-   OBJ.load_obj(filename);
+   OBJ.load_obj(objfilename);
 
    //OBJ.load_obj("other/obj/sphere.obj");
 
@@ -239,19 +249,19 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
 
    //rotate_obj.show();
    
+   // printf( "%d", rotate_obj );
 
    //rotate_obj.scale(1.8);
    //rotate_obj.translate(15,15,15);
    //rotate_obj.show();
    
   
-  /*   
+ 
    //adjust object rotation
    rotate_obj.rotateY( RX );
    rotate_obj.rotateX( RY );
-   rotate_obj.rotateZ( RZ );
-  */
-
+   //rotate_obj.rotateZ( RZ );
+ 
 
 
    //camera.rotateY(12);
@@ -332,88 +342,87 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
          vprj[2]=rotate_points(rotate_obj,v3);   
          vprj[3]=rotate_points(rotate_obj,v4);
 
-         cout << "Rendering polygon "<< plycount << endl; plycount++;
+         //cout << "Rendering polygon "<< plycount << endl; plycount++;
 
          //render four sided polygon (step through 4 verts and connect the dots) 
          for (j=0;j<4;j++){
-               
-                  double ZVAL = .5 ;
+             double ZVAL = .5 ;
 
-                  cout << vprj[j].x << " "<< vprj[j].x << " " << vprj[j].z << endl;
+             cout << vprj[j].x << " "<< vprj[j].x << " " << vprj[j].z << endl;
 
-                  scoord_x =  (vprj[j].x   *lineart.center_x*ZVAL)+lineart.center_x;
-                  scoord_y =  (vprj[j].y   *lineart.center_y*ZVAL)+lineart.center_y;
+             scoord_x =  (vprj[j].x   *lineart.center_x*ZVAL)+lineart.center_x;
+             scoord_y =  (vprj[j].y   *lineart.center_y*ZVAL)+lineart.center_y;
 
-                 if (j<3){
+             if (j<3){
 
-                    ecoord_x =  (vprj[j+1].x   *lineart.center_x*ZVAL)+lineart.center_x;
-                    ecoord_y =  (vprj[j+1].y   *lineart.center_y*ZVAL)+lineart.center_y;
+                ecoord_x =  (vprj[j+1].x   *lineart.center_x*ZVAL)+lineart.center_x;
+                ecoord_y =  (vprj[j+1].y   *lineart.center_y*ZVAL)+lineart.center_y;
 
-                      lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-                 }
-                 if (RENDER_PTS){
-                     //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
-                     lineart.draw_point(scoord_x   , scoord_y  , vtx_color);
-                     lineart.draw_point(scoord_x+1 , scoord_y  , vtx_color);
-                     lineart.draw_point(scoord_x-1 , scoord_y  , vtx_color);
-                     lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
-                     lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
-                 }
-
-         }
-       }//4 sided   
-
-       /***********/
-
-             
-       //RENDER THREE SIDED POLYGONS
-       if (OBJ.is_three_sided)
-       {
-         poly3=OBJ.faces3[i]; //store 3 verts in a vector4
-    
-         //look up each face vertex (vector3 <vtx1,vtx2,vtx3>) 
-         v1=OBJ.obj_pts[int(poly3.x)];
-         v2=OBJ.obj_pts[int(poly3.y)];
-         v3=OBJ.obj_pts[int(poly3.z)];
-     
-         //calculate point rotationargv[0], argv[1], argv[2], argv[3],argv[4],argv[5]);s
-         vprj[0]=rotate_points(rotate_obj,v1);
-         vprj[1]=rotate_points(rotate_obj,v2);
-         vprj[2]=rotate_points(rotate_obj,v3);
-
-         cout << "Rendering polygon "<< plycount << endl; plycount++;
-
-         //render 3 sided polygon (step through 3 verts and connect the dots) 
-         for (j=0;j<3;j++){
-
-             scoord_x =  (vprj[j].x   *lineart.center_x/2)+lineart.center_x;
-             scoord_y =  (vprj[j].y   *lineart.center_y/2)+lineart.center_y;
-
-             if (j<2){
-              ecoord_x =  (vprj[j+1].x *lineart.center_x/2)+lineart.center_x;
-              ecoord_y =  (vprj[j+1].y *lineart.center_y/2)+lineart.center_y;
-              lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+                  lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
              }
-
              if (RENDER_PTS){
-               //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
-                 lineart.draw_point(scoord_x   , scoord_y   , vtx_color);
-                 lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
-                 lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
+                 //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
+                 lineart.draw_point(scoord_x   , scoord_y  , vtx_color);
+                 lineart.draw_point(scoord_x+1 , scoord_y  , vtx_color);
+                 lineart.draw_point(scoord_x-1 , scoord_y  , vtx_color);
                  lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
                  lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
              }
 
-         }
-       }
+         }//4 sided polys 
 
+       }//4 sided   
+
+       /***********/
+             
+       //RENDER THREE SIDED POLYGONS
+       if (OBJ.is_three_sided)
+       {
+           poly3=OBJ.faces3[i]; //store 3 verts in a vector4
+    
+           //look up each face vertex (vector3 <vtx1,vtx2,vtx3>) 
+           v1=OBJ.obj_pts[int(poly3.x)];
+           v2=OBJ.obj_pts[int(poly3.y)];
+           v3=OBJ.obj_pts[int(poly3.z)];
+     
+           //calculate point rotationargv[0], argv[1], argv[2], argv[3],argv[4],argv[5]);s
+           vprj[0]=rotate_points(rotate_obj,v1);
+           vprj[1]=rotate_points(rotate_obj,v2);
+           vprj[2]=rotate_points(rotate_obj,v3);
+
+           // cout << "Rendering polygon "<< plycount << endl; plycount++;
+
+           //render 3 sided polygon (step through 3 verts and connect the dots) 
+           for (j=0;j<3;j++){
+               scoord_x =  (vprj[j].x   *lineart.center_x/2)+lineart.center_x;
+               scoord_y =  (vprj[j].y   *lineart.center_y/2)+lineart.center_y;
+           
+               if (j<2){
+                   ecoord_x =  (vprj[j+1].x *lineart.center_x/2)+lineart.center_x;
+                   ecoord_y =  (vprj[j+1].y *lineart.center_y/2)+lineart.center_y;
+                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+               }
+           
+               if (RENDER_PTS){
+                   //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
+                   lineart.draw_point(scoord_x   , scoord_y   , vtx_color);
+                   lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
+                   lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
+                   lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
+                   lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
+               }
+           }
+
+       }
 
    }//render iterator
 
-   savebmp(outfilename , width, height, dpi, pixels);
+   savebmp(outfilename , width, height, dpi, output_image);
  
    cout << "# Done Rendering ! " << endl;
 }
+
+
 
 
 int main(int argc, char *argv[])
@@ -422,16 +431,14 @@ int main(int argc, char *argv[])
     //model MOBJ;
     //MOBJ.make_cube(1);
     //MOBJ.save_obj("mycube.obj");
-  
-  
+    
     //( int width, int height, char* filename ,float RX, float RY, float RZ ,char* outfilename){
     render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), atof(argv[5]), atof(argv[6]),  argv[7]);
 
     //render_model(256,256,"mycube.obj",0,0,0,"foo.bmp");
     //render_model(256,256,"mycube.obj", 0, 90 ,0,"foo.bmp");
-    
-
-   return 0;
+  
+    return 0;
 }
 
 

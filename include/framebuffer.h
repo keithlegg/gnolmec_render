@@ -21,9 +21,9 @@ class framebuffer {
    
    //RGB color struct
    struct RGBType {
-	   double r;
-	   double g;
-	   double b;
+	   short r;
+	   short g;
+	   short b;
    };
 
 
