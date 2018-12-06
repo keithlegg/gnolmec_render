@@ -1,12 +1,12 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "framebuffer.h"
-#include "Vectors.h"
-#include "Matrix4.cpp"
-#include "model.h"
+#include "inc/framebuffer.h"
+#include "inc/Vectors.h"
+#include "inc/Matrices.h"
+#include "inc/model.h"
 
-#include "node.h"
+//#include "node.h"
 
 
 using namespace std;
@@ -160,7 +160,7 @@ Vector4 rotate_points ( Matrix4 m, Vector3 v) {
 
 void render_model( int width, int height, char* filename ,float RX, float RY, float RZ ,char* outfilename){
 
-   cout << "# Begin Rendering ..." << endl;
+   cout << "# Begin Rendering ..." << std::endl;
 
    int dpi    = 72; 
    //int width  = 512; 
@@ -230,17 +230,21 @@ void render_model( int width, int height, char* filename ,float RX, float RY, fl
 
    
    
-   rotate_obj.show();
+   //rotate_obj.show();
+   
+
    //rotate_obj.scale(1.8);
    //rotate_obj.translate(15,15,15);
    //rotate_obj.show();
    
+/*
    
    //adjust object rotation
    rotate_obj.rotateY( RX );
    rotate_obj.rotateX( RY );
    rotate_obj.rotateZ( RZ );
 
+*/
 
 
 
