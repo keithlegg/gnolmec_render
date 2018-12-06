@@ -20,9 +20,23 @@ And the BMP picture export from rasterrain:
 http://sourceforge.net/projects/rasterrain/
 
 
-Copy all the files into a directory on Linux or OSX and type "make"
+if you are on Ubuntu or OSX just go to the folder and type "make"
 
-it should work well from there.
+to run type:
+
+./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
+
+
+args in order are 
+	X resolution of outoput image
+	Y resolution of outoput image
+	obj file to load and render
+	X rotation 
+	Y rotation
+	Z rotation 
+	output bmp file 
+
+
 
 
 Keith Legg
