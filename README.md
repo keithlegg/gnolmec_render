@@ -28,20 +28,21 @@ to run type:
 
 
 args in order are 
-	X resolution of outoput image
-	Y resolution of outoput image
-	obj file to load and render
-	X rotation 
-	Y rotation
-	Z rotation 
-	output bmp file 
+	- X resolution of outoput image
+	- Y resolution of outoput image
+	- obj file to load and render
+	- X rotation 
+	- Y rotation
+	- Z rotation 
+	- output bmp file 
+
+
+
 
 
 
 
 Keith Legg
-
-
 Updated       - December 6, 2018 
 Original code - February 22, 2014
 
