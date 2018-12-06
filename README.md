@@ -26,7 +26,7 @@ to run type:
 
 ./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
 
-
+<pre>
 args in order are 
 	- X resolution of outoput image
 	- Y resolution of outoput image
@@ -35,6 +35,7 @@ args in order are
 	- Y rotation
 	- Z rotation 
 	- output bmp file 
+</pre>
 
 
 
