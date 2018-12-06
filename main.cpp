@@ -342,7 +342,7 @@ void render_model( int width, int height, char* objfilename ,float RX, float RY,
          vprj[2]=rotate_points(rotate_obj,v3);   
          vprj[3]=rotate_points(rotate_obj,v4);
 
-         //cout << "Rendering polygon "<< plycount << endl; plycount++;
+         cout << "Rendering 4 sided polygon "<< plycount << endl; plycount++;
 
          //render four sided polygon (step through 4 verts and connect the dots) 
          for (j=0;j<4;j++){
@@ -390,7 +390,7 @@ void render_model( int width, int height, char* objfilename ,float RX, float RY,
            vprj[1]=rotate_points(rotate_obj,v2);
            vprj[2]=rotate_points(rotate_obj,v3);
 
-           // cout << "Rendering polygon "<< plycount << endl; plycount++;
+           // cout << "Rendering 3 sided polygon "<< plycount << endl; plycount++;
 
            //render 3 sided polygon (step through 3 verts and connect the dots) 
            for (j=0;j<3;j++){
