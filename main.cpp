@@ -7,9 +7,11 @@
 #include "include/model.h"
 
 
+#include "include/Matrices.h"
+
 //YES YES, I KNOW YOU ARE SUPPOSED TO INLCUDE .H., NOT CPP! 
 //but it is the only way this works.... mission: go figure out why!??
-#include "Matrices.cpp"
+//#include "Matrices.cpp"
 
 
 using namespace std;
@@ -260,7 +262,7 @@ void render_model( int width, int height, char* objfilename ,float RX, float RY,
    //adjust object rotation
    rotate_obj.rotateY( RX );
    rotate_obj.rotateX( RY );
-   //rotate_obj.rotateZ( RZ );
+   rotate_obj.rotateZ( RZ );
  
 
 
