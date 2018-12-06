@@ -9,10 +9,6 @@
 
 #include "include/Matrices.h"
 
-//YES YES, I KNOW YOU ARE SUPPOSED TO INLCUDE .H., NOT CPP! 
-//but it is the only way this works.... mission: go figure out why!??
-//#include "Matrices.cpp"
-
 
 using namespace std;
 
@@ -22,7 +18,7 @@ int pix_iterator;//index to a pixel on the framebuffer
 
 /*
 
-   ./bmp_draw 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
+   ./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
 
 */
 
