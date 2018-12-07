@@ -22,19 +22,23 @@ http://sourceforge.net/projects/rasterrain/
 
 if you are on Ubuntu or OSX just go to the folder and type "make"
 
-to run type:
 
-./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
+
+To run it, compile and then type:
+<pre>
+    ./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
+</pre>
+
 
 <pre>
-args in order are 
-	- X resolution of outoput image
-	- Y resolution of outoput image
-	- obj file to load and render
-	- X rotation 
-	- Y rotation
-	- Z rotation 
-	- output bmp file 
+    args in order are:
+        - X resolution of output image
+        - Y resolution of output image
+        - obj file to load and render
+        - X rotation 
+        - Y rotation
+        - Z rotation 
+        - output bmp file 
 </pre>
 
 

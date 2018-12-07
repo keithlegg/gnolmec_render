@@ -58,6 +58,9 @@ class framebuffer {
        delete rgbdata;  
    }
 
+   // void loadbmp (const char *filename, int w, int h, int dpi, framebuffer::RGBType *data);
+   static void savebmp (const char *filename, int w, int h, int dpi, framebuffer::RGBType *data);
+
    void draw_point ( int xcoord, int ycoord );
    void draw_point ( int xcoord, int ycoord, RGBType pcol );
    void draw_circle ( int x_orig, int y_orig, int dia);
