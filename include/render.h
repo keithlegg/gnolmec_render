@@ -27,7 +27,10 @@ class render {
 void make_image(int width, int height);
 
 // intersect_2d (self, v1s, v1e, v2s, v2e ):
-void intersect_2d (void);
+//void intersect_2d (void);
+
+int get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y, 
+    float p2_x, float p2_y, float p3_x, float p3_y, float *i_x, float *i_y);
 
 Vector4 rotate_points ( Matrix4 m, Vector4 v);
 Vector4 rotate_points ( Matrix4 m, Vector3 v);

@@ -70,77 +70,41 @@ void make_image(int width, int height)
 
 /*********************************************************/
 
-
-
-/* intersect 2 lines in 2D 
-    v1s - line1 start 
-    v1e - line1 end 
-    v2s - line2 start
-    v2e - line2 end 
-*/
-
-void intersect_2d (void)
+int get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y, 
+    float p2_x, float p2_y, float p3_x, float p3_y, float *i_x, float *i_y)
 {
+    float s02_x, s02_y, s10_x, s10_y, s32_x, s32_y, s_numer, t_numer, denom, t;
+    s10_x = p1_x - p0_x;
+    s10_y = p1_y - p0_y;
+    s32_x = p3_x - p2_x;
+    s32_y = p3_y - p2_y;
 
-    // start and end coords for two 2D lines
-    // long p0_x = 0; 
-    // long p0_y = 0; 
-    // long p1_x = 0; 
-    // long p1_y = 0; 
-    // long p2_x = 0; 
-    // long p2_y = 0; 
-    // long p3_x = 0; 
-    // long p3_y = 0; 
+    denom = s10_x * s32_y - s32_x * s10_y;
+    if (denom == 0)
+        return 0; // Collinear
+    bool denomPositive = denom > 0;
 
+    s02_x = p0_x - p2_x;
+    s02_y = p0_y - p2_y;
+    s_numer = s10_x * s02_y - s10_y * s02_x;
+    if ((s_numer < 0) == denomPositive)
+        return 0; // No collision
 
-    long p0_x = -4; 
-    long p0_y = -4; 
-    long p1_x = -4; 
-    long p1_y = 0; 
-    long p2_x = 4; 
-    long p2_y = 4; 
-    long p3_x = -7; 
-    long p3_y = -7; 
+    t_numer = s32_x * s02_y - s32_y * s02_x;
+    if ((t_numer < 0) == denomPositive)
+        return 0; // No collision
 
+    if (((s_numer > denom) == denomPositive) || ((t_numer > denom) == denomPositive))
+        return 0; // No collision
+    // Collision detected
+    t = t_numer / denom;
+    if (i_x != NULL)
+        *i_x = p0_x + (t * s10_x);
+    if (i_y != NULL)
+        *i_y = p0_y + (t * s10_y);
 
-    // return values
-    long i_x = 0;
-    long i_y = 0; 
-
-    long s1_x = 0;
-    long s1_y = 0;
-    long s2_x = 0;
-    long s2_y = 0;
-
-    s1_x = p1_x - p0_x;  
-    s1_y = p1_y - p0_y;
-    s2_x = p3_x - p2_x;
-    s2_y = p3_y - p2_y;
-
-    long s = 0;
-    long t = 0;
-
-    //try: 
-    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
-    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
-    //except:
-    //    // print('something went wrong in 2D line intersection')
-    //    return 0
-    
-    if (s >= 0 and s <= 1 and t >= 0 and t <= 1){
-        // Collision detected
-        i_x = p0_x + (t * s1_x);
-        i_y = p0_y + (t * s1_y);
-        
-        //return (i_x,i_y);
-        cout << "intersection is " << i_x << " " << i_y << endl;  
-    
-    }
-
-    //return 0; // No collision
-
+    return 1;
 }
-
 
 /*********************************************************/
 
@@ -270,10 +234,9 @@ void really_simple_render_model( int width, int height, char* objfilename, float
    //set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)
    {
-       if (OBJ.is_four_sided)
-       {
+
            //RENDER 4 SIDED POLYGONS
-           poly=OBJ.faces[i]; //store 4 verts in a vector4
+           //poly=OBJ.faces[i]; //store 4 verts in a vector4
    
            //look up each face vertex (vector3 X4) 
            v1=OBJ.obj_pts[int(poly.x)];
@@ -315,52 +278,6 @@ void really_simple_render_model( int width, int height, char* objfilename, float
 
            } 
 
-       }//draw 4 sided polygons  
-
-       /***********/
-             
-       //RENDER THREE SIDED POLYGONS
-       if (OBJ.is_three_sided)
-       {
-           poly3=OBJ.faces3[i]; //store 3 verts in a vector4
-    
-           //look up each face vertex (vector3 <vtx1,vtx2,vtx3>) 
-           v1=OBJ.obj_pts[int(poly3.x)];
-           v2=OBJ.obj_pts[int(poly3.y)];
-           v3=OBJ.obj_pts[int(poly3.z)];
-     
-           //calculate point rotationargv[0], argv[1], argv[2], argv[3],argv[4],argv[5]);s
-           vprj[0]=rotate_points(rotate_obj,v1);
-           vprj[1]=rotate_points(rotate_obj,v2);
-           vprj[2]=rotate_points(rotate_obj,v3);
-
-           // cout << "Rendering 3 sided polygon "<< plycount << endl; plycount++;
-
-           //render 3 sided polygon (step through 3 verts and connect the dots) 
-           for (j=0;j<3;j++)
-           {
-               scoord_x =  (vprj[j].x   *lineart.center_x/2)+lineart.center_x;
-               scoord_y =  (vprj[j].y   *lineart.center_y/2)+lineart.center_y;
-           
-               if (j<2)
-               {
-                   ecoord_x =  (vprj[j+1].x *lineart.center_x/2)+lineart.center_x;
-                   ecoord_y =  (vprj[j+1].y *lineart.center_y/2)+lineart.center_y;
-                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-               }
-           
-               if (RENDER_PTS)
-               {
-                   //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
-                   lineart.draw_point(scoord_x   , scoord_y   , vtx_color);
-                   lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
-                   lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
-                   lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
-                   lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
-               }
-           }
-
-       }//draw 3 sided polygons
 
    }//render iterator
 
@@ -525,11 +442,10 @@ void render_model( int width, int height, char* objfilename, float RX, float RY,
        }
       */
       /***********/
-       if (OBJ.is_four_sided)
-       {
+
               
          //RENDER 4 SIDED POLYGONS
-         poly=OBJ.faces[i]; //store 4 verts in a vector4
+         //poly=OBJ.faces[i]; //store 4 verts in a vector4
    
          //look up each face vertex (vector3 X4) 
          v1=OBJ.obj_pts[int(poly.x)];
@@ -572,38 +488,32 @@ void render_model( int width, int height, char* objfilename, float RX, float RY,
 
          } 
 
-       }//draw 4 sided polygons  
+ 
 
        /***********/
-             
+       /*       
        //RENDER THREE SIDED POLYGONS
        if (OBJ.is_three_sided)
        {
            poly3=OBJ.faces3[i]; //store 3 verts in a vector4
-    
            //look up each face vertex (vector3 <vtx1,vtx2,vtx3>) 
            v1=OBJ.obj_pts[int(poly3.x)];
            v2=OBJ.obj_pts[int(poly3.y)];
            v3=OBJ.obj_pts[int(poly3.z)];
-     
            //calculate point rotationargv[0], argv[1], argv[2], argv[3],argv[4],argv[5]);s
            vprj[0]=rotate_points(rotate_obj,v1);
            vprj[1]=rotate_points(rotate_obj,v2);
            vprj[2]=rotate_points(rotate_obj,v3);
-
            // cout << "Rendering 3 sided polygon "<< plycount << endl; plycount++;
-
            //render 3 sided polygon (step through 3 verts and connect the dots) 
            for (j=0;j<3;j++){
                scoord_x =  (vprj[j].x   *lineart.center_x/2)+lineart.center_x;
                scoord_y =  (vprj[j].y   *lineart.center_y/2)+lineart.center_y;
-           
                if (j<2){
                    ecoord_x =  (vprj[j+1].x *lineart.center_x/2)+lineart.center_x;
                    ecoord_y =  (vprj[j+1].y *lineart.center_y/2)+lineart.center_y;
                    lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
                }
-           
                if (RENDER_PTS){
                    //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
                    lineart.draw_point(scoord_x   , scoord_y   , vtx_color);
@@ -613,8 +523,8 @@ void render_model( int width, int height, char* objfilename, float RX, float RY,
                    lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
                }
            }
-
        }//draw 3 sided polygons
+       */
 
    }//render iterator
 

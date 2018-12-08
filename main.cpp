@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "include/render.h"
+#include "include/model.h"
 
 using namespace std;
 
@@ -20,26 +21,51 @@ using namespace std;
 */
 
 
+void test_intersection(){
+
+    float xcoord = 0;
+    float ycoord = 0;
+
+    float *xpt = &xcoord; 
+    float *ypt = &ycoord; 
+
+    get_line_intersection(-2, -3, 1, 2, -3, 2, 2, -2, xpt, ypt);
+  
+    cout << "test intersection: " << xcoord << ycoord << endl ;
+
+}
+
+
+/***********************************/
+
 
 int main(int argc, char *argv[])
 {
 
-    //model MOBJ;
-    //MOBJ.make_cube(1);
-    //MOBJ.save_obj("mycube.obj");
+    model MOBJ;
+    //MOBJ.make_cube(1.1);
+    //MOBJ.make_circle( 4, 5.2);
+
     
-    if (argc < 8){
-        cout << "ARGS: xres yres inputfile X Y Z outputfile \n";
-        return 0;
-    }
+    MOBJ.load_obj("3d_obj/monkey.obj");
+    MOBJ.save_obj("newmonkey.obj");
    
 
-    //intersect_2d();
+
+    // if (argc < 8){
+    //     cout << "ARGS: xres yres inputfile X Y Z outputfile \n";
+    //     return 0;
+    // }
+   
+
+    // test_intersection();
+  
 
 
-    //( int width, int height, char* filename ,float RX, float RY, float RZ ,char* outfilename){
-    //render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), atof(argv[5]), atof(argv[6]),  argv[7]);
-    really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), atof(argv[5]), atof(argv[6]),  argv[7]);
+
+    // really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), atof(argv[5]), atof(argv[6]),  argv[7]);
+
+
 
     //render_model(256,256,"mycube.obj",0,0,0,"foo.bmp");
     //render_model(256,256,"mycube.obj", 0, 90 ,0,"foo.bmp");
