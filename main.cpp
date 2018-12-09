@@ -74,15 +74,15 @@ void obj_file_stuff(void){
 int main(int argc, char *argv[])
 {
 
+    //test_load_bmp("out.bmp");
+
+    /* * * * * * * * * */ 
 
     // if (argc < 9){
     //     cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale \n";
     //     return 0;
     // }
-   
-
-    //test_load_bmp("out.bmp");
-
+ 
     /* * * * * * * * * */
 
     // test_intersection();
