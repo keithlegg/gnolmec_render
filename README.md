@@ -1,6 +1,8 @@
 
-This is pretty much the only thing I have written in C++
 
+![alt text](https://raw.githubusercontent.com/keithlegg/render_thing/master/images/examples/monkey.jpg) 
+
+simple 3d renderer, procedural model in C++, with GCC using standard libraries. 
 
 The vector and Matrix libraries are written by the legendary Song Ho Ahn.
 I probably could have written those myself, but it was a huge time saver to borrow his.
