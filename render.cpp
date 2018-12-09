@@ -250,8 +250,10 @@ void really_simple_render_model( int width, int height, char* objfilename, float
        int j = 0;
 
        cout << endl;
+       
+       int numverts = OBJ.faces[i].size();
 
-       for (j=0;j<OBJ.faces[i].size();j++){
+       for (j=0;j<numverts;j++){
            // cout << "face index is " << int(OBJ.faces[i][j]-1) << endl;
            
            // look up each face vertex (vector3 X4) 
@@ -259,13 +261,13 @@ void really_simple_render_model( int width, int height, char* objfilename, float
            
            draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
            
-           cout << "roatated point is " << draw_poly[j] << j << endl; 
+           cout << "rotated point is " << draw_poly[j] << j << endl; 
 
        }//
          
-
-       // render four sided polygon (step through 4 verts and connect the dots) 
-       for (j=0;j<4;j++)
+       // DEBUG - LOOP NUMBER OF VERTICES - PER FACE 
+       // 3 only works for triangles 
+       for (j=0;j<numverts;j++)
        {
            // cout << vprj[j].x << " "<< vprj[j].x << " " << vprj[j].z << endl;
 
@@ -279,7 +281,7 @@ void really_simple_render_model( int width, int height, char* objfilename, float
            scoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx);
            scoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny);
 
-           if (j<3)
+           if (j<numverts-1)
            {
                ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx );//+lineart.center_x
                ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny );//+lineart.center_y 
