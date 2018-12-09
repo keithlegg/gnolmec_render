@@ -20,8 +20,9 @@ using namespace std;
 
 */
 
+/***********************************/
 
-void test_intersection(){
+void test_intersection(void){
 
     float xcoord = 0;
     float ycoord = 0;
@@ -35,6 +36,18 @@ void test_intersection(){
 
 }
 
+/***********************************/
+
+
+void obj_file_stuff(void){
+    model MOBJ;
+    //MOBJ.make_cube(1.1);
+    //MOBJ.make_circle( 4, 5.2);
+   
+    MOBJ.load_obj("3d_obj/monkey.obj");
+    MOBJ.save_obj("newmonkey.obj");
+
+}
 
 /***********************************/
 
@@ -42,30 +55,21 @@ void test_intersection(){
 int main(int argc, char *argv[])
 {
 
-    model MOBJ;
-    //MOBJ.make_cube(1.1);
-    //MOBJ.make_circle( 4, 5.2);
 
-    
-    MOBJ.load_obj("3d_obj/monkey.obj");
-    MOBJ.save_obj("newmonkey.obj");
+    if (argc < 9){
+        cout << "ARGS: xres yres inputfile X Y Z outputfile \n";
+        return 0;
+    }
    
-
-
-    // if (argc < 8){
-    //     cout << "ARGS: xres yres inputfile X Y Z outputfile \n";
-    //     return 0;
-    // }
-   
+    /* * * * * * * * * */
 
     // test_intersection();
-  
+    // obj_file_stuff();
 
+    /* * * * * * * * * */
 
-
-    // really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), atof(argv[5]), atof(argv[6]),  argv[7]);
-
-
+    really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
+                                atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
 
     //render_model(256,256,"mycube.obj",0,0,0,"foo.bmp");
     //render_model(256,256,"mycube.obj", 0, 90 ,0,"foo.bmp");

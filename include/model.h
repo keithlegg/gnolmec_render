@@ -1,13 +1,14 @@
 #ifndef MODEL_H
 #define _MODEL_H
 
+
 #include <iostream>
 #include <stdio.h>
-// #include <stdlib.h> 
-
 #include <vector>
 
 
+#define MAX_NUM_VERTICES 5000
+#define MAX_NUM_FACES 2000
 
 
 class model {
@@ -17,17 +18,12 @@ class model {
 
         int vtx_cnt;
         int fac_cnt;
-        //int cnt_fids; 
 
-
-        Vector3 obj_pts[2000];
-        //Vector3 faces3[1000];
-        //Vector4 faces[1000];  //works but limits us to 4 sided 
+        Vector3 obj_pts[MAX_NUM_VERTICES]; //okay to limit to 3, never more than that for a point
 
         std::vector<double> vtx_tmp;
         std::vector<int> fac_tmp;        
-        std::vector<int> faces[1000];
-
+        std::vector<int> faces[MAX_NUM_FACES];
 
         model(){
             face_count     = 0;
@@ -44,8 +40,10 @@ class model {
 
         void showinfo();
         void show();
+
         void save_obj( char* filename );
         void load_obj( char* filename );
+
         void make_cube(double scale);
         void make_circle(int divs, double scale);
         void make_square(double scale);     

@@ -58,8 +58,6 @@ void model::showinfo()
 {
    cout << " loded vertex data  "<< model::vertex_count << endl;
    cout << " loded face data  "<< face_count << endl;
-   //cout <<" size of 3 sided poly buffer " << getnum_faces3()  << endl;
-   // cout <<" size of 4 sided poly buffer " << getnum_faces()  << endl;
 }
 
 

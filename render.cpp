@@ -12,6 +12,7 @@
 
 using namespace std;
 
+#define MAX_POLYGON_VERTS 100
 
 int pix_iterator;//index to a pixel on the framebuffer
 
@@ -126,24 +127,25 @@ Vector4 rotate_points ( Matrix4 m, Vector4 v) {
 /*********************************************************/
 
 
-Vector4 rotate_points ( Matrix4 m, Vector3 v) {
+Vector3 rotate_points ( Matrix4 m, Vector3 v) {
     /* multiply a vector3 by a matrix44 
        handled by the matrix library 
     */
 
-    Vector4 out;
+    Vector3 out;
     out.x = m[0] * v.x + m[4] * v.y + m[8]  * v.z + m[12] * 1;
     out.y = m[1] * v.x + m[5] * v.y + m[9]  * v.z + m[13] * 1;
     out.z = m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14] * 1;
-    out.w = m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15] * 1;
+    //out.w = m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15] * 1;
 
     return out;
 }
 
 
+
 /*********************************************************/
 
-void really_simple_render_model( int width, int height, char* objfilename, float RX, float RY, float RZ , char* outfilename){
+void really_simple_render_model( int width, int height, char* objfilename, float RX, float RY, float RZ , char* outfilename, double RSCALE){
 
    cout << "# Begin Rendering ..." << endl;
 
@@ -213,15 +215,13 @@ void really_simple_render_model( int width, int height, char* objfilename, float
    //rotate_obj.scale(1.8);
    //rotate_obj.translate(15,15,15);
    //rotate_obj.show();
-    
- 
+  
    //adjust object rotation
    rotate_obj.rotateY( RX );
    rotate_obj.rotateX( RY );
    rotate_obj.rotateZ( RZ );
 
    /***********************/
-
    //set colors
    poly_color.r = 170;
    poly_color.g = 22;
@@ -231,52 +231,74 @@ void really_simple_render_model( int width, int height, char* objfilename, float
    vtx_color.g = 255;
    vtx_color.b = 255;
 
+   
+
+
+   //debug - min the process of rendering N sided - converting from Vector4
+   //double draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
+   
+
+
+   // one problem is that rotate_points function returns a Vector4!! debug 
+   //Vector4 tmp_vtx;
+
+   Vector3 draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
+
    //set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)
    {
+       int j = 0;
 
-           //RENDER 4 SIDED POLYGONS
-           //poly=OBJ.faces[i]; //store 4 verts in a vector4
-   
-           //look up each face vertex (vector3 X4) 
-           v1=OBJ.obj_pts[int(poly.x)];
-           v2=OBJ.obj_pts[int(poly.y)];
-           v3=OBJ.obj_pts[int(poly.z)];
-           v4=OBJ.obj_pts[int(poly.w)];
-        
-           //calculate point rotations
-           vprj[0]=rotate_points(rotate_obj,v1);
-           vprj[1]=rotate_points(rotate_obj,v2);
-           vprj[2]=rotate_points(rotate_obj,v3);   
-           vprj[3]=rotate_points(rotate_obj,v4);
+       cout << endl;
 
-           cout << "Rendering 4 sided polygon "<< plycount << endl; plycount++;
+       for (j=0;j<OBJ.faces[i].size();j++){
+           // cout << "face index is " << int(OBJ.faces[i][j]-1) << endl;
+           
+           // look up each face vertex (vector3 X4) 
+           //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
+           
+           draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
+           
+           cout << "roatated point is " << draw_poly[j] << j << endl; 
 
-           //render four sided polygon (step through 4 verts and connect the dots) 
-           for (j=0;j<4;j++)
+       }//
+         
+
+       // render four sided polygon (step through 4 verts and connect the dots) 
+       for (j=0;j<4;j++)
+       {
+           // cout << vprj[j].x << " "<< vprj[j].x << " " << vprj[j].z << endl;
+
+           //scoord_x =  (draw_poly[j].x * lineart.center_x * ZVAL) + lineart.center_x;
+           //scoord_y =  (draw_poly[j].y * lineart.center_y * ZVAL) + lineart.center_y;
+           double cenx =  (double)lineart.center_x;
+           double ceny =  (double)lineart.center_y;
+          
+           // cout << "center_x center_y " <<  cenx << " " << ceny;
+
+           scoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx);
+           scoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny);
+
+           if (j<3)
            {
-               double ZVAL = .5 ;
-               cout << vprj[j].x << " "<< vprj[j].x << " " << vprj[j].z << endl;
+               ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx );//+lineart.center_x
+               ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny );//+lineart.center_y 
 
-               scoord_x =  (vprj[j].x   *lineart.center_x*ZVAL)+lineart.center_x;
-               scoord_y =  (vprj[j].y   *lineart.center_y*ZVAL)+lineart.center_y;
+               cout << "draw a line " << scoord_x << " " << scoord_y << " " << ecoord_x << " " << ecoord_y << endl;
 
-               if (j<3)
-               {
-                   ecoord_x =  (vprj[j+1].x   *lineart.center_x*ZVAL)+lineart.center_x;
-                   ecoord_y =  (vprj[j+1].y   *lineart.center_y*ZVAL)+lineart.center_y;
-                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-               }
-               if (RENDER_PTS){
-                   //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
-                   lineart.draw_point(scoord_x   , scoord_y  , vtx_color);
-                   lineart.draw_point(scoord_x+1 , scoord_y  , vtx_color);
-                   lineart.draw_point(scoord_x-1 , scoord_y  , vtx_color);
-                   lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
-                   lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
-               }
+               lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+           }
 
-           } 
+           // if (RENDER_PTS){
+           //     //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
+           // lineart.draw_point(scoord_x   , scoord_y   , vtx_color);
+           // lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
+           // lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
+           // lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
+           // lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
+           // }
+
+       } 
 
 
    }//render iterator
@@ -446,18 +468,19 @@ void render_model( int width, int height, char* objfilename, float RX, float RY,
               
          //RENDER 4 SIDED POLYGONS
          //poly=OBJ.faces[i]; //store 4 verts in a vector4
-   
+         
+
          //look up each face vertex (vector3 X4) 
-         v1=OBJ.obj_pts[int(poly.x)];
-         v2=OBJ.obj_pts[int(poly.y)];
-         v3=OBJ.obj_pts[int(poly.z)];
-         v4=OBJ.obj_pts[int(poly.w)];
+         // v1=OBJ.obj_pts[ 
+         // v2=OBJ.obj_pts[
+         // v3=OBJ.obj_pts[
+         // v4=OBJ.obj_pts[
         
          //calculate point rotations
-         vprj[0]=rotate_points(rotate_obj,v1);
-         vprj[1]=rotate_points(rotate_obj,v2);
-         vprj[2]=rotate_points(rotate_obj,v3);   
-         vprj[3]=rotate_points(rotate_obj,v4);
+         // vprj[0]=rotate_points(rotate_obj,v1);
+         // vprj[1]=rotate_points(rotate_obj,v2);
+         // vprj[2]=rotate_points(rotate_obj,v3);   
+         // vprj[3]=rotate_points(rotate_obj,v4);
 
          cout << "Rendering 4 sided polygon "<< plycount << endl; plycount++;
 
