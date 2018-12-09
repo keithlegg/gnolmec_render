@@ -26,7 +26,7 @@ if you are on Ubuntu or OSX just go to the folder and type "make"
 
 To run it, compile and then type:
 <pre>
-    ./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
+    ./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp 50 
 </pre>
 
 
@@ -39,6 +39,7 @@ To run it, compile and then type:
         - Y rotation
         - Z rotation 
         - output bmp file 
+        - render overall scale
 </pre>
 
 

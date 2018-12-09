@@ -262,7 +262,7 @@ void model::make_cube(double scale){
 
     for (a=0;a<360;a=a+step)
     {
-        cout << "a is " << a << endl ;
+        //cout << "a is " << a << endl ;
         
         //x axis 
         //obj_pts[vcnt].set(0,  sin(deg_to_rad(a))*scale, cos(deg_to_rad(a))*scale );
