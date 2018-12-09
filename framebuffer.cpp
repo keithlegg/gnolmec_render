@@ -1,5 +1,7 @@
 
 #include <iostream>
+#include <fstream>
+
 #include <stdio.h>
 
 #include <cstdlib>
@@ -8,6 +10,7 @@
 #include "include/framebuffer.h"
 
 
+using namespace std; 
 
 /***********************/
 
@@ -60,7 +63,35 @@ Eh  4   28 00 00 00   40 bytes  Number of bytes in the DIB header (from this poi
 
 
   
-//void framebuffer::loadbmp (const char *filename, int w, int h, int dpi, framebuffer::RGBType *data) {}
+void framebuffer::loadbmp (const char *filename, framebuffer::RGBType *data)
+{
+
+   // output_image[pix_iterator].b = flat_color;
+   //framebuffer::RGBType poly_color; 
+   //framebuffer::RGBType vtx_color; 
+ 
+   streampos size;
+   char * memblock;
+
+   ifstream file (filename, ios::in|ios::binary|ios::ate);
+  
+   if (file.is_open())
+   {
+       size = file.tellg();
+       memblock = new char [size];
+       file.seekg (0, ios::beg);
+       file.read (memblock, size);
+       file.close();
+   
+       cout << "the entire file content is in memory";
+
+       delete[] memblock;
+   }
+
+   else cout << "Unable to open file";
+   //return 0;
+
+}
       
 
 

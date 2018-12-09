@@ -256,7 +256,6 @@ void really_simple_render_model( int width, int height, char* objfilename, float
            //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
            draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
            //cout << "rotated point is " << draw_poly[j] << j << endl; 
-
        }//
 
        // loop through the vertices for each face           
@@ -296,17 +295,16 @@ void really_simple_render_model( int width, int height, char* objfilename, float
            
            if (RENDER_PTS){
            
-             // if you want a circle at each point 
-             // lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
+               // if you want a circle at each point 
+               // lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
              
-             // really big 5 pixel dot 
-             lineart.draw_point(scoord_x   , scoord_y   , vtx_color); //if you only want a tiny point 
-             lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
-             lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
-             lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
-             lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
+               // really big 5 pixel dot 
+               lineart.draw_point(scoord_x   , scoord_y   , vtx_color); //if you only want a tiny point 
+               lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
+               lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
+               lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
+               lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
               
-
            }
 
        } 

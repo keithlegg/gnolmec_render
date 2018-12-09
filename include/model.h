@@ -44,9 +44,13 @@ class model {
         void save_obj( char* filename );
         void load_obj( char* filename );
 
-        void make_cube(double scale);
+        void make_line(double scale); 
         void make_circle(int divs, double scale);
-        void make_square(double scale);     
+        
+        void make_square(double scale);  
+        void make_cube(double scale);
+   
+
 
 };
 

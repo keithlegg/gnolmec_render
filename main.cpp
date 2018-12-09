@@ -7,6 +7,9 @@
 #include "include/render.h"
 #include "include/model.h"
 
+#include "include/framebuffer.h"
+
+
 using namespace std;
 
 
@@ -19,6 +22,17 @@ using namespace std;
        ./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
 
 */
+
+
+
+void test_load_bmp(char *filename){
+
+    framebuffer::RGBType* input_image;
+    framebuffer loaded_bmp( 1024, 1024 );
+
+    framebuffer::loadbmp(filename , input_image);
+
+}
 
 /***********************************/
 
@@ -42,11 +56,15 @@ void test_intersection(void){
 void obj_file_stuff(void){
     
     model MOBJ;
-    //MOBJ.make_cube(1.1);
-    MOBJ.make_circle( 10, 5.2);
-   
-    //MOBJ.load_obj("3d_obj/monkey.obj");
-    MOBJ.save_obj("circle.obj");
+    
+    MOBJ.make_cube(1.1);
+    
+    //MOBJ.make_circle( 10, 5.2);
+    //MOBJ.make_line( .2);   
+    //MOBJ.make_square(2);
+
+    // MOBJ.load_obj("3d_obj/monkey.obj");
+    MOBJ.save_obj("newmonkey.obj");
 
 }
 
@@ -57,11 +75,14 @@ int main(int argc, char *argv[])
 {
 
 
-    if (argc < 9){
-        cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale \n";
-        return 0;
-    }
+    // if (argc < 9){
+    //     cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale \n";
+    //     return 0;
+    // }
    
+
+    //test_load_bmp("out.bmp");
+
     /* * * * * * * * * */
 
     // test_intersection();

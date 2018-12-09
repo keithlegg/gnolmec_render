@@ -107,12 +107,13 @@ void model::save_obj( char* filename)
         cout << " error - no faces to export ";
     }
 
-    cout << " face count is  " << face_count << endl;
+    // cout << " face count is  " << face_count << endl;
 
     int ff = 0; 
+    int xx = 0;
 
     // export array of N sided faces
-    for (int xx=0;xx<face_count;xx++)
+    for (xx=0; xx<face_count; xx++)
     {
         myfile << "f ";
         for (ff=0; ff < faces[xx].size();ff++)
@@ -236,17 +237,19 @@ void model::make_cube(double scale){
     obj_pts[5].set(-scale,  scale, -scale);
     obj_pts[6].set( scale,  scale, -scale);
     obj_pts[7].set( scale,  scale,  scale);
-   
+       
+    //fac_tmp = {1,2,3,4};
+    //faces[0] = fac_tmp;
 
     // faces - NOT zero indexed
-    // faces[0].set(1,2,3,4);
-    // faces[1].set(1,2,6,5);
-    // faces[2].set(2,3,7,6);
-    // faces[3].set(3,7,8,4);
-    // faces[4].set(4,8,5,1);
-    // faces[5].set(5,6,7,8);
+    faces[0] = {1,2,3,4};
+    faces[1] = {1,2,6,5};
+    faces[2] = {2,3,7,6};
+    faces[3] = {3,7,8,4};
+    faces[4] = {4,8,5,1};
+    faces[5] = {5,6,7,8};
 
-    face_count = 6; //sizeof(vector3), etc etc 
+    face_count = 6;  
     model::vertex_count = 8;
 }
 
@@ -259,6 +262,8 @@ void model::make_cube(double scale){
     int step = 360/divs;
     
     cout << "step is " << step << endl ;
+
+    fac_tmp.clear();
 
     for (a=0;a<360;a=a+step)
     {
@@ -278,14 +283,13 @@ void model::make_cube(double scale){
     // cout << faceindices[0] << faceindices[5];
 
     int i = 0; 
-
-    // to get size of  (sizeof(faceindices)/sizeof(*faceindices)) 
-    for (int i=0; i< vcnt ; i++) 
+ 
+    for (int i=0; i<vcnt; i++) 
     {
         //fac_tmp.clear();
         fac_tmp.push_back(i+1);  
-
     }
+
 
     faces[0] = fac_tmp;
     face_count = 1;
@@ -296,19 +300,46 @@ void model::make_cube(double scale){
 /**********************/
  void model::make_square(double scale)
  {
+    fac_tmp.clear();
+
     // vertices - (3d vectors)
+    
+    // obj_pts[vcnt].set( sin(deg_to_rad(a))*scale, cos(deg_to_rad(a))*scale, 0 ); 
+
     obj_pts[0].set(-scale, 1,  scale);
     obj_pts[1].set( scale, 1,  scale);
     obj_pts[2].set( scale, 1, -scale);
     obj_pts[3].set(-scale, 1, -scale);
 
     // face - NOT zero indexed 
-    //faces[0].set(1,2,3,4);
+    
+    //fac_tmp.push_back(1); 
+    //fac_tmp.push_back(2); 
+    //fac_tmp.push_back(3); 
+    //fac_tmp.push_back(4); 
+    
+    fac_tmp = {1,2,3,4};
+    faces[0] = fac_tmp;
 
     face_count = 1;
     model::vertex_count =4;
  }    
 
+
+
+/**********************/
+ void model::make_line(double scale)
+ {
+    // vertices - (3d vectors)
+    obj_pts[0].set(-scale, 0,  -scale);
+    obj_pts[1].set( scale, 0,  scale);
+
+    faces[0] = {1,2};
+
+    face_count = 1;
+
+    model::vertex_count =4;
+ }     
 
 
 
