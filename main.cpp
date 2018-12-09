@@ -74,7 +74,7 @@ void obj_file_stuff(void){
 int main(int argc, char *argv[])
 {
 
-    //test_load_bmp("out.bmp");
+    test_load_bmp("images/uvmap.bmp");
 
     /* * * * * * * * * */ 
 
@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
     //really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
     //                            atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
 
-    render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
-                                atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
+    //render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
+    //                            atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
 
 
 

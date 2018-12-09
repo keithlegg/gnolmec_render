@@ -66,6 +66,8 @@ Eh  4   28 00 00 00   40 bytes  Number of bytes in the DIB header (from this poi
 void framebuffer::loadbmp (const char *filename, framebuffer::RGBType *data)
 {
 
+   //http://www.cplusplus.com/doc/tutorial/files/ 
+
    // output_image[pix_iterator].b = flat_color;
    //framebuffer::RGBType poly_color; 
    //framebuffer::RGBType vtx_color; 
@@ -83,8 +85,7 @@ void framebuffer::loadbmp (const char *filename, framebuffer::RGBType *data)
        file.read (memblock, size);
        file.close();
    
-       cout << "the entire file content is in memory";
-
+       cout << "the entire file content is in memory" << endl; 
        delete[] memblock;
    }
 
