@@ -45,6 +45,7 @@ class model {
         void load_obj( char* filename );
 
         void make_line(double scale); 
+        void make_triangle(double scale); 
         void make_circle(int divs, double scale);
         
         void make_square(double scale);  

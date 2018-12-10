@@ -97,6 +97,7 @@ void model::save_obj( char* filename)
     myfile << "#number of faces     "<< face_count <<"\n";
     myfile <<"\n";
 
+    //DEBUG why is vertex_count an attribute ?? - cant we just get the size of the array - DEBUG!
     for (int xx=0;xx<model::vertex_count;xx++){
         myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] <<"\n";
     }
@@ -134,7 +135,7 @@ void model::load_obj(char* filename){
     ifstream fin;
     fin.open(filename); // open a file
     if (!fin.good()){ 
-        cout << "NO FILE! "<< filename << endl;
+        cout << "OBJ file \""<< filename <<"\" appears to be missing or broken." << endl;
         exit (EXIT_FAILURE); // exit if file not found
     }
 
@@ -326,6 +327,42 @@ void model::make_cube(double scale){
  }    
 
 
+/**********************/
+ void model::make_triangle(double scale)
+ {
+    fac_tmp.clear();
+
+    // vertices - (3d vectors)
+    
+    // obj_pts[vcnt].set( sin(deg_to_rad(a))*scale, cos(deg_to_rad(a))*scale, 0 ); 
+
+
+    // //X axis 
+    // obj_pts[0].set( 0, -scale ,  0     );
+    // obj_pts[1].set( 0, 0      ,  scale );
+    // obj_pts[2].set( 0, scale  ,  0     );
+
+    // Y axis 
+    // obj_pts[0].set( -scale ,0 ,  0     );
+    // obj_pts[1].set( 0      ,0 ,  scale );
+    // obj_pts[2].set( scale  ,0 ,  0     );
+
+    // // Z axis 
+    obj_pts[0].set( -scale ,  0    , 0 );
+    obj_pts[1].set( 0      ,  scale, 0 );
+    obj_pts[2].set( scale  ,  0    , 0 );
+
+
+
+    
+    fac_tmp = {1,2,3};
+    faces[0] = fac_tmp;
+
+    face_count = 1;
+    model::vertex_count = 3;
+ }    
+
+
 
 /**********************/
  void model::make_line(double scale)
@@ -334,7 +371,7 @@ void model::make_cube(double scale){
     obj_pts[0].set(-scale, 0,  -scale);
     obj_pts[1].set( scale, 0,  scale);
 
-    faces[0] = {1,2};
+    faces[0] = {1,2}; //notice this is only a 2 point poly (line)
 
     face_count = 1;
 

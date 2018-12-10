@@ -1,0 +1,34 @@
+
+#commented line 
+
+framebuffer 1024 1024
+
+loadbmp images/uvmap.bmp 
+savebmp foo.bmp 
+
+loadobj monkey.obj
+saveobj suzanne.obj 
+
+bgcolor 128 128 128 
+
+render_property pointcolor 255 0 0 
+render_property linecolor 0 255 0
+render_property linethick 3
+render_property pointsize 5
+render_property scanline true 
+render_property lighted true 
+render_property textured true 
+
+
+line3D 1 4 3, 3 3 3 , 4 -7 9 
+
+points3D 5 1 5,  7 7 4 , 1 -1 3  
+
+
+rotate3D 45 45 45 
+move3D 0 12 0 
+scale3D 2 2 2 
+
+points2D 5,5 7,7 
+
+

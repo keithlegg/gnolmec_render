@@ -19,7 +19,7 @@ using namespace std;
 /*
    TO RUN: 
 
-       ./renderthing 500 500 3d_obj/cone.obj 0 60 0 foo.bmp
+       ./renderthing 500 500 3d_obj/triangle.obj 0 60 0 foo.bmp 50
 
 */
 
@@ -57,14 +57,16 @@ void obj_file_stuff(void){
     
     model MOBJ;
     
-    MOBJ.make_cube(1.1);
+    //MOBJ.make_cube(1.1);
     
     //MOBJ.make_circle( 10, 5.2);
     //MOBJ.make_line( .2);   
     //MOBJ.make_square(2);
+    
+    MOBJ.make_triangle( .2);  
 
     // MOBJ.load_obj("3d_obj/monkey.obj");
-    MOBJ.save_obj("newmonkey.obj");
+    MOBJ.save_obj("3d_obj/triangle.obj");
 
 }
 
@@ -74,29 +76,31 @@ void obj_file_stuff(void){
 int main(int argc, char *argv[])
 {
 
-    test_load_bmp("images/uvmap.bmp");
+    //test_load_bmp("images/uvmap.bmp");
+
+    //obj_file_stuff();
 
     /* * * * * * * * * */ 
 
-    // if (argc < 9){
-    //     cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale \n";
-    //     return 0;
-    // }
- 
     /* * * * * * * * * */
 
     // test_intersection();
     //obj_file_stuff();
 
     /* * * * * * * * * */
+    if (argc < 9){
+        cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale \n";
+        return 0;
+    }
 
-    //really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
-    //                            atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
+    // really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
+    //                             atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
 
-    //render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
-    //                            atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
+    /* * * * * * * * * */
+    render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
+                                atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
 
-
+    /* * * * * * * * * */
 
     //render_model(256,256,"mycube.obj",0,0,0,"foo.bmp");
     //render_model(256,256,"mycube.obj", 0, 90 ,0,"foo.bmp");
