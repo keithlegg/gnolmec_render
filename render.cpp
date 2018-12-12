@@ -329,6 +329,32 @@ void really_simple_render_model( int width, int height, char* objfilename,
 
 /*********************************************************/
 
+void draw_scanline( framebuffer* fb, 
+                    float sx, float sy, float ex, float ey,  
+                    float *phit_x , float *phit_y )
+{
+
+    framebuffer::RGBType scanline_color; 
+    framebuffer::RGBType scanhit_color; 
+
+    scanhit_color.r = 1;
+    scanhit_color.g = 155;
+    scanhit_color.b = 55;
+
+    scanline_color.r = 75;
+    scanline_color.g = 155;
+    scanline_color.b = 1;
+
+    get_line_intersection( 0.0     , 0.0    , 400.0    , 400.0, 
+                           sx, sy, ex, ey, phit_x, phit_y) ; 
+
+    fb->draw_line(0.0, 0.0,  400.0 ,  400.0 , scanline_color);
+    fb->draw_circle(*phit_x , *phit_x   , 5, scanhit_color);
+
+    cout << "hahaha line intersection at " << *phit_x <<" " << *phit_x << endl;  
+
+}
+
 
 void render_model( int width, int height, char* objfilename, 
                                  float RX, float RY, float RZ , char* outfilename, double RSCALE)
@@ -349,6 +375,8 @@ void render_model( int width, int height, char* objfilename,
 
    framebuffer::RGBType* output_image;
    framebuffer lineart( width, height );
+   framebuffer *p_lineart = &lineart;
+
    output_image = lineart.rgbdata;
 
    /***********/
@@ -376,9 +404,6 @@ void render_model( int width, int height, char* objfilename,
    framebuffer::RGBType poly_color; 
    framebuffer::RGBType vtx_color; 
 
-   framebuffer::RGBType scanline_color; 
-   framebuffer::RGBType scanhit_color; 
-
    //containers for 3d objects 
    model OBJ;
    OBJ.load_obj(objfilename);
@@ -392,8 +417,8 @@ void render_model( int width, int height, char* objfilename,
    Matrix4 rotate_obj;    //4X4 rotation matrix 
 
 
-   int i =0;
-   int j =0;
+   int i = 0;
+   int j = 0;
    int plycount = 0;
    int pntcountsave_obj = 0;
 
@@ -422,14 +447,6 @@ void render_model( int width, int height, char* objfilename,
    vtx_color.r = 1;
    vtx_color.g = 255;
    vtx_color.b = 255;
-
-   scanhit_color.r = 1;
-   scanhit_color.g = 155;
-   scanhit_color.b = 55;
-
-   scanline_color.r = 75;
-   scanline_color.g = 155;
-   scanline_color.b = 1;
 
    //debug - min the process of rendering N sided - converting from Vector4
    //double draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
@@ -478,17 +495,15 @@ void render_model( int width, int height, char* objfilename,
                
                /*******************/ 
                if (RENDER_SCANLINE){
-                   // first shot at scanline rendering - 
-                   // int get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y, 
-                   //     float p2_x, float p2_y, float p3_x, float p3_y, float *i_x, float *i_y)
+                   // get_line_intersection( 0.0     , 0.0    , 400.0    , 400.0, 
+                   //                        scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
+                   // lineart.draw_line(0.0, 0.0,  400.0 ,  400.0 , scanline_color);
+                   // lineart.draw_circle(hit_x , hit_y   , 5, scanhit_color);
+                   // cout << "line intersection at " << hit_x <<" " << hit_y << endl;
+                  
+                   draw_scanline( p_lineart, scoord_x, scoord_y, 
+                                  ecoord_x, ecoord_y, p_hit_x , p_hit_y );
 
-                   get_line_intersection( 0.0     , 0.0    , 400.0    , 400.0, 
-                                          scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
-
-                   lineart.draw_line(0.0, 0.0,  400.0 ,  400.0 , scanline_color);
-
-                   lineart.draw_circle(hit_x , hit_y   , 5, scanhit_color);
-                   cout << "line intersection at " << hit_x <<" " << hit_y << endl;
                }
                /*******************/ 
 

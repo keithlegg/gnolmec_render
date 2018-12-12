@@ -4,6 +4,9 @@ INC = -I "include"
 
 renderthing:$(OBJ)
 	g++ -o renderthing main.cpp Matrices.cpp model.cpp framebuffer.cpp render.cpp
+
+    # -g is for debugging flags with GDB 
+	#g++ -g -o renderthing main.cpp Matrices.cpp model.cpp framebuffer.cpp render.cpp
 	rm -f $(OBJ)
 
 clean:

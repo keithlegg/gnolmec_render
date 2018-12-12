@@ -165,19 +165,28 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
 
 void framebuffer::draw_point ( int xcoord, int ycoord ){
    pix_iterator = ycoord * bwidth + xcoord;  
-
-   rgbdata[pix_iterator].r = plotcolor.r;       
-   rgbdata[pix_iterator].g = plotcolor.g;
-   rgbdata[pix_iterator].b = plotcolor.b;
+   
+   if (xcoord > 0 && xcoord > 1){
+       if (xcoord < framebuffer::bwidth && xcoord < framebuffer::bheight){
+           rgbdata[pix_iterator].r = plotcolor.r;       
+           rgbdata[pix_iterator].g = plotcolor.g;
+           rgbdata[pix_iterator].b = plotcolor.b;
+       }
+   }
 }
 
 /***********************/
 
 void framebuffer::draw_point ( int xcoord, int ycoord, RGBType pcol ){
-   pix_iterator = xcoord * bwidth + ycoord;     
-   rgbdata[pix_iterator].r = pcol.r;       
-   rgbdata[pix_iterator].g = pcol.g;
-   rgbdata[pix_iterator].b = pcol.b;
+
+   if (xcoord > 0 && xcoord > 1){  
+       if (xcoord < framebuffer::bwidth && xcoord < framebuffer::bheight){  
+           pix_iterator = xcoord * bwidth + ycoord;     
+           rgbdata[pix_iterator].r = pcol.r;       
+           rgbdata[pix_iterator].g = pcol.g;
+           rgbdata[pix_iterator].b = pcol.b;
+       }
+   }
 }
 
 /***********************/
