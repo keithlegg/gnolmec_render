@@ -243,6 +243,14 @@ void model::make_cube(double scale){
     //faces[0] = fac_tmp;
 
     // faces - NOT zero indexed
+    // faces[0] = {1,2,3,4};
+    // faces[1] = {1,2,6,5};
+    // faces[2] = {2,3,7,6};
+    // faces[3] = {3,7,8,4};
+    // faces[4] = {4,8,5,1};
+    // faces[5] = {5,6,7,8};
+
+    /********************/    
     faces[0] = {1,2,3,4};
     faces[1] = {1,2,6,5};
     faces[2] = {2,3,7,6};
@@ -312,15 +320,15 @@ void model::make_cube(double scale){
     obj_pts[2].set( scale, 1, -scale);
     obj_pts[3].set(-scale, 1, -scale);
 
-    // face - NOT zero indexed 
+    // face indices are NOT zero indexed 
     
+    //fac_tmp = {1,2,3,4};
     //fac_tmp.push_back(1); 
     //fac_tmp.push_back(2); 
     //fac_tmp.push_back(3); 
     //fac_tmp.push_back(4); 
     
-    fac_tmp = {1,2,3,4};
-    faces[0] = fac_tmp;
+    faces[0] = {1,2,3,4};
 
     face_count = 1;
     model::vertex_count =4;
@@ -352,11 +360,7 @@ void model::make_cube(double scale){
     obj_pts[1].set( 0      ,  scale, 0 );
     obj_pts[2].set( scale  ,  0    , 0 );
 
-
-
-    
-    fac_tmp = {1,2,3};
-    faces[0] = fac_tmp;
+    faces[0] = {1,2,3};
 
     face_count = 1;
     model::vertex_count = 3;

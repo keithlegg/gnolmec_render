@@ -147,14 +147,25 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
     fwrite( bmpfileheader, 1, 14, f);
     fwrite( bmpinfoheader, 1, 40, f);
 
-    for (int i = 0; i < k;i++){
+    for (int i = 0; i < k;i++)
+    {
         framebuffer::RGBType rgb = data[i];
 
         double red   = (data[i].r)*255;
         double green = (data[i].g)*255;
         double blue  = (data[i].b)*255;
 
-        unsigned char color[3] = { (int)floor(blue),(int)floor(green),(int)floor(red) };
+        /*****************/
+        // osx complains with -std-c++11 option  
+        // error: non-constant-expression cannot be narrowed from type 'int' to 'unsigned char' in 
+        
+        // unsigned char color[3] = { (int)floor(blue),(int)floor(green),(int)floor(red) };
+        
+        //this is modified to compile on OSX - not sure its right (or the other one, for that matter!)
+        int color[3] = { (int)floor(blue),(int)floor(green),(int)floor(red) };
+        
+        /*****************/
+
         fwrite (color, 1,3,f);
     }
     fclose(f);
