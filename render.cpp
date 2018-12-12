@@ -330,6 +330,7 @@ void really_simple_render_model( int width, int height, char* objfilename,
 /*********************************************************/
 
 void draw_scanline( framebuffer* fb, 
+                    float whichline, float res_x, float res_y, 
                     float sx, float sy, float ex, float ey,  
                     float *phit_x , float *phit_y )
 {
@@ -344,14 +345,14 @@ void draw_scanline( framebuffer* fb,
     scanline_color.r = 75;
     scanline_color.g = 155;
     scanline_color.b = 1;
-
-    get_line_intersection( 0.0     , 0.0    , 400.0    , 400.0, 
+    
+    get_line_intersection( 0.0     , whichline    ,  res_x , whichline, 
                            sx, sy, ex, ey, phit_x, phit_y) ; 
 
-    fb->draw_line(0.0, 0.0,  400.0 ,  400.0 , scanline_color);
+    fb->draw_line(0.0, whichline,  res_x ,  whichline , scanline_color);
     fb->draw_circle(*phit_x , *phit_x   , 5, scanhit_color);
 
-    cout << "hahaha line intersection at " << *phit_x <<" " << *phit_x << endl;  
+    //cout << "line intersection at " << *phit_x <<" " << *phit_x << endl;  
 
 }
 
@@ -501,8 +502,10 @@ void render_model( int width, int height, char* objfilename,
                    // lineart.draw_circle(hit_x , hit_y   , 5, scanhit_color);
                    // cout << "line intersection at " << hit_x <<" " << hit_y << endl;
                   
-                   draw_scanline( p_lineart, scoord_x, scoord_y, 
-                                  ecoord_x, ecoord_y, p_hit_x , p_hit_y );
+                   draw_scanline( p_lineart,
+                                  (float)250, (float)300, (float)300,  
+                                  scoord_x, scoord_y, ecoord_x, ecoord_y, 
+                                  p_hit_x , p_hit_y );
 
                }
                /*******************/ 
