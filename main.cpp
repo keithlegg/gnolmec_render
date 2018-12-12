@@ -57,16 +57,18 @@ void obj_file_stuff(void){
     
     model MOBJ;
     
-    //MOBJ.make_cube(1.1);
+    MOBJ.make_cube(1.1);
     
     //MOBJ.make_circle( 10, 5.2);
     //MOBJ.make_line( .2);   
     //MOBJ.make_square(2);
     
-    MOBJ.make_triangle( .2);  
+    //MOBJ.make_triangle( .2);  
 
     // MOBJ.load_obj("3d_obj/monkey.obj");
-    MOBJ.save_obj("3d_obj/triangle.obj");
+
+    //MOBJ.save_obj("3d_obj/triangle.obj");
+    MOBJ.save_obj("cube.obj");
 
 }
 
@@ -89,7 +91,7 @@ int main(int argc, char *argv[])
 
     /* * * * * * * * * */
     if (argc < 9){
-        cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale \n";
+        cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
         return 0;
     }
 
@@ -98,7 +100,7 @@ int main(int argc, char *argv[])
 
     /* * * * * * * * * */
     render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
-                                atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
+                                atof(argv[5]), atof(argv[6]),  argv[7],  atof(argv[8]), atof(argv[9]) );
 
     /* * * * * * * * * */
 

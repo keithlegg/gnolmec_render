@@ -321,13 +321,6 @@ void model::make_cube(double scale){
     obj_pts[3].set(-scale, 1, -scale);
 
     // face indices are NOT zero indexed 
-    
-    //fac_tmp = {1,2,3,4};
-    //fac_tmp.push_back(1); 
-    //fac_tmp.push_back(2); 
-    //fac_tmp.push_back(3); 
-    //fac_tmp.push_back(4); 
-    
     faces[0] = {1,2,3,4};
 
     face_count = 1;

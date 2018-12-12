@@ -358,7 +358,7 @@ void draw_scanline( framebuffer* fb,
 
 
 void render_model( int width, int height, char* objfilename, 
-                                 float RX, float RY, float RZ , char* outfilename, double RSCALE)
+                                 float RX, float RY, float RZ , char* outfilename, double RSCALE, int which)
 {
 
    cout << "# Begin Rendering ..." << endl;
@@ -503,7 +503,7 @@ void render_model( int width, int height, char* objfilename,
                    // cout << "line intersection at " << hit_x <<" " << hit_y << endl;
                   
                    draw_scanline( p_lineart,
-                                  (float)250, (float)300, (float)300,  
+                                  (float)which, (float)300, (float)300,  
                                   scoord_x, scoord_y, ecoord_x, ecoord_y, 
                                   p_hit_x , p_hit_y );
 
