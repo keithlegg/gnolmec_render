@@ -62,7 +62,32 @@ Eh  4   28 00 00 00   40 bytes  Number of bytes in the DIB header (from this poi
 /***********************/
 
 
-  
+ 
+framebuffer::~framebuffer(void) {
+   delete rgbdata;  
+}
+
+framebuffer::framebuffer( int w, int h) {
+       bwidth = w;
+       bheight = h;
+       n = bwidth * bheight;
+       rgbdata = new RGBType[n];
+
+       // degree = radian * (180 / PI) // PI = 3.14159265
+       // radian = degree * (PI/180) 
+       DEG_TO_RAD = 0.0174532925;
+       RAD_TO_DEG = 57.29577951;
+
+       center_x = w/2;
+       center_y = h/2;
+
+       plotcolor.r = 1;
+       plotcolor.g = 1;
+       plotcolor.b = 1;
+}
+
+ 
+
 void framebuffer::loadbmp (const char *filename, framebuffer::RGBType *data)
 {
 
@@ -156,7 +181,7 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
         double blue  = (data[i].b)*255;
 
         /*****************/
-        // osx complains with -std-c++11 option  
+        // OSX complains when compiling with -std-c++11 option  
         // error: non-constant-expression cannot be narrowed from type 'int' to 'unsigned char' in 
         
         // unsigned char color[3] = { (int)floor(blue),(int)floor(green),(int)floor(red) };

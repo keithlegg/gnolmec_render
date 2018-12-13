@@ -19,7 +19,7 @@ using namespace std;
 /*
    TO RUN: 
 
-       ./renderthing 500 500 3d_obj/triangle.obj 0 60 0 foo.bmp 50
+       ./renderthing 500 500 3d_obj/triangle.obj 0 60 0 foo.bmp 50 2
 
 */
 
@@ -74,11 +74,30 @@ void obj_file_stuff(void){
 
 /***********************************/
 
+void test_image_draw(char *outfile){
+
+    //framebuffer::RGBType* test_draw;
+    framebuffer test_draw( 1024, 1024 );
+
+    //framebuffer::RGBType poly_color; 
+    //framebuffer::RGBType vtx_color; 
+
+    //test_draw->savebmp (outfile, 1024, 1024, 300, framebuffer::RGBType *data) ;
+
+
+}
+
+
+/***********************************/
+
 
 int main(int argc, char *argv[])
 {
 
     //test_load_bmp("images/uvmap.bmp");
+
+    test_image_draw("foo.bmp");
+
 
     //obj_file_stuff();
 

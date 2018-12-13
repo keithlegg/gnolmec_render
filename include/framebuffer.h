@@ -9,11 +9,14 @@ class framebuffer {
    int pix_iterator;
 
    public:
+
      int bwidth;
      int bheight;
+     
      int center_x; //center of screen
      int center_y; //center of screen
      int n;        //number of pixels
+
      double DEG_TO_RAD;
      double RAD_TO_DEG;
 
@@ -36,30 +39,12 @@ class framebuffer {
 
 
    RGBType *rgbdata;  //pointer to our pixel array
+
    RGBType plotcolor; //color for the pretty lines and dots
 
-   framebuffer( int w, int h) {
-       bwidth = w;
-       bheight = h;
-       n = bwidth * bheight;
-       rgbdata = new RGBType[n];
+   framebuffer( int w, int h);
 
-       // degree = radian * (180 / PI) // PI = 3.14159265
-       // radian = degree * (PI/180) 
-       DEG_TO_RAD = 0.0174532925;
-       RAD_TO_DEG = 57.29577951;
-
-       center_x = w/2;
-       center_y = h/2;
-
-       plotcolor.r = 1;
-       plotcolor.g = 1;
-       plotcolor.b = 1;
-   }
-
-   ~framebuffer() {
-       delete rgbdata;  
-   }
+   ~framebuffer(void);
 
    static void loadbmp (const char *filename, framebuffer::RGBType *data);
    static void savebmp (const char *filename, int w, int h, int dpi, framebuffer::RGBType *data);
