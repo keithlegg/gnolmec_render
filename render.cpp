@@ -147,7 +147,7 @@ void really_simple_render_model( int width, int height, char* objfilename,
                                  char* outfilename, double RSCALE)
 {
 
-   cout << "# Begin Rendering ..." << endl;
+   //cout << "# Begin Rendering ..." << endl;
 
    int dpi    = 72; 
    //int width  = 512; 
@@ -205,6 +205,7 @@ void really_simple_render_model( int width, int height, char* objfilename,
    int pntcountsave_obj = 0;
 
    int RENDER_VTX_PTS = 1;
+
    double scoord_x, scoord_y, ecoord_x, ecoord_y;
 
    
@@ -317,8 +318,8 @@ void really_simple_render_model( int width, int height, char* objfilename,
 
    framebuffer::savebmp(outfilename , width, height, dpi, output_image);
    
-   cout << outfilename << " saved to disk. " << endl;
-   cout << "# Done Rendering ! " << endl;
+   //cout << outfilename << " saved to disk. " << endl;
+   //cout << "# Done Rendering ! " << endl;
 }
 
 /*********************************************************/
@@ -355,10 +356,11 @@ void render_model( int width, int height, char* objfilename,
                                  float RX, float RY, float RZ , char* outfilename, double RSCALE, int which)
 {
 
-   cout << "# Begin Rendering ..." << endl;
+   //cout << "# Begin Rendering ..." << endl;
 
    int RENDER_VTX_PTS   = 1;
    int RENDER_SCANLINE  = 1;
+   int RENDER_POLYFILL  = 1;
 
    int dpi    = 72; 
    int res_x = width;
@@ -453,6 +455,10 @@ void render_model( int width, int height, char* objfilename,
    float *p_hit_x = &hit_x; //line intersection hit X
    float *p_hit_y = &hit_y; //line intersection hit Y 
 
+
+   //5 numbers to represent the filled polygon scanline geom 
+   float  l1x, l1y, l2x, l2y, l3x, l3y = 0;    
+
    //set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)
    {
@@ -489,7 +495,7 @@ void render_model( int width, int height, char* objfilename,
                /*******************/ 
                if (RENDER_SCANLINE)
                {
-
+                   /***************************************/
                    framebuffer::RGBType scanline_color; 
                    framebuffer::RGBType scanhit_color; 
                    scanhit_color.r = 1;
@@ -499,17 +505,37 @@ void render_model( int width, int height, char* objfilename,
                    scanline_color.g = 155;
                    scanline_color.b = 1;  
 
+                   // run the calc function to check for a line intersection 
                    get_line_intersection( 0.0,  (float)which, (float)width  , (float)which, 
                                           scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
 
-                   lineart.draw_line(0.0 , (float)which, (float)width, (float)which , scanline_color);
-                   
-                   if (hit_x>0 && hit_y>0){
-                       lineart.draw_circle(hit_x , hit_y   , 5, scanhit_color);
-                   }
-                   
-                   /***************************************/
 
+                   // show the scanline we are feeding into the calc function 
+                   lineart.draw_line(0.0 , (float)which, (float)width, (float)which , scanline_color);
+
+                   //keeping it off 0 prevent false hits for non geometry                    
+                   if (hit_x>0 && hit_y>0){
+                       int c = 0;
+                       for(c=0;c<4;c++){
+                           lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                       }
+                       
+                       //cache the hits to draw the filled in line later 
+                       if(j==0){
+                           l1x = hit_x;
+                           l1y = hit_y;
+                       }
+
+                       if(j==1){
+                           l2x = hit_x;
+                           l2y = hit_y;
+                       }
+
+                   }
+
+                   /***************************************/
+                   // attempt to move scanline into its own function
+                   // not working right yet  
                    /*
                    draw_scanline( p_lineart,
                                   (float)which, (float)300, (float)300,  
@@ -531,6 +557,37 @@ void render_model( int width, int height, char* objfilename,
                ecoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx );//+lineart.center_x
                ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+
+               if (RENDER_SCANLINE)
+               {
+                   /***************************************/
+                   framebuffer::RGBType scanline_color; 
+                   framebuffer::RGBType scanhit_color; 
+                   scanhit_color.r = 1;
+                   scanhit_color.g = 155;
+                   scanhit_color.b = 55;
+                   scanline_color.r = 75;
+                   scanline_color.g = 155;
+                   scanline_color.b = 1;  
+
+                   // run the calc function to check for a line intersection 
+                   get_line_intersection( 0.0,  (float)which, (float)width  , (float)which, 
+                                          scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
+
+                   // show the scanline we are feeding into the calc function 
+                   lineart.draw_line(0.0 , (float)which, (float)width, (float)which , scanline_color);
+                   
+                   if (hit_x>0 && hit_y>0){
+                       int c = 0;
+                       for(c=0;c<4;c++){
+                           lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                       }
+
+                       l3x = hit_x;
+                       l3y = hit_y;
+                                           
+                   }
+                }               
            }
 
 
@@ -546,6 +603,23 @@ void render_model( int width, int height, char* objfilename,
                lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
            }
 
+           if (RENDER_POLYFILL){
+                //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
+                
+                //draw all three lines if the data exists
+                if( l1x != 0 && l2x !=0){
+                    lineart.draw_line(l1x, l1y, l2x, l2y, vtx_color);
+                }
+                if( l1x != 0 && l3x !=0){
+                    lineart.draw_line(l1x, l1y, l3x, l3y, vtx_color);
+                }
+                if( l2x != 0 && l3x !=0){
+                    lineart.draw_line(l2x, l2y, l3x, l3y, vtx_color);
+                }                
+
+           }
+
+
        } 
 
 
@@ -553,6 +627,6 @@ void render_model( int width, int height, char* objfilename,
 
    framebuffer::savebmp(outfilename , width, height, dpi, output_image);
    
-   cout << outfilename << " saved to disk. " << endl;
-   cout << "# Done Rendering ! " << endl;
+   //cout << outfilename << " saved to disk. " << endl;
+   cout << "finished rendering." << endl;
 }

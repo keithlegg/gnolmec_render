@@ -22,11 +22,11 @@ class animate_renderthing:
       #./renderthing 512 512 ./3d_obj/monkey.obj 0 0 0 animated/first_1.bmp 100 1
       xrot = 0
       yrot = 0
-      zrot = 0
+      zrot = 33
+
+      renderscale = 600 
       
       imagename = 'blah'
-      whichline = i 
-      renderscale = 500 
 
       com_to_run = (self.com_name+' '
                       +str(self.res_x)+' '+str(self.res_y)
@@ -34,7 +34,7 @@ class animate_renderthing:
                       +str(xrot)+' '+str(yrot)+' '+str(zrot)+' '
                       +self.outpath+'/%s_'%imagename
                       +str(i)+'.bmp'+' '
-                      +str(renderscale)+' '+str(whichline)
+                      +str(renderscale)+' '+str(i)
                     ) 
 
       
@@ -52,9 +52,11 @@ class animate_renderthing:
 
 
 anim_obj = animate_renderthing()
-
 #anim_obj.render(1)
 
-anim_obj.animate('./3d_obj/triangle.obj')
+
+anim_obj.animate('./3d_obj/triangle.obj')  # scale to 600
+#anim_obj.animate('./3d_obj/sphere.obj')  # scale to 500
+#anim_obj.animate('./3d_obj/monkey.obj')  # scale to 100
 
 
