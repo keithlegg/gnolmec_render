@@ -21,52 +21,46 @@ int pix_iterator;//index to a pixel on the framebuffer
 /*********************************************************/
 
 
-void make_image(int width, int height)
+void make_image(int width, int height, char *outfile)
 {
-    /* 
-        UNFINISHED - STAND ALONE GENERATE AN IMAGE 
-    */
 
-    int dpi    = 72; 
-    //int width  = 512; 
-    //int height = 512; 
-    int res_x = width;
-    int res_y = height;
+    framebuffer test_draw( width, height );
+    framebuffer *ptest_draw = &test_draw;
 
-    int n = width * height;
+    int pix_iterator;
 
-    framebuffer::RGBType* output_image;
-    framebuffer myimage( width, height );
-    output_image = myimage.rgbdata;
     /***********/
-    short flat_color = 0; //background grey color 
+    short flat_color = 128; //background grey color 
 
     //fill each pixel with a color  
     for (int x = 0; x < width; x++)
-    {    //rotate_obj.show();
+    {   
         for (int y = 0; y < height; y++)
         {  
             pix_iterator = y * width + x;     
 
-            //funky moire pattern 
-            // output_image[pix_iterator].r = y/2;       
-            // output_image[pix_iterator].g = 255;//-y/3;
-            // output_image[pix_iterator].b = x*(y/2);
-
-            output_image[pix_iterator].r = flat_color;       
-            output_image[pix_iterator].g = flat_color;
-            output_image[pix_iterator].b = flat_color;
+            test_draw.rgbdata[pix_iterator].r = flat_color;  //= 0x254;      
+            test_draw.rgbdata[pix_iterator].g = flat_color;  //= 0x0
+            test_draw.rgbdata[pix_iterator].b = flat_color;  //= 0x0
 
         }
-    }
+   }
 
 
-    framebuffer::RGBType poly_color; 
-    framebuffer::RGBType vtx_color; 
+   framebuffer::RGBType  drawcolor;
+   drawcolor.r = 0x255;
+   drawcolor.g = 0x0;
+   drawcolor.b = 0x0;
 
-    //framebuffer::savebmp(outfilename , width, height, dpi, output_image);
-    //cout << outfilename << " saved to disk. " << endl;
-    //cout << "# Done Rendering ! " << endl;
+   ptest_draw->draw_point(10, 10, drawcolor);
+   ptest_draw->draw_point(11, 11, drawcolor);
+   ptest_draw->draw_point(12, 12, drawcolor);
+
+   // instance method 
+   ptest_draw->savebmp (outfile, width, height, 300, test_draw.rgbdata) ;
+
+   //static/class method 
+   //framebuffer::savebmp (outfile, width, height, 300, test_draw.rgbdata) ;
 
 }
 
@@ -367,8 +361,6 @@ void render_model( int width, int height, char* objfilename,
    int RENDER_SCANLINE  = 1;
 
    int dpi    = 72; 
-   //int width  = 512; 
-   //int height = 512; 
    int res_x = width;
    int res_y = height;
 
@@ -495,17 +487,35 @@ void render_model( int width, int height, char* objfilename,
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
                
                /*******************/ 
-               if (RENDER_SCANLINE){
-                   // get_line_intersection( 0.0     , 0.0    , 400.0    , 400.0, 
-                   //                        scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
-                   // lineart.draw_line(0.0, 0.0,  400.0 ,  400.0 , scanline_color);
-                   // lineart.draw_circle(hit_x , hit_y   , 5, scanhit_color);
-                   // cout << "line intersection at " << hit_x <<" " << hit_y << endl;
-                  
+               if (RENDER_SCANLINE)
+               {
+
+                   framebuffer::RGBType scanline_color; 
+                   framebuffer::RGBType scanhit_color; 
+                   scanhit_color.r = 1;
+                   scanhit_color.g = 155;
+                   scanhit_color.b = 55;
+                   scanline_color.r = 75;
+                   scanline_color.g = 155;
+                   scanline_color.b = 1;  
+
+                   get_line_intersection( 0.0,  (float)which, (float)width  , (float)which, 
+                                          scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
+
+                   lineart.draw_line(0.0 , (float)which, (float)width, (float)which , scanline_color);
+                   
+                   if (hit_x>0 && hit_y>0){
+                       lineart.draw_circle(hit_x , hit_y   , 5, scanhit_color);
+                   }
+                   
+                   /***************************************/
+
+                   /*
                    draw_scanline( p_lineart,
                                   (float)which, (float)300, (float)300,  
                                   scoord_x, scoord_y, ecoord_x, ecoord_y, 
                                   p_hit_x , p_hit_y );
+                   */
 
                }
                /*******************/ 

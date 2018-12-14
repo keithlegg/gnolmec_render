@@ -4,6 +4,8 @@
 #ifndef framebuffer_H
 #define _framebuffer_H
 
+
+
 class framebuffer {
 
    int pix_iterator;

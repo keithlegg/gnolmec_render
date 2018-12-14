@@ -74,16 +74,46 @@ void obj_file_stuff(void){
 
 /***********************************/
 
-void test_image_draw(char *outfile){
+void test_image_draw( int width, int height, char *outfile)
+{
 
-    //framebuffer::RGBType* test_draw;
-    framebuffer test_draw( 1024, 1024 );
+    framebuffer test_draw( width, height );
+    framebuffer *ptest_draw = &test_draw;
 
-    //framebuffer::RGBType poly_color; 
-    //framebuffer::RGBType vtx_color; 
+    int pix_iterator;
 
-    //test_draw->savebmp (outfile, 1024, 1024, 300, framebuffer::RGBType *data) ;
+    /***********/
+    short flat_color = 128; //background grey color 
 
+    //fill each pixel with a color  
+    for (int x = 0; x < width; x++)
+    {   
+        for (int y = 0; y < height; y++)
+        {  
+            pix_iterator = y * width + x;     
+
+            test_draw.rgbdata[pix_iterator].r = flat_color;  //= 0x254;      
+            test_draw.rgbdata[pix_iterator].g = flat_color;  //= 0x0
+            test_draw.rgbdata[pix_iterator].b = flat_color;  //= 0x0
+
+        }
+   }
+
+
+   framebuffer::RGBType  drawcolor;
+   drawcolor.r = 0x255;
+   drawcolor.g = 0x0;
+   drawcolor.b = 0x0;
+
+   ptest_draw->draw_point(2, 2, drawcolor);
+   //ptest_draw->draw_point(11, 11, drawcolor);
+   //ptest_draw->draw_point(12, 12, drawcolor);
+
+   // instance method 
+   ptest_draw->savebmp (outfile, width, height, 300, test_draw.rgbdata) ;
+
+   //static/class method 
+   //framebuffer::savebmp (outfile, width, height, 300, test_draw.rgbdata) ;
 
 }
 
@@ -96,7 +126,7 @@ int main(int argc, char *argv[])
 
     //test_load_bmp("images/uvmap.bmp");
 
-    test_image_draw("foo.bmp");
+    //test_image_draw(10, 10, "foeeeeo.bmp");
 
 
     //obj_file_stuff();
@@ -109,7 +139,7 @@ int main(int argc, char *argv[])
     //obj_file_stuff();
 
     /* * * * * * * * * */
-    if (argc < 9){
+    if (argc < 10){
         cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
         return 0;
     }
