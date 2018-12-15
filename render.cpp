@@ -359,10 +359,14 @@ void render_model( int width, int height, char* objfilename,
    //cout << "# Begin Rendering ..." << endl;
 
    int RENDER_VTX_PTS   = 1;
-   int RENDER_SCANLINE  = 1;
+   
+   int RENDER_SCANLINE  = 0; //do the scan line render loop 
+   int SHOW_SCANAREA    = 0; //show the actual "line" indicating where the scan is happening 
+   int SHOW_SCANLINE    = 0; //show the actual "line" indicating where the scan is happening 
    int RENDER_POLYFILL  = 1;
 
    int dpi    = 72; 
+
    int res_x = width;
    int res_y = height;
 
@@ -375,6 +379,7 @@ void render_model( int width, int height, char* objfilename,
    output_image = lineart.rgbdata;
 
    /***********/
+   //draw the background - fill with a solid color
    short flat_color = 0; //background grey color 
 
    //fill each pixel with a color  
@@ -385,9 +390,9 @@ void render_model( int width, int height, char* objfilename,
             pix_iterator = y * width + x;     
 
             //funky moire pattern 
-            // output_image[pix_iterator].r = y/2;       
-            // output_image[pix_iterator].g = 255;//-y/3;
-            // output_image[pix_iterator].b = x*(y/2);
+            //output_image[pix_iterator].r = y/2;       
+            //output_image[pix_iterator].g = 255;//-y/3;
+            //output_image[pix_iterator].b = x*(y/2);
 
             output_image[pix_iterator].r = flat_color;       
             output_image[pix_iterator].g = flat_color;
@@ -395,6 +400,8 @@ void render_model( int width, int height, char* objfilename,
 
         }
    }
+
+   /***********/
 
    framebuffer::RGBType poly_color; 
    framebuffer::RGBType vtx_color; 
@@ -474,154 +481,177 @@ void render_model( int width, int height, char* objfilename,
 
        }//
 
-       // loop through the vertices for each face           
-       for (j=0;j<numverts;j++)
-       {
-           // use the center of the screen as the point to draw geom from 
-           double cenx =  (double)lineart.center_x;
-           double ceny =  (double)lineart.center_y;
-          
-           // scale the geometry and translate it to the center of screen  
-           scoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx);
-           scoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny);
+       // use the center of the screen as the point to draw geom from 
+       double cenx =  (double)lineart.center_x;
+       double ceny =  (double)lineart.center_y;
 
-           if (j<numverts-1)
+       framebuffer::RGBType scanline_color; 
+       framebuffer::RGBType scanhit_color; 
+       scanhit_color.r = 1;
+       scanhit_color.g = 155;
+       scanhit_color.b = 55;
+       scanline_color.r = 75;
+       scanline_color.g = 155;
+       scanline_color.b = 1;  
+
+       /****************************************************/
+       // this block draws the scanline 
+       // you can loop once - or more to fill the polygon   
+       int sl=0;
+       //sl=which; 
+       //if(1){
+       for(sl=0;sl<which;sl++){
+
+           // loop through the vertices for each face           
+           for (j=0;j<numverts;j++)
            {
-               ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx ); 
-               ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny ); 
-               // cout << "draw a line " << scoord_x << " " << scoord_y << " " << ecoord_x << " " << ecoord_y << endl;
-               lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-               
-               /*******************/ 
-               if (RENDER_SCANLINE)
+
+              
+               // scale the geometry and translate it to the center of screen  
+               scoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx);
+               scoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny);
+
+               // build up the polygon edges by iterating in twos
+               // vertex[j] (connected to) vertex[j+1]
+               if (j<numverts-1)
                {
-                   /***************************************/
-                   framebuffer::RGBType scanline_color; 
-                   framebuffer::RGBType scanhit_color; 
-                   scanhit_color.r = 1;
-                   scanhit_color.g = 155;
-                   scanhit_color.b = 55;
-                   scanline_color.r = 75;
-                   scanline_color.g = 155;
-                   scanline_color.b = 1;  
+                   ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx ); 
+                   ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny ); 
 
-                   // run the calc function to check for a line intersection 
-                   get_line_intersection( 0.0,  (float)which, (float)width  , (float)which, 
-                                          scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
+                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+                   
+                   /*******************/ 
+                   if (RENDER_SCANLINE)
+                   {
+                       // run the calc function to check for a line intersection 
+                       get_line_intersection( 0.0,  (float)sl, (float)width  , (float)sl, 
+                                              scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
 
+                       if (SHOW_SCANAREA){
+                           // show the scanline we are feeding into the calc function 
+                           lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
+                       } 
 
-                   // show the scanline we are feeding into the calc function 
-                   lineart.draw_line(0.0 , (float)which, (float)width, (float)which , scanline_color);
+                       //keeping it off 0 prevent false hits for non geometry                    
+                       if (hit_x>0 && hit_y>0){
+                           int c = 0;
+                           for(c=0;c<4;c++){
+                               lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                           }
+                           
+                           // cache the hits to draw the filled in line later 
+                           if(j==0){
+                               l1x = hit_x;
+                               l1y = hit_y;
+                           }
 
-                   //keeping it off 0 prevent false hits for non geometry                    
-                   if (hit_x>0 && hit_y>0){
-                       int c = 0;
-                       for(c=0;c<4;c++){
-                           lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                           if(j==1){
+                               l2x = hit_x;
+                               l2y = hit_y;
+                           }
+
                        }
-                       
-                       //cache the hits to draw the filled in line later 
-                       if(j==0){
-                           l1x = hit_x;
-                           l1y = hit_y;
-                       }
 
-                       if(j==1){
-                           l2x = hit_x;
-                           l2y = hit_y;
-                       }
+                       /***************************************/
+                       // attempt to move scanline into its own function
+                       // not working right yet  
+                       /*
+                       draw_scanline( p_lineart,
+                                      (float)sl, (float)300, (float)300,  
+                                      scoord_x, scoord_y, ecoord_x, ecoord_y, 
+                                      p_hit_x , p_hit_y );
+                       */
 
                    }
-
-                   /***************************************/
-                   // attempt to move scanline into its own function
-                   // not working right yet  
-                   /*
-                   draw_scanline( p_lineart,
-                                  (float)which, (float)300, (float)300,  
-                                  scoord_x, scoord_y, ecoord_x, ecoord_y, 
-                                  p_hit_x , p_hit_y );
-                   */
+                   /*******************/ 
 
                }
-               /*******************/ 
 
-           }
-
-
-           // last line segment 
-           if (j==numverts-1)
-           {
-               scoord_x =  ((double)(draw_poly[0].x * RSCALE) + cenx);
-               scoord_y =  ((double)(draw_poly[0].y * RSCALE) + ceny);
-               ecoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx );//+lineart.center_x
-               ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
-               lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-
-               if (RENDER_SCANLINE)
+              
+              
+               // third "virtual" line segment 
+               // I call it virtual because it connects the last drawn point to the first 
+               // making the polyline periodic 
+               
+               // last line segment 
+               if (j==numverts-1)
                {
-                   /***************************************/
-                   framebuffer::RGBType scanline_color; 
-                   framebuffer::RGBType scanhit_color; 
-                   scanhit_color.r = 1;
-                   scanhit_color.g = 155;
-                   scanhit_color.b = 55;
-                   scanline_color.r = 75;
-                   scanline_color.g = 155;
-                   scanline_color.b = 1;  
+                   scoord_x =  ((double)(draw_poly[0].x * RSCALE) + cenx);
+                   scoord_y =  ((double)(draw_poly[0].y * RSCALE) + ceny);
+                   ecoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx );//+lineart.center_x
+                   ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
+
+                   //draw the closing third edge of the polygon 
+                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+
+                   //////////////////////////////////
 
                    // run the calc function to check for a line intersection 
-                   get_line_intersection( 0.0,  (float)which, (float)width  , (float)which, 
+                   get_line_intersection( 0.0,  (float)sl, (float)width  , (float)sl, 
                                           scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
 
-                   // show the scanline we are feeding into the calc function 
-                   lineart.draw_line(0.0 , (float)which, (float)width, (float)which , scanline_color);
-                   
-                   if (hit_x>0 && hit_y>0){
-                       int c = 0;
-                       for(c=0;c<4;c++){
-                           lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                   if(RENDER_SCANLINE){
+                       if(SHOW_SCANAREA){
+                           // show the scanline we are feeding into the calc function 
+                           lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
                        }
 
-                       l3x = hit_x;
-                       l3y = hit_y;
-                                           
+                       if (hit_x>0 && hit_y>0){
+                           int c = 0;
+                           for(c=0;c<4;c++){
+                               lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                           }
+
+                           l3x = hit_x;
+                           l3y = hit_y;
+                                               
+                       }//if hit detected 
                    }
-                }               
-           }
+                }//last line segment               
 
-
-           if (RENDER_VTX_PTS){
-               // if you want a circle at each point 
-               //lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
-               
-               // really big 5 pixel dot 
-               lineart.draw_point(scoord_x   , scoord_y   , vtx_color); //if you only want a tiny point 
-               lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
-               lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
-               lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
-               lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
-           }
-
-           if (RENDER_POLYFILL){
-                //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
                 
-                //draw all three lines if the data exists
-                if( l1x != 0 && l2x !=0){
-                    lineart.draw_line(l1x, l1y, l2x, l2y, vtx_color);
-                }
-                if( l1x != 0 && l3x !=0){
-                    lineart.draw_line(l1x, l1y, l3x, l3y, vtx_color);
-                }
-                if( l2x != 0 && l3x !=0){
-                    lineart.draw_line(l2x, l2y, l3x, l3y, vtx_color);
-                }                
 
-           }
+               // draw a highly visible dot at the intersection points 
+               if (RENDER_VTX_PTS){
+                   // really big 5 pixel dot 
+                   lineart.draw_point(scoord_x   , scoord_y   , vtx_color); //if you only want a tiny point 
+                   lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
+                   lineart.draw_point(scoord_x-1 , scoord_y   , vtx_color);
+                   lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
+                   lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
+               }
 
 
+
+               /***********************************************************/
+
+           } 
+       }//scan line loop 
+
+       //done with scanline loop here
+       /****************************************************/
+
+       if (SHOW_SCANLINE){
+           // show the scanline we are feeding into the calc function 
+           lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
        } 
 
+       // draw a line bewteen the two intersection points 
+       if (RENDER_POLYFILL){
+            //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
+            
+            //draw all three lines if the data exists
+            if( l1x != 0 && l2x !=0){
+                lineart.draw_line(l1x, l1y, l2x, l2y, vtx_color);
+            }
+            if( l1x != 0 && l3x !=0){
+                lineart.draw_line(l1x, l1y, l3x, l3y, vtx_color);
+            }
+            if( l2x != 0 && l3x !=0){
+                lineart.draw_line(l2x, l2y, l3x, l3y, vtx_color);
+            }                
+
+       }
 
    }//render iterator
 
