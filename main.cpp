@@ -27,6 +27,8 @@ using namespace std;
 
 void test_load_bmp(char *filename){
 
+    /* someday I will be able to load BMP files as well as save them ... sigh */
+  
     framebuffer::RGBType* input_image;
     framebuffer loaded_bmp( 1024, 1024 );
 
@@ -37,6 +39,8 @@ void test_load_bmp(char *filename){
 /***********************************/
 
 void test_intersection(void){
+
+    /* test of the function that calculates a line intersetion */ 
 
     float xcoord = 0;
     float ycoord = 0;
@@ -54,7 +58,8 @@ void test_intersection(void){
 
 
 void obj_file_stuff(void){
-    
+    /* test of loading and saving an OBJ file with my 3D model class*/
+
     model MOBJ;
     
     MOBJ.make_cube(1.1);
@@ -73,6 +78,15 @@ void obj_file_stuff(void){
 }
 
 /***********************************/
+/*
+   self contained example of creating a BMP file 
+   detached from the renderer, just to show how to driectly 
+   create a framebuffer and dump it to disk.
+
+   The colors are a total mess. 
+   OSX compiles the BMP exporter function differently.
+   See framebuffer.cpp line 184 for a better explanation.
+*/
 
 void test_image_draw( int width, int height, char *outfile)
 {
@@ -119,6 +133,14 @@ void test_image_draw( int width, int height, char *outfile)
 
 
 /***********************************/
+
+/*
+
+   TO DO LIST 
+
+   I discovered a bug where it will hang forever if you pass a folder instaed of a file for the input.
+
+*/
 
 
 int main(int argc, char *argv[])

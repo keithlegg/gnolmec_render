@@ -183,10 +183,10 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
         /*****************/
         // OSX complains when compiling with -std-c++11 option  
         // error: non-constant-expression cannot be narrowed from type 'int' to 'unsigned char' in 
-        unsigned char color[3] = { (int)floor(blue),(int)floor(green),(int)floor(red) };
+        //unsigned char color[3] = { (int)floor(blue),(int)floor(green),(int)floor(red) };
         
         //this is modified to compile on OSX - not sure its right (or the other one, for that matter!)
-        //int color[3] = { (int)(blue),(int)(green),(int)(red) };
+        int color[3] = { (int)(blue),(int)(green),(int)(red) };
         
         /*****************/
 

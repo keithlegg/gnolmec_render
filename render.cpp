@@ -360,10 +360,10 @@ void render_model( int width, int height, char* objfilename,
 
    int RENDER_VTX_PTS   = 1;
    
-   int RENDER_SCANLINE  = 0; //do the scan line render loop 
-   int SHOW_SCANAREA    = 0; //show the actual "line" indicating where the scan is happening 
-   int SHOW_SCANLINE    = 0; //show the actual "line" indicating where the scan is happening 
-   int RENDER_POLYFILL  = 1;
+   int RENDER_SCANLINE     = 1; //do the scan line render loop 
+   int SHOW_SCANLINE       = 1; //show the actual "line" indicating where the scan is happening 
+   int SHOW_POLYFILL       = 1; //fill the polygon 
+   int SHOW_SCANLINE_DOTS  = 0; //show the point where the scan line intersects the polygon edge 
 
    int dpi    = 72; 
 
@@ -405,6 +405,7 @@ void render_model( int width, int height, char* objfilename,
 
    framebuffer::RGBType poly_color; 
    framebuffer::RGBType vtx_color; 
+   framebuffer::RGBType polyline_color; 
 
    //containers for 3d objects 
    model OBJ;
@@ -442,9 +443,13 @@ void render_model( int width, int height, char* objfilename,
 
    /***********************/
    //set colors
-   poly_color.r = 170;
-   poly_color.g = 22;
-   poly_color.b = 170;
+   poly_color.r = 64;
+   poly_color.g = 56;
+   poly_color.b = 27;
+
+   polyline_color.r = 170;
+   polyline_color.g = 22;
+   polyline_color.b = 170;
 
    vtx_color.r = 1;
    vtx_color.g = 255;
@@ -518,25 +523,25 @@ void render_model( int width, int height, char* objfilename,
                    ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx ); 
                    ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny ); 
 
-                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+                   //draw a polygon edge 
+                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, polyline_color);
                    
                    /*******************/ 
-                   if (RENDER_SCANLINE)
+                   if (RENDER_SCANLINE == 1)
                    {
                        // run the calc function to check for a line intersection 
                        get_line_intersection( 0.0,  (float)sl, (float)width  , (float)sl, 
                                               scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
 
-                       if (SHOW_SCANAREA){
-                           // show the scanline we are feeding into the calc function 
-                           lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
-                       } 
 
                        //keeping it off 0 prevent false hits for non geometry                    
                        if (hit_x>0 && hit_y>0){
-                           int c = 0;
-                           for(c=0;c<4;c++){
-                               lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                           if (SHOW_SCANLINE_DOTS == 1)
+                           {                        
+                               int c = 0;
+                               for(c=0;c<4;c++){
+                                   lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                               }
                            }
                            
                            // cache the hits to draw the filled in line later 
@@ -582,7 +587,7 @@ void render_model( int width, int height, char* objfilename,
                    ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
 
                    //draw the closing third edge of the polygon 
-                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
+                   lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, polyline_color);
 
                    //////////////////////////////////
 
@@ -590,16 +595,15 @@ void render_model( int width, int height, char* objfilename,
                    get_line_intersection( 0.0,  (float)sl, (float)width  , (float)sl, 
                                           scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
 
-                   if(RENDER_SCANLINE){
-                       if(SHOW_SCANAREA){
-                           // show the scanline we are feeding into the calc function 
-                           lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
-                       }
+                   if(RENDER_SCANLINE==1){
 
                        if (hit_x>0 && hit_y>0){
-                           int c = 0;
-                           for(c=0;c<4;c++){
-                               lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                           if (SHOW_SCANLINE_DOTS==1)
+                           {
+                               int c = 0;
+                               for(c=0;c<4;c++){
+                                   lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
+                               }
                            }
 
                            l3x = hit_x;
@@ -609,10 +613,8 @@ void render_model( int width, int height, char* objfilename,
                    }
                 }//last line segment               
 
-                
-
-               // draw a highly visible dot at the intersection points 
-               if (RENDER_VTX_PTS){
+               //draw a dot to show the polygon vertices  
+               if (RENDER_VTX_PTS==1){
                    // really big 5 pixel dot 
                    lineart.draw_point(scoord_x   , scoord_y   , vtx_color); //if you only want a tiny point 
                    lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
@@ -622,7 +624,22 @@ void render_model( int width, int height, char* objfilename,
                }
 
 
+               // draw a line bewteen the two intersection points 
+               if (SHOW_POLYFILL==1){
+                    //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
+                    
+                    //draw all three lines if the data exists
+                    if( l1x != 0 && l2x !=0){
+                        lineart.draw_line(l1x, l1y, l2x, l2y, poly_color);
+                    }
+                    if( l1x != 0 && l3x !=0){
+                        lineart.draw_line(l1x, l1y, l3x, l3y, poly_color);
+                    }
+                    if( l2x != 0 && l3x !=0){
+                        lineart.draw_line(l2x, l2y, l3x, l3y, poly_color);
+                    }                
 
+               }
                /***********************************************************/
 
            } 
@@ -631,13 +648,14 @@ void render_model( int width, int height, char* objfilename,
        //done with scanline loop here
        /****************************************************/
 
-       if (SHOW_SCANLINE){
+       if (SHOW_SCANLINE==1){
            // show the scanline we are feeding into the calc function 
            lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
        } 
 
-       // draw a line bewteen the two intersection points 
-       if (RENDER_POLYFILL){
+       // line bewteen the two intersection points 
+       // draw once more to cover everything else 
+       if (SHOW_POLYFILL==1){
             //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
             
             //draw all three lines if the data exists
