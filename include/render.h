@@ -28,8 +28,10 @@ void draw_scanline( framebuffer* fb,
                     float *phit_x , float *phit_y );
 
 
-Vector4 rotate_points ( Matrix4 m, Vector4 v);
-Vector3 rotate_points ( Matrix4 m, Vector3 v);
+//Vector4 rotate_points ( Matrix4 m, Vector4 v);
+//Vector3 rotate_points ( Matrix4 m, Vector3 v);
+
+void test_framebuffer(void);
 
 void render_model( int width, int height, char* objfilename ,float RX, float RY, float RZ ,char* outfilename, double RSCALE, int which); 
 

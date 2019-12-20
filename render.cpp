@@ -106,11 +106,11 @@ int get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y,
 
 /*********************************************************/
 
-
+/*
 Vector4 rotate_points ( Matrix4 m, Vector4 v) {
-    /* multiply a vector4 by a matrix44 
-       handled by the matrix library 
-    */
+    // multiply a vector4 by a matrix44 
+    //   handled by the matrix library 
+    
 
     Vector4 out;
     out.x = m[0] * v.x + m[4] * v.y + m[8]  * v.z + m[12] * v.w;
@@ -121,25 +121,61 @@ Vector4 rotate_points ( Matrix4 m, Vector4 v) {
     return out;
 }
 
-/*********************************************************/
-
 
 Vector3 rotate_points ( Matrix4 m, Vector3 v) {
-    /* multiply a vector3 by a matrix44 
-       handled by the matrix library 
-    */
+    // multiply a vector3 by a matrix44 
+    //   handled by the matrix library 
+
+        | 0 2 |    | 0 3 6 |    |  0  4  8 12 |
+        | 1 3 |    | 1 4 7 |    |  1  5  9 13 |
+                   | 2 5 8 |    |  2  6 10 14 |
+                                |  3  7 11 15 |       
+
+    
 
     Vector3 out;
+    
     out.x = m[0] * v.x + m[4] * v.y + m[8]  * v.z + m[12] * 1;
     out.y = m[1] * v.x + m[5] * v.y + m[9]  * v.z + m[13] * 1;
     out.z = m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14] * 1;
-    //out.w = m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15] * 1;
+    // //out.w = m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15] * 1;
 
     return out;
 }
 
+*/
 
 
+void test_framebuffer(void)
+{
+    int width = 512;
+    int height = 512;
+    int dpi    = 72; 
+
+    framebuffer::RGBType poly_color; 
+    framebuffer::RGBType vtx_color; 
+
+    //set colors
+    poly_color.r = 170;
+    poly_color.g = 22;
+    poly_color.b = 170;
+    vtx_color.r = 1;
+    vtx_color.g = 255;
+    vtx_color.b = 255;
+
+    framebuffer lineart( width, height );
+    framebuffer::RGBType* output_image;
+
+    output_image = lineart.rgbdata;
+
+    lineart.draw_point(1,1);
+    lineart.draw_point(5,5);    
+    lineart.draw_point(10,10);
+    //lineart.draw_line(0, 0, width, 0, poly_color);
+
+    // saveBMP_24bit ( RGBType *data, const char *filename, int w, int h); 
+    framebuffer::savebmp("fb_test.bmp" , width, height, dpi, output_image);    
+}
 /*********************************************************/
 
 void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
@@ -233,21 +269,28 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
 
    //debug - min the process of rendering N sided - converting from Vector4
    //double draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
-
-   // one problem is that rotate_points function returns a Vector4!! debug 
-   //Vector4 tmp_vtx;
-
    Vector3 draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
 
+   // -----------------
 
+   //load the camera matrix (via model) and push points around 
    model camera_matrix;
    camera_matrix.load_matrix( matrixfile );
-
    float RSCALE = 1000.0/abs(camera_matrix.m44[14]);
 
    rotate_obj = rotate_obj * camera_matrix.m44;
 
-
+   // framebuffer draws "upside down" flip the Y with a matrix 
+   
+   // Matrix4 flip_y;    
+   // flip_y.identity();
+   // flip_y.rotateZ(180);
+   // //  |  0  4  8 12 |
+   // //  |  1  5  9 13 |
+   // //  |  2  6 10 14 |
+   // //  |  3  7 11 15 |     
+   // rotate_obj = rotate_obj * flip_y;
+   // ---------------------
 
    //set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)
@@ -259,7 +302,13 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
        for (j=0;j<numverts;j++){
            // look up each face vertex (vector3 X4) 
            //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
-           draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
+           
+           // I did this thinking it was needed , BUT the matrix lib can do it directly. and better ?
+           //draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
+           
+           // this will use the matrix library directly 
+           draw_poly[j] = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][j])-1] ;
+
            //cout << "rotated point is " << draw_poly[j] << j << endl; 
        }//
 
@@ -462,8 +511,6 @@ void render_model( int width, int height, char* objfilename,
    //debug - min the process of rendering N sided - converting from Vector4
    //double draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
 
-   // one problem is that rotate_points function returns a Vector4!! debug 
-   //Vector4 tmp_vtx;
 
    Vector3 draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
 
@@ -485,7 +532,11 @@ void render_model( int width, int height, char* objfilename,
        for (j=0;j<numverts;j++){
            // look up each face vertex (vector3 X4) 
            //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
-           draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
+           
+           //draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
+           
+           draw_poly[j] = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][j])-1] ;
+
            //cout << "rotated point is " << draw_poly[j] << j << endl; 
 
        }//

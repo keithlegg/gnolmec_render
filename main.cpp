@@ -167,31 +167,25 @@ int main(int argc, char *argv[])
     }
 
  
+   // --------------------------
 
-    //renderthing 512 512 3d_obj/monkey.obj ../camera_matrix.olm 0 0 90 render.bmp 100
- 
+    //test_framebuffer();
 
-    // really_simple_render_model( int width, int height, char* objfilename,  char* matrixfile, float RX, float RY, float RZ ,
-    //                                                     char* outfilename);
+    //make_image(512, 512, "testimage.bmp");
+
+    // --------------------------
 
     really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
                                 atof(argv[5]), atof(argv[6]),  atof(argv[7]),  argv[8]);
 
 
 
-
+    // --------------------------
 
     // "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
     // render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
     //                              atof(argv[5]), atof(argv[6]),  argv[7],  atof(argv[8]), atof(argv[9]) );
    
-
-
-
-    /* * * * * * * * * */
-
-    //render_model(256,256,"mycube.obj",0,0,0,"foo.bmp");
-    //render_model(256,256,"mycube.obj", 0, 90 ,0,"foo.bmp");
   
     return 0;
 }
