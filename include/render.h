@@ -32,7 +32,11 @@ Vector4 rotate_points ( Matrix4 m, Vector4 v);
 Vector3 rotate_points ( Matrix4 m, Vector3 v);
 
 void render_model( int width, int height, char* objfilename ,float RX, float RY, float RZ ,char* outfilename, double RSCALE, int which); 
-void really_simple_render_model( int width, int height, char* objfilename ,float RX, float RY, float RZ ,char* outfilename, double RSCALE);        
+
+void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, float RX, float RY, float RZ, char* outfilename);
+
+
+
 
 
 #endif

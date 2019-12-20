@@ -161,17 +161,32 @@ int main(int argc, char *argv[])
     //obj_file_stuff();
 
     /* * * * * * * * * */
-    if (argc < 10){
+    if (argc < 8){
         cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
         return 0;
     }
 
-    // really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
-    //                             atof(argv[5]), atof(argv[6]),  argv[7],   atof(argv[8]) );
+ 
 
-    /* * * * * * * * * */
-    render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
-                                atof(argv[5]), atof(argv[6]),  argv[7],  atof(argv[8]), atof(argv[9]) );
+    //renderthing 512 512 3d_obj/monkey.obj ../camera_matrix.olm 0 0 90 render.bmp 100
+ 
+
+    // really_simple_render_model( int width, int height, char* objfilename,  char* matrixfile, float RX, float RY, float RZ ,
+    //                                                     char* outfilename);
+
+    really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
+                                atof(argv[5]), atof(argv[6]),  atof(argv[7]),  argv[8]);
+
+
+
+
+
+    // "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
+    // render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
+    //                              atof(argv[5]), atof(argv[6]),  argv[7],  atof(argv[8]), atof(argv[9]) );
+   
+
+
 
     /* * * * * * * * * */
 

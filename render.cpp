@@ -142,9 +142,8 @@ Vector3 rotate_points ( Matrix4 m, Vector3 v) {
 
 /*********************************************************/
 
-void really_simple_render_model( int width, int height, char* objfilename, 
-                                 float RX, float RY, float RZ , 
-                                 char* outfilename, double RSCALE)
+void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
+                                 float RX, float RY, float RZ, char* outfilename)
 {
 
    //cout << "# Begin Rendering ..." << endl;
@@ -218,8 +217,8 @@ void really_simple_render_model( int width, int height, char* objfilename,
    //rotate_obj.show();
   
    //adjust object rotation
-   rotate_obj.rotateY( RX );
-   rotate_obj.rotateX( RY );
+   rotate_obj.rotateY( RY );
+   rotate_obj.rotateX( RX );
    rotate_obj.rotateZ( RZ );
 
    /***********************/
@@ -232,18 +231,23 @@ void really_simple_render_model( int width, int height, char* objfilename,
    vtx_color.g = 255;
    vtx_color.b = 255;
 
-   
-
-
    //debug - min the process of rendering N sided - converting from Vector4
    //double draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
-   
-
 
    // one problem is that rotate_points function returns a Vector4!! debug 
    //Vector4 tmp_vtx;
 
    Vector3 draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
+
+
+   model camera_matrix;
+   camera_matrix.load_matrix( matrixfile );
+
+   float RSCALE = 1000.0/abs(camera_matrix.m44[14]);
+
+   rotate_obj = rotate_obj * camera_matrix.m44;
+
+
 
    //set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)
@@ -513,15 +517,15 @@ void render_model( int width, int height, char* objfilename,
 
               
                // scale the geometry and translate it to the center of screen  
-               scoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx);
-               scoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny);
+               scoord_x =  ((double)(draw_poly[j].y * RSCALE) + cenx);
+               scoord_y =  ((double)(draw_poly[j].x * RSCALE) + ceny);
 
                // build up the polygon edges by iterating in twos
                // vertex[j] (connected to) vertex[j+1]
                if (j<numverts-1)
                {
-                   ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx ); 
-                   ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny ); 
+                   ecoord_x =  ((double)(draw_poly[j+1].y * RSCALE) + cenx ); 
+                   ecoord_y =  ((double)(draw_poly[j+1].x * RSCALE) + ceny ); 
 
                    //draw a polygon edge 
                    lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, polyline_color);

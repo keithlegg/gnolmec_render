@@ -128,7 +128,62 @@ void model::save_obj( char* filename)
     cout << endl << "obj file " << filename << " exported." << endl;
 
 }
+/**********************/
+/*
+   load a 4X4 matrix from disk to project geometry in render
+*/
+void model::load_matrix(char* filename)
+{
+    
+    ifstream fin;
+    fin.open(filename); // open a file
+    if (!fin.good()){ 
+        cout << "matrix file \""<< filename <<"\" appears to be missing or broken." << endl;
+        exit (EXIT_FAILURE); // exit if file not found
+    }
 
+    int line_ct = 0;
+    while (!fin.eof())
+    {
+        char buf[MAX_CHARS_PER_LINE];
+        fin.getline(buf, MAX_CHARS_PER_LINE);
+        
+        int i = 0;
+        int n = 0; 
+
+        const char* token[MAX_TOKENS_PER_LINE] = {};
+        token[0] = strtok(buf, DELIMITER);
+
+        //if line has data on it ...  
+        if (token[0]) 
+        {
+            // walk the space delineated tokens 
+            for (n=1; n < MAX_TOKENS_PER_LINE; n++)
+            {
+                token[n] = strtok(0, DELIMITER);
+                if (!token[n]) break;  
+            }
+
+        }
+        
+        if (line_ct==0){
+            m44[0]=atof(token[0]); m44[1]=atof(token[1]); m44[2]=atof(token[2]); m44[3]=atof(token[3]);
+        }
+        if (line_ct==1){
+            m44[4]=atof(token[0]); m44[5]=atof(token[1]); m44[6]=atof(token[2]); m44[7]=atof(token[3]);
+        }
+        if (line_ct==2){
+            m44[8]=atof(token[0]); m44[9]=atof(token[1]); m44[10]=atof(token[2]); m44[11]=atof(token[3]);
+        }
+        if (line_ct==3){
+            m44[12]=atof(token[0]); m44[13]=atof(token[1]); m44[14]=atof(token[2]); m44[15]=atof(token[3]);
+        }
+
+        line_ct ++; 
+    }
+
+    //m44.transpose();
+}
 
 /**********************/
 void model::load_obj(char* filename){

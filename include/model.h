@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <vector>
 
+#include "Vectors.h"
+#include "Matrices.h"
+
 
 #define MAX_NUM_VERTICES 5000
 #define MAX_NUM_FACES 2000
@@ -20,10 +23,13 @@ class model {
         int fac_cnt;
 
         Vector3 obj_pts[MAX_NUM_VERTICES]; //okay to limit to 3, never more than that for a point
-
+        
+        //std::vector<double> m44_elem;  
         std::vector<double> vtx_tmp;
         std::vector<int> fac_tmp;        
         std::vector<int> faces[MAX_NUM_FACES];
+
+        Matrix4 m44;
 
         model(){
             face_count     = 0;
@@ -43,6 +49,7 @@ class model {
 
         void save_obj( char* filename );
         void load_obj( char* filename );
+        void load_matrix(char* filename);
 
         void make_line(double scale); 
         void make_triangle(double scale); 
