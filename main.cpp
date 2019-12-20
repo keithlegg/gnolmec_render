@@ -175,18 +175,24 @@ int main(int argc, char *argv[])
 
     // --------------------------
 
-    really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
-                                atof(argv[5]), atof(argv[6]),  atof(argv[7]),  argv[8]);
+    // ARGS: really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
+    //                                   float RX, float RY, float RZ, char* outfilename)
+
+    // really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
+    //                             atof(argv[5]), atof(argv[6]),  atof(argv[7]),  argv[8]);
 
 
 
     // --------------------------
 
-    // "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
-    // render_model( atoi(argv[1]), atoi(argv[2]), argv[3], atof(argv[4]), 
-    //                              atof(argv[5]), atof(argv[6]),  argv[7],  atof(argv[8]), atof(argv[9]) );
+    // ARGS:  render_model( int width, int height, char* objfilename, char* matrixfile, 
+    //                      float RX, float RY, float RZ , char* outfilename)
+
+    render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
+                                 atof(argv[5]), atof(argv[6]),  atof(argv[7]), argv[8] );
    
-  
+
+
     return 0;
 }
 

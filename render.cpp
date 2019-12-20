@@ -106,46 +106,6 @@ int get_line_intersection(float p0_x, float p0_y, float p1_x, float p1_y,
 
 /*********************************************************/
 
-/*
-Vector4 rotate_points ( Matrix4 m, Vector4 v) {
-    // multiply a vector4 by a matrix44 
-    //   handled by the matrix library 
-    
-
-    Vector4 out;
-    out.x = m[0] * v.x + m[4] * v.y + m[8]  * v.z + m[12] * v.w;
-    out.y = m[1] * v.x + m[5] * v.y + m[9]  * v.z + m[13] * v.w;
-    out.z = m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14] * v.w;
-    out.w = m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15] * v.w;
- 
-    return out;
-}
-
-
-Vector3 rotate_points ( Matrix4 m, Vector3 v) {
-    // multiply a vector3 by a matrix44 
-    //   handled by the matrix library 
-
-        | 0 2 |    | 0 3 6 |    |  0  4  8 12 |
-        | 1 3 |    | 1 4 7 |    |  1  5  9 13 |
-                   | 2 5 8 |    |  2  6 10 14 |
-                                |  3  7 11 15 |       
-
-    
-
-    Vector3 out;
-    
-    out.x = m[0] * v.x + m[4] * v.y + m[8]  * v.z + m[12] * 1;
-    out.y = m[1] * v.x + m[5] * v.y + m[9]  * v.z + m[13] * 1;
-    out.z = m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14] * 1;
-    // //out.w = m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15] * 1;
-
-    return out;
-}
-
-*/
-
-
 void test_framebuffer(void)
 {
     int width = 512;
@@ -176,6 +136,58 @@ void test_framebuffer(void)
     // saveBMP_24bit ( RGBType *data, const char *filename, int w, int h); 
     framebuffer::savebmp("fb_test.bmp" , width, height, dpi, output_image);    
 }
+
+
+/*********************************************************/
+
+void draw_scanline( framebuffer* fb, 
+                    float whichline, float res_x, float res_y, 
+                    float sx, float sy, float ex, float ey,  
+                    float *phit_x , float *phit_y )
+{
+
+    framebuffer::RGBType scanline_color; 
+    framebuffer::RGBType scanhit_color; 
+
+    scanhit_color.r = 1;
+    scanhit_color.g = 155;
+    scanhit_color.b = 55;
+
+    scanline_color.r = 75;
+    scanline_color.g = 155;
+    scanline_color.b = 1;
+    
+    get_line_intersection( 0.0     , whichline    ,  res_x , whichline, 
+                           sx, sy, ex, ey, phit_x, phit_y) ; 
+
+    fb->draw_line(0.0, whichline,  res_x ,  whichline , scanline_color);
+    fb->draw_circle(*phit_x , *phit_x   , 5, scanhit_color);
+
+    //cout << "line intersection at " << *phit_x <<" " << *phit_x << endl;  
+
+}
+
+/*********************************************************/
+void simple_clip(int width, int height, double *x1, double *y1, double *x2, double *y2)
+{
+    //fake clipping - this just keeps renderer from crashing.
+    //to properly clip you must project the line beyond the borders and clip 
+    //at the point line intersects the edge of image 
+
+    if(*x1>= width) { *x1 = width;}
+    if(*y1>= height){ *y1 = height;}
+
+    if(*x2>= width) { *x1 = width;}
+    if(*y2>= height){ *y2 = height;}     
+
+    if(*x1< 1.0) { *x1 = 1.0;}
+    if(*y1< 1.0) { *y1 = 1.0;}
+
+    if(*x2 < 1.0) { *x1 = 1.0;}
+    if(*y2 < 1.0) { *y2 = 1.0;}  
+
+}
+
 /*********************************************************/
 
 void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
@@ -333,7 +345,7 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
                ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny );//+lineart.center_y 
 
                // cout << "draw a line " << scoord_x << " " << scoord_y << " " << ecoord_x << " " << ecoord_y << endl;
-
+               simple_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
 
                // get_line_intersection
@@ -347,6 +359,8 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
                scoord_y =  ((double)(draw_poly[0].y * RSCALE) + ceny);
                ecoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx );//+lineart.center_x
                ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
+               
+               simple_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
            }
            
@@ -354,7 +368,7 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
            
                // if you want a circle at each point 
                // lineart.draw_circle(scoord_x, scoord_y, 3, vtx_color);
-             
+               simple_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);             
                // really big 5 pixel dot 
                lineart.draw_point(scoord_x   , scoord_y   , vtx_color); //if you only want a tiny point 
                lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
@@ -375,47 +389,23 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
    //cout << "# Done Rendering ! " << endl;
 }
 
+
 /*********************************************************/
 
-void draw_scanline( framebuffer* fb, 
-                    float whichline, float res_x, float res_y, 
-                    float sx, float sy, float ex, float ey,  
-                    float *phit_x , float *phit_y )
-{
+// void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
+//                                  float RX, float RY, float RZ, char* outfilename)
 
-    framebuffer::RGBType scanline_color; 
-    framebuffer::RGBType scanhit_color; 
-
-    scanhit_color.r = 1;
-    scanhit_color.g = 155;
-    scanhit_color.b = 55;
-
-    scanline_color.r = 75;
-    scanline_color.g = 155;
-    scanline_color.b = 1;
-    
-    get_line_intersection( 0.0     , whichline    ,  res_x , whichline, 
-                           sx, sy, ex, ey, phit_x, phit_y) ; 
-
-    fb->draw_line(0.0, whichline,  res_x ,  whichline , scanline_color);
-    fb->draw_circle(*phit_x , *phit_x   , 5, scanhit_color);
-
-    //cout << "line intersection at " << *phit_x <<" " << *phit_x << endl;  
-
-}
-
-
-void render_model( int width, int height, char* objfilename, 
-                                 float RX, float RY, float RZ , char* outfilename, double RSCALE, int which)
+void render_model( int width, int height, char* objfilename, char* matrixfile, 
+                                 float RX, float RY, float RZ , char* outfilename)
 {
 
    //cout << "# Begin Rendering ..." << endl;
 
    int RENDER_VTX_PTS   = 1;
    
-   int RENDER_SCANLINE     = 1; //do the scan line render loop 
-   int SHOW_SCANLINE       = 1; //show the actual "line" indicating where the scan is happening 
-   int SHOW_POLYFILL       = 1; //fill the polygon 
+   int RENDER_SCANLINE     = 0; //do the scan line render loop 
+   int SHOW_SCANLINE       = 0; //show the actual "line" indicating where the scan is happening 
+   int SHOW_POLYFILL       = 0; //fill the polygon 
    int SHOW_SCANLINE_DOTS  = 0; //show the point where the scan line intersects the polygon edge 
 
    int dpi    = 72; 
@@ -430,6 +420,8 @@ void render_model( int width, int height, char* objfilename,
    framebuffer *p_lineart = &lineart;
 
    output_image = lineart.rgbdata;
+
+   int which = 1;
 
    /***********/
    //draw the background - fill with a solid color
@@ -470,8 +462,6 @@ void render_model( int width, int height, char* objfilename,
    Vector3 poly3;         //store vertex id's in a vector3 (3 sided poly) 
    Vector4 vprj[4];       //3 and 4 sided -  projected point coordinates
    Vector3 v1,v2,v3,v4;   //retrieved point data (xyz)
-   Matrix4 rotate_obj;    //4X4 rotation matrix 
-
 
    int i = 0;
    int j = 0;
@@ -480,6 +470,9 @@ void render_model( int width, int height, char* objfilename,
 
    double scoord_x, scoord_y, ecoord_x, ecoord_y;
 
+   /***********************/
+
+   Matrix4 rotate_obj;    //4X4 rotation matrix
    
    rotate_obj.identity();
 
@@ -490,9 +483,15 @@ void render_model( int width, int height, char* objfilename,
    //rotate_obj.show();
   
    //adjust object rotation
-   rotate_obj.rotateY( RX );
-   rotate_obj.rotateX( RY );
+   rotate_obj.rotateX( RX );
+   rotate_obj.rotateY( RY );
    rotate_obj.rotateZ( RZ );
+
+   //load the camera matrix (via model) and push points around 
+   model camera_matrix;
+   camera_matrix.load_matrix( matrixfile );
+   float RSCALE = 1000.0/abs(camera_matrix.m44[14]); //hack to scale object based on Z xform 
+   rotate_obj = rotate_obj * camera_matrix.m44;
 
    /***********************/
    //set colors
@@ -519,10 +518,10 @@ void render_model( int width, int height, char* objfilename,
    float *p_hit_y = &hit_y; //line intersection hit Y 
 
 
-   //5 numbers to represent the filled polygon scanline geom 
-   float  l1x, l1y, l2x, l2y, l3x, l3y = 0;    
+   // 5 numbers to represent the filled polygon scanline geom 
+   double  l1x, l1y, l2x, l2y, l3x, l3y = 0;    
 
-   //set this to number of faces , or 1 if rendering edges
+   // set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)
    {
        int j = 0;
@@ -532,11 +531,7 @@ void render_model( int width, int height, char* objfilename,
        for (j=0;j<numverts;j++){
            // look up each face vertex (vector3 X4) 
            //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
-           
-           //draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
-           
            draw_poly[j] = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][j])-1] ;
-
            //cout << "rotated point is " << draw_poly[j] << j << endl; 
 
        }//
@@ -560,7 +555,8 @@ void render_model( int width, int height, char* objfilename,
        int sl=0;
        //sl=which; 
        //if(1){
-       for(sl=0;sl<which;sl++){
+       for(sl=0;sl<which;sl++)
+       {
 
            // loop through the vertices for each face           
            for (j=0;j<numverts;j++)
@@ -568,16 +564,19 @@ void render_model( int width, int height, char* objfilename,
 
               
                // scale the geometry and translate it to the center of screen  
-               scoord_x =  ((double)(draw_poly[j].y * RSCALE) + cenx);
-               scoord_y =  ((double)(draw_poly[j].x * RSCALE) + ceny);
+               scoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx);
+               scoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny);
 
                // build up the polygon edges by iterating in twos
                // vertex[j] (connected to) vertex[j+1]
                if (j<numverts-1)
                {
-                   ecoord_x =  ((double)(draw_poly[j+1].y * RSCALE) + cenx ); 
-                   ecoord_y =  ((double)(draw_poly[j+1].x * RSCALE) + ceny ); 
+                   ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx ); 
+                   ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny ); 
 
+                   //sad attempt to clip geom to edges of image 
+                   simple_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);
+                   
                    //draw a polygon edge 
                    lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, polyline_color);
                    
@@ -633,6 +632,7 @@ void render_model( int width, int height, char* objfilename,
                // I call it virtual because it connects the last drawn point to the first 
                // making the polyline periodic 
                
+               /* 
                // last line segment 
                if (j==numverts-1)
                {
@@ -642,6 +642,7 @@ void render_model( int width, int height, char* objfilename,
                    ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
 
                    //draw the closing third edge of the polygon 
+                   simple_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);                     
                    lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, polyline_color);
 
                    //////////////////////////////////
@@ -657,6 +658,7 @@ void render_model( int width, int height, char* objfilename,
                            {
                                int c = 0;
                                for(c=0;c<4;c++){
+
                                    lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
                                }
                            }
@@ -667,9 +669,11 @@ void render_model( int width, int height, char* objfilename,
                        }//if hit detected 
                    }
                 }//last line segment               
+                */
 
                //draw a dot to show the polygon vertices  
                if (RENDER_VTX_PTS==1){
+                   simple_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);                  
                    // really big 5 pixel dot 
                    lineart.draw_point(scoord_x   , scoord_y   , vtx_color); //if you only want a tiny point 
                    lineart.draw_point(scoord_x+1 , scoord_y   , vtx_color);
@@ -682,7 +686,7 @@ void render_model( int width, int height, char* objfilename,
                // draw a line bewteen the two intersection points 
                if (SHOW_POLYFILL==1){
                     //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
-                    
+                    simple_clip(width, height, &l1x, &l1y, &l2x, &l2y);  
                     //draw all three lines if the data exists
                     if( l1x != 0 && l2x !=0){
                         lineart.draw_line(l1x, l1y, l2x, l2y, poly_color);
@@ -705,6 +709,7 @@ void render_model( int width, int height, char* objfilename,
 
        if (SHOW_SCANLINE==1){
            // show the scanline we are feeding into the calc function 
+           //simple_clip(width, height, &l1x, &l1y, &l2x, &l2y);  
            lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
        } 
 
@@ -712,7 +717,7 @@ void render_model( int width, int height, char* objfilename,
        // draw once more to cover everything else 
        if (SHOW_POLYFILL==1){
             //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
-            
+            simple_clip(width, height, &l1x, &l1y, &l2x, &l2y);  
             //draw all three lines if the data exists
             if( l1x != 0 && l2x !=0){
                 lineart.draw_line(l1x, l1y, l2x, l2y, vtx_color);
