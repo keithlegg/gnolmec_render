@@ -199,6 +199,9 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
 /***********************/
 
 void framebuffer::draw_point ( int xcoord, int ycoord ){
+   if (xcoord >framebuffer::bwidth){return;}
+   if (ycoord >framebuffer::bheight){return;}
+   
    if (xcoord > 0 && xcoord > 1){
        if (xcoord < framebuffer::bwidth && xcoord < framebuffer::bheight){
            pix_iterator = (ycoord * framebuffer::bwidth) + xcoord;
@@ -213,7 +216,9 @@ void framebuffer::draw_point ( int xcoord, int ycoord ){
 /***********************/
 
 void framebuffer::draw_point ( int xcoord, int ycoord, RGBType pcol ){
-
+   if (xcoord >framebuffer::bwidth){return;}
+   if (ycoord >framebuffer::bheight){return;}
+   
    if (xcoord > 0 && xcoord > 1){  
        if (xcoord < framebuffer::bwidth && xcoord < framebuffer::bheight){  
            pix_iterator = (ycoord * framebuffer::bwidth) + xcoord;    

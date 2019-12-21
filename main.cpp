@@ -42,11 +42,11 @@ void test_intersection(void){
 
     /* test of the function that calculates a line intersetion */ 
 
-    float xcoord = 0;
-    float ycoord = 0;
+    double xcoord = 0;
+    double ycoord = 0;
 
-    float *xpt = &xcoord; 
-    float *ypt = &ycoord; 
+    double *xpt = &xcoord; 
+    double *ypt = &ycoord; 
 
     get_line_intersection(-2, -3, 1, 2, -3, 2, 2, -2, xpt, ypt);
   
@@ -177,20 +177,20 @@ int main(int argc, char *argv[])
 
     // ARGS: really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
     //                                   float RX, float RY, float RZ, char* outfilename)
-
-    // really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
-    //                             atof(argv[5]), atof(argv[6]),  atof(argv[7]),  argv[8]);
-
-
-
-    // --------------------------
-
-    // ARGS:  render_model( int width, int height, char* objfilename, char* matrixfile, 
-    //                      float RX, float RY, float RZ , char* outfilename)
-
-    render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
-                                 atof(argv[5]), atof(argv[6]),  atof(argv[7]), argv[8] );
+    
+    int render_simple = 0;
    
+    if(render_simple){ 
+        really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
+                                    atof(argv[5]), atof(argv[6]),  atof(argv[7]),  argv[8]);
+    }else{
+        // ARGS:  render_model( int width, int height, char* objfilename, char* matrixfile, 
+        //                      float RX, float RY, float RZ , char* outfilename)
+
+        render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
+                                     atof(argv[5]), atof(argv[6]),  atof(argv[7]), argv[8] );
+   
+    }
 
 
     return 0;
