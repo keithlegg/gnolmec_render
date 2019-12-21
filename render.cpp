@@ -12,11 +12,9 @@
 
 using namespace std;
 
-#define MAX_POLYGON_VERTS 100
+#define MAX_POLYGON_VERTS 10
 
 int pix_iterator;//index to a pixel on the framebuffer
-
-
 
 /*********************************************************/
 
@@ -30,7 +28,7 @@ void make_image(int width, int height, char *outfile)
     int pix_iterator;
 
     /***********/
-    short flat_color = 128; //background grey color 
+    short flat_color = 128; 
 
     //fill each pixel with a color  
     for (int x = 0; x < width; x++)
@@ -112,9 +110,9 @@ int get_line_intersection(double p0_x, double p0_y, double p1_x, double p1_y,
 
 /*********************************************************/
 /*
-    placeholder for clipping function 
-    crop geom to a 2D rectangle 
-    return 1/0 if geom was clipped to test for intersection
+    stupid simple clipping function for points (and more?)
+    crop geom to a 2D rectangle ( if they are offscreen, dont draw them )
+    return 1 or 0 if geom was clipped to test for intersection
 */
 int poly_clip(int width, int height, double *x1, double *y1, double *x2, double *y2)
 {
@@ -167,33 +165,23 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 
 void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor)
 {
-    int RENDER_VTX_PTS      = 1;
-    int RENDER_LINES        = 1; // wireframe edges  
-    int RENDER_SCANLINE     = 1; // do the scan line render loop 
-    int SHOW_SCANLINE       = 1; // show the actual "line" indicating where the scan is happening 
-    int SHOW_POLYFILL       = 1; // fill the polygon 
+    int RENDER_SCANLINE   = 1; // do the scan line render loop 
+    int RENDER_LINES      = 1; // wireframe edges  
+    int RENDER_VTX_PTS    = 0;
 
-    framebuffer::RGBType poly_color; 
+    int SHOW_CLIP_AREA    = 0; // show clipping rectangle 
+
+
     framebuffer::RGBType vtx_color; 
-    framebuffer::RGBType scanline_color; 
-    framebuffer::RGBType scanhit_color; 
+    vtx_color.r = 1;
+    vtx_color.g = 145;
+    vtx_color.b = 40;
 
-    //set colors
-    poly_color.r = 64;
-    poly_color.g = 56;
-    poly_color.b = 27;
-
-    vtx_color.r = 255;
-    vtx_color.g = 255;
-    vtx_color.b = 255;
-
-    scanhit_color.r = 1;
-    scanhit_color.g = 155;
-    scanhit_color.b = 55;
+    framebuffer::RGBType scanline_color;
     scanline_color.r = 75;
     scanline_color.g = 155;
     scanline_color.b = 1;  
-  
+
     // use the center of the screen as the point to draw geom from 
     double cenx = (double)fb->center_x;
     double ceny = (double)fb->center_y;
@@ -202,6 +190,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
            scx3, scy3, ecx3, ecy3;
 
     //------------------------- 
+    // DEBUG - PULL FROM SCREENSIZE  - THIS IS HARDCODED            
     // define clipping rectangle 
     double clp_x1  = 1;
     double clp_y1  = 1;
@@ -210,19 +199,17 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     double clipwidth  = abs(clp_x2-clp_x1);
     double clipheight = abs(clp_y2-clp_y1);
 
-    // view clip rectangle 
-    if (0)
+    // DEBUG - view clip rectangle 
+    if (SHOW_CLIP_AREA == 1)
     {
         fb->draw_line(clp_x1, clp_y1, clp_x2, clp_y1, fillcolor);
         fb->draw_line(clp_x2, clp_y1, clp_x2, clp_y2, fillcolor);
         fb->draw_line(clp_x2, clp_y2, clp_x1, clp_y2, fillcolor);
         fb->draw_line(clp_x1, clp_y2, clp_x1, clp_y1, fillcolor);
     }     
-    //------------------------- 
 
-    // int cl_it = 0; //clip iterator ;)
-    // for (cl_it=*y1;cl_it<*y2;cl_it++){};//scan clip rectangle 
-    
+    //------------------------- 
+   
     //store the hits that raster_clip() finds  
     double   h1x,  h1y,  h2x,  h2y,  h3x,  h3y = 0.0; 
     double* ph1x = &h1x; 
@@ -255,140 +242,80 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     
     double cit = 0.0;
  
-    for (cit=clp_y1;cit<clp_y2;cit=cit+1)
-    {   
-        //fb->draw_line(clp_x1, cit, clp_x2, cit, fillcolor);  //debug - full scanline
+    //-------------------
 
-        // intersect the first 2 lines ------------------------------------------------------    
-        num_hits = raster_clip( clp_x1 , cit  , clp_x2  , cit ,  // input line (raster) 
-                                scx1   , scy1    , ecx1   , ecy1  ,  // line1 to intersect
-                                scx2   , scy2    , ecx2   , ecy2  ,  // line2 to intersect
-                                ph1x   , ph1y    , ph2x   , ph2y );  // output line, if any 
-
-        if (num_hits==2){
-            //cout << "we have a hit 1! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
-            fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
-        }
-
-        // intersect the next 2 lines ------------------------------------------------------
-        num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
-                                scx2   , scy2    , ecx2   , ecy2 ,  // line1 to intersect
-                                scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
-                                ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
-
-        if (num_hits==2){
-            //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
-            fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
-        }
-
-
-        // intersect the last 2 lines ------------------------------------------------------
-        num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
-                                scx1   , scy1    , ecx1   , ecy1 ,  // line1 to intersect
-                                scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
-                                ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
-
-        if (num_hits==2){
-            //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
-            fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
-        }
-
-    }//scanline iterations 
-
-    //draw the edges last (on top of fill)
-    fb->draw_line(scx1, scy1, ecx1, ecy1, fillcolor);
-    fb->draw_line(scx2, scy2, ecx2, ecy2, fillcolor);
-    fb->draw_line(scx3, scy3, ecx3, ecy3, fillcolor);
-
-    //------------------------- 
-
-    
-    
     if (RENDER_SCANLINE == 1)
     {
+        for (cit=clp_y1;cit<clp_y2;cit=cit+1)
+        {   
+            //fb->draw_line(clp_x1, cit, clp_x2, cit, fillcolor);  //debug - full scanline
+
+            // intersect the first 2 lines ------------------------------------------------------    
+            num_hits = raster_clip( clp_x1 , cit  , clp_x2  , cit ,  // input line (raster) 
+                                    scx1   , scy1    , ecx1   , ecy1  ,  // line1 to intersect
+                                    scx2   , scy2    , ecx2   , ecy2  ,  // line2 to intersect
+                                    ph1x   , ph1y    , ph2x   , ph2y );  // output line, if any 
+
+            if (num_hits==2){
+                //cout << "we have a hit 1! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
+                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+            }
+
+            // intersect the next 2 lines ------------------------------------------------------
+            num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
+                                    scx2   , scy2    , ecx2   , ecy2 ,  // line1 to intersect
+                                    scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
+                                    ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
+
+            if (num_hits==2){
+                //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
+                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+            }
 
 
-    }// render scanlines
-  
-    /*  
-   
-    // third "virtual" line segment 
-    // I call it virtual because it connects the last drawn point to the first 
-    // making the polyline periodic 
+            // intersect the last 2 lines ------------------------------------------------------
+            num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
+                                    scx1   , scy1    , ecx1   , ecy1 ,  // line1 to intersect
+                                    scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
+                                    ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
+
+            if (num_hits==2){
+                //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
+                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+            }
+
+        }//scanline iterations 
     
-    /*
-    // last line segment 
-    if (j==numverts-1)
+    }//draw scanline 
+
+    //-------------------
+
+    //draw the edges last (on top of fill)
+    if (RENDER_LINES == 1)
     {
-        scoord_x =  ((double)(draw_poly[0].x * RSCALE) + cenx);
-        scoord_y =  ((double)(draw_poly[0].y * RSCALE) + ceny);
-        ecoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx );//+lineart.center_x
-        ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
+        fb->draw_line(scx1, scy1, ecx1, ecy1, fillcolor);
+        fb->draw_line(scx2, scy2, ecx2, ecy2, fillcolor);
+        fb->draw_line(scx3, scy3, ecx3, ecy3, fillcolor);
+    }
 
-        //draw the closing third edge of the polygon 
-        poly_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);                     
-        lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, fillcolor);
-
-        //////////////////////////////////
-
-        // run the calc function to check for a line intersection 
-        get_line_intersection( 0.0,  (float)sl, (float)width  , (float)sl, 
-                               scoord_x, scoord_y, ecoord_x, ecoord_y, p_hit_x, p_hit_y) ; 
-
-        if(RENDER_SCANLINE==1){
-
-            if (hit_x>0 && hit_y>0){
-                if (SHOW_SCANLINE_DOTS==1)
-                {
-                    int c = 0;
-                    for(c=0;c<4;c++){
-
-                        lineart.draw_circle(hit_x , hit_y , c, scanhit_color);
-                    }
-                }
-
-                l3x = hit_x;
-                l3y = hit_y;
-                                    
-            }//if hit detected 
-        }
-     }//last line segment               
-     */
+    //-------------------
+    //finally - draw the points (on top of everything)
 
     //draw a dot to show the polygon vertices  
-    if (RENDER_VTX_PTS==1)
+    if (RENDER_VTX_PTS == 1)
     {
         int wasclipped = 0;
         wasclipped = poly_clip(clipwidth, clipheight, &scx1, &scy1, &ecx1, &ecy1);                  
         // really big 5 pixel dot 
         if(wasclipped==0)
         {
-            fb->draw_point(scx1   , scy1   , fillcolor); //if you only want a tiny point 
-            fb->draw_point(scx1+1 , scy1   , fillcolor);
-            fb->draw_point(scx1-1 , scy1   , fillcolor);
-            fb->draw_point(scx1   , scy1+1 , fillcolor);
-            fb->draw_point(scx1   , scy1-1 , fillcolor);
+            fb->draw_point(scx1   , scy1   , vtx_color); //if you only want a tiny point 
+            fb->draw_point(scx1+1 , scy1   , vtx_color);
+            fb->draw_point(scx1-1 , scy1   , vtx_color);
+            fb->draw_point(scx1   , scy1+1 , vtx_color);
+            fb->draw_point(scx1   , scy1-1 , vtx_color);
         }
     }
-
-    /*
-    // draw a line bewteen the two intersection points 
-    if (SHOW_POLYFILL==1){
-         //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
-         poly_clip(clipwidth, clipheight, &l1x, &l1y, &l2x, &l2y);  
-         //draw all three lines if the data exists
-         if( l1x != 0 && l2x !=0){
-             fb->draw_line(l1x, l1y, l2x, l2y, poly_color);
-         }
-         if( l1x != 0 && l3x !=0){
-             fb->draw_line(l1x, l1y, l3x, l3y, poly_color);
-         }
-         if( l2x != 0 && l3x !=0){
-             fb->draw_line(l2x, l2y, l3x, l3y, poly_color);
-         }                
-
-    }*/
-
     
 }
 /*********************************************************/
@@ -398,39 +325,30 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
                                  float RX, float RY, float RZ , char* outfilename)
 {
 
-   int dpi = 72; 
+    int dpi = 72; 
+    int n = width * height;
 
-   int n = width * height;
+    framebuffer::RGBType* output_image;
+    framebuffer lineart( width, height );
+    framebuffer *p_lineart = &lineart;
 
-   framebuffer::RGBType* output_image;
-   framebuffer lineart( width, height );
-   framebuffer *p_lineart = &lineart;
-
-   output_image = lineart.rgbdata;
-
-   int which = 1;
+    output_image = lineart.rgbdata;
 
     framebuffer::RGBType polyline_color; 
-    
     polyline_color.r = 170;
     polyline_color.g = 22;
     polyline_color.b = 170;
 
    /***********/
-   //clear the background  with a solid color
+   // clear the background  with a solid color
    short flat_color = 0; //background grey color 
 
-   //fill each pixel with a color  
+   // fill each pixel with a color  
    for (int x = 0; x < width; x++)
    {    //rotate_obj.show();
         for (int y = 0; y < height; y++)
         {  
             pix_iterator = y * width + x;     
-
-            //funky moire pattern 
-            //output_image[pix_iterator].r = y/2;       
-            //output_image[pix_iterator].g = 255;//-y/3;
-            //output_image[pix_iterator].b = x*(y/2);
 
             output_image[pix_iterator].r = flat_color;       
             output_image[pix_iterator].g = flat_color;
@@ -440,8 +358,6 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
    }
 
    /***********/
-
-
    //containers for 3d objects 
    model OBJ;
    OBJ.load_obj(objfilename);
@@ -458,22 +374,9 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
    int plycount = 0;
    int pntcountsave_obj = 0;
 
-
-   //debug - min the process of rendering N sided - converting from Vector4
-   //double draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
-   //Vector3 draw_poly[MAX_POLYGON_VERTS]; //polygon being drawn 
-
    /***********************/
-
    Matrix4 rotate_obj;    //4X4 rotation matrix
-   
    rotate_obj.identity();
-
-   //rotate_obj.show();
-   // printf( "%d", rotate_obj );
-   //rotate_obj.scale(1.8);
-   //rotate_obj.translate(15,15,15);
-   //rotate_obj.show();
   
    //adjust object rotation
    rotate_obj.rotateX( RX );
@@ -513,36 +416,6 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
            draw_triangle( RSCALE, p_lineart, p1, p2, p3 , polyline_color);
         }
 
-
-       //done with scanline loop here
-       /****************************************************/
-
-       /*
-       if (SHOW_SCANLINE==1){
-           // show the scanline we are feeding into the calc function 
-           //poly_clip(width, height, &l1x, &l1y, &l2x, &l2y);  
-           lineart.draw_line(0.0 , (float)sl, (float)width, (float)sl , scanline_color);
-       } 
-
-       // line bewteen the two intersection points 
-       // draw once more to cover everything else 
-       if (SHOW_POLYFILL==1){
-            //cout << ' ' << l1x << ' ' << l1y <<' '<< l2x << ' ' << l2y <<' ' << l3x << ' ' <<l3y << endl;
-            poly_clip(width, height, &l1x, &l1y, &l2x, &l2y);  
-            //draw all three lines if the data exists
-            if( l1x != 0 && l2x !=0){
-                lineart.draw_line(l1x, l1y, l2x, l2y, vtx_color);
-            }
-            if( l1x != 0 && l3x !=0){
-                lineart.draw_line(l1x, l1y, l3x, l3y, vtx_color);
-            }
-            if( l2x != 0 && l3x !=0){
-                lineart.draw_line(l2x, l2y, l3x, l3y, vtx_color);
-            }                
-
-       }
-       */
-
    }//render iterator
 
    framebuffer::savebmp(outfilename , width, height, dpi, output_image);
@@ -564,12 +437,7 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
 void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
                                  float RX, float RY, float RZ, char* outfilename)
 {
-
-   //cout << "# Begin Rendering ..." << endl;
-
    int dpi    = 72; 
-   //int width  = 512; 
-   //int height = 512; 
    int res_x = width;
    int res_y = height;
 
