@@ -10,8 +10,8 @@
 #include "Matrices.h"
 
 
-#define MAX_NUM_VERTICES 5000
-#define MAX_NUM_FACES 2000
+#define MAX_NUM_VERTICES 10000
+#define MAX_NUM_FACES 7000
 
 
 class model {

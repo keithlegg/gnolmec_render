@@ -203,10 +203,10 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
 
     //------------------------- 
     // define clipping rectangle 
-    double clp_x1  = 5;
-    double clp_y1  = 5;
-    double clp_x2  = 500;
-    double clp_y2  = 500;
+    double clp_x1  = 1;
+    double clp_y1  = 1;
+    double clp_x2  = 511;
+    double clp_y2  = 511;
     double clipwidth  = abs(clp_x2-clp_x1);
     double clipheight = abs(clp_y2-clp_y1);
 
@@ -245,31 +245,57 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     ecx2 =  ((double)(p3.x * rscale) + cenx ); 
     ecy2 =  ((double)(p3.y * rscale) + ceny ); 
 
-    double y_val = 300.0;
-    int num_hits = 0;
-    
-    num_hits = raster_clip( clp_x1 , y_val  , clp_x2 , y_val ,  // input line (raster) 
-                            scx1   , scy1    , ecx1   , ecy1   ,  // line1 to intersect
-                            scx2   , scy2    , ecx2   , ecy2   ,  // line2 to intersect
-                            ph1x   , ph1y    , ph2x   , ph2y );  // output line, if any 
-
-    fb->draw_line(clp_x1, y_val, clp_x2, y_val, fillcolor);  //full scanline
-    
-    cout <<" num hits " << num_hits << "\n";
-
-    if (num_hits==2){
-        cout << "we have a hit! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
-        fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
-    }
- 
-
     // scale pt3 and translate it to the center of screen     
     scx3 =  ((double)(p3.x * rscale) + cenx );
     scy3 =  ((double)(p3.y * rscale) + ceny );
     ecx3 =  ((double)(p1.x * rscale) + cenx ); 
     ecy3 =  ((double)(p1.y * rscale) + ceny ); 
 
+    int num_hits = 0;
+    
+    double cit = 0.0;
+ 
+    for (cit=clp_y1;cit<clp_y2;cit=cit+1)
+    {   
+        //fb->draw_line(clp_x1, cit, clp_x2, cit, fillcolor);  //debug - full scanline
 
+        // intersect the first 2 lines ------------------------------------------------------    
+        num_hits = raster_clip( clp_x1 , cit  , clp_x2  , cit ,  // input line (raster) 
+                                scx1   , scy1    , ecx1   , ecy1  ,  // line1 to intersect
+                                scx2   , scy2    , ecx2   , ecy2  ,  // line2 to intersect
+                                ph1x   , ph1y    , ph2x   , ph2y );  // output line, if any 
+
+        if (num_hits==2){
+            //cout << "we have a hit 1! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
+            fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+        }
+
+        // intersect the next 2 lines ------------------------------------------------------
+        num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
+                                scx2   , scy2    , ecx2   , ecy2 ,  // line1 to intersect
+                                scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
+                                ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
+
+        if (num_hits==2){
+            //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
+            fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+        }
+
+
+        // intersect the last 2 lines ------------------------------------------------------
+        num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
+                                scx1   , scy1    , ecx1   , ecy1 ,  // line1 to intersect
+                                scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
+                                ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
+
+        if (num_hits==2){
+            //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
+            fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+        }
+
+    }//scanline iterations 
+
+    //draw the edges last (on top of fill)
     fb->draw_line(scx1, scy1, ecx1, ecy1, fillcolor);
     fb->draw_line(scx2, scy2, ecx2, ecy2, fillcolor);
     fb->draw_line(scx3, scy3, ecx3, ecy3, fillcolor);
