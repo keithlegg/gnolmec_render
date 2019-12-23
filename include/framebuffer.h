@@ -2,7 +2,7 @@
 #pragma once
 
 #ifndef framebuffer_H
-#define _framebuffer_H
+#define framebuffer_H
 
 
 

@@ -1,5 +1,5 @@
 #ifndef MODEL_H
-#define _MODEL_H
+#define MODEL_H
 
 
 #include <iostream>
@@ -9,12 +9,22 @@
 #include "Vectors.h"
 #include "Matrices.h"
 
+#include "point_ops.h"
 
 #define MAX_NUM_VERTICES 10000
 #define MAX_NUM_FACES 7000
 
 
-class model {
+
+struct zindex_faces
+{
+    double distance;
+    std::vector<int> face; 
+};
+
+
+
+class model: public polygon_ops {
     public:
         int vertex_count;
         int face_count;
@@ -28,6 +38,7 @@ class model {
         std::vector<double> vtx_tmp;
         std::vector<int> fac_tmp;        
         std::vector<int> faces[MAX_NUM_FACES];
+        //std::vector<zindex_faces> sortfaces[MAX_NUM_FACES];
 
         Matrix4 m44;
 
@@ -46,6 +57,11 @@ class model {
 
         void showinfo();
         void show();
+   
+        //void hello(void); //test of inheritance
+        
+        void sort_faces_dist( Vector3 campos );
+
 
         void save_obj( char* filename );
         void load_obj( char* filename );

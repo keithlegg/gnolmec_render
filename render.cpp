@@ -390,6 +390,15 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
    rotate_obj = rotate_obj * camera_matrix.m44;
 
    /***********************/
+   // Z sort the faces 
+
+   Vector3 campos;
+   campos.set(1,1,1);
+
+   // sort of works!!
+   // OBJ.sort_faces_dist(campos);
+   
+   /***********************/
 
    // set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)
