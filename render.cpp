@@ -9,6 +9,8 @@
 #include "include/render.h"
 #include "include/model.h"
 
+#include "include/point_ops.h"
+
 #include "include/BMP.h"
 
 
@@ -162,14 +164,34 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 
 }
 
+
+
+/*
+    // weird idea to play with  - intersect geom on a 2D grid as a (re)sampling technique
+    
+    int grid_clip(   double x1  , double y1  , double x2  , double y2  ,   // input line (raster) 
+                     double ix1 , double iy1 , double ix2 , double iy2 ,   // line1 to intersect
+                     double jx1 , double jy1 , double jx2 , double jy2 ,   // line2 to intersect
+                     double *ox1, double *oy1, double *ox2, double *oy2)   // output line, if any  
+
+
+    for num rows() {
+        get_line_intersection( x1,  y1 , x2 , y2 , 
+                                          jx1, jy1, jx2, jy2,  ox2, oy2) ;
+    }
+
+*/
+
+   
+
 /*********************************************************/
 
 
 void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
 {
     int RENDER_SCANLINE   = 1; // do the scan line render loop 
-    int RENDER_LINES      = 1; // wireframe edges  
-    int RENDER_VTX_PTS    = 1;
+    int RENDER_LINES      = 0; // wireframe edges  
+    int RENDER_VTX_PTS    = 0;
 
     int SHOW_CLIP_AREA    = 0; // show clipping rectangle 
 
@@ -209,7 +231,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     //------------------------- 
    
     //store the hits that raster_clip() finds  
-    double   h1x,  h1y,  h2x,  h2y,  h3x,  h3y = 0.0; 
+    double h1x,  h1y,  h2x,  h2y,  h3x,  h3y = 0.0; 
     double* ph1x = &h1x; 
     double* ph1y = &h1y; 
     double* ph2x = &h2x; 
@@ -326,6 +348,9 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     int dpi = 72; 
     int n = width * height;
 
+    Vector3 lightpos = Vector3(5,5,5); 
+    double light_intensity = .5;
+
     framebuffer::RGBType* output_image;
     framebuffer lineart( width, height );
     framebuffer *p_lineart = &lineart;
@@ -401,50 +426,73 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
    rotate_obj = rotate_obj * camera_matrix.m44;  
 
    /***********************/
-   // Z sort the faces 
+   // Z sort the faces (broken at the moment )
 
    Vector3 campos;
    campos.set(camera_matrix.m44[12],camera_matrix.m44[13],camera_matrix.m44[14]);
    cout << "render clip pos "<< camera_matrix.m44[12] <<" "<< camera_matrix.m44[13] <<" "<< camera_matrix.m44[14] <<"\n";
    
-   // sort of works!!
+
+
+   // sort - sort of works!!
    //OBJ.sort_faces_dist(campos);
    
    /***********************/
 
-   // set this to number of faces , or 1 if rendering edges
-   for (i=0;i<OBJ.face_count;i++)
-   {
-       int j = 0;
+    // set this to number of faces , or 1 if rendering edges
+    for (i=0;i<OBJ.face_count;i++)
+    {
+        int j = 0;
        
-       int numverts = OBJ.faces[i].size();
+        int numverts = OBJ.faces[i].size();
        
-       //only draw triangles for now 
-       if (numverts==3)
-       {
-           // look up each face vertex (vector3 X4) 
-           //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
+        //only draw triangles for now 
+        if (numverts==3)
+        {
+            // look up each face vertex (vector3 X4) 
+            //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
 
-           Vector3 p1 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][0])-1];
-           Vector3 p2 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][1])-1];
-           Vector3 p3 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][2])-1];
+            Vector3 p1 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][0])-1];
+            Vector3 p2 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][1])-1];
+            Vector3 p3 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][2])-1];
 
-           // non rotated geom   
-           // Vector3 p1 = OBJ.obj_pts[ int(OBJ.faces[i][0])-1];
-           // Vector3 p2 = OBJ.obj_pts[ int(OBJ.faces[i][1])-1];
-           // Vector3 p3 = OBJ.obj_pts[ int(OBJ.faces[i][2])-1];
+            // non rotated geom   
+            // Vector3 p1 = OBJ.obj_pts[ int(OBJ.faces[i][0])-1];
+            // Vector3 p2 = OBJ.obj_pts[ int(OBJ.faces[i][1])-1];
+            // Vector3 p3 = OBJ.obj_pts[ int(OBJ.faces[i][2])-1];
+
+            //--------------
+            
+            // get the center of face to move light vector to 
+            Vector3 fcntr;
+            OBJ.triangle_centroid(&fcntr, p1, p2, p3);
+            //cout << "## face center is " <<f_cntr.x <<" "<< f_cntr.y <<" "<< f_cntr.z << "\n";
+
+            // super simple shading model 
+            Vector3 fac_normal = OBJ.three_vec3_to_normal( p1, p2, p3, true);           
+            //cout << "## face normal is " <<fac_normal.x <<" "<< fac_normal.y <<" "<< fac_normal.z << "\n";
+                    
+            //# build a vector between face center and light position  
+            Vector3 to_light = fcntr - lightpos; 
+
+            // calculate the angle between face and light vectors 
+            // treating the 3D light position as a vector
+            double light_angle = (  fac_normal.angle( to_light ) );
+            
+            //int angle  = (int)rtd( light_angle );
+            int angle  = (int) light_angle ;
+
+            int light_pow = light_intensity*256;
+               
+            fill_color.r = (int)light_pow-angle;
+            fill_color.g = (int)light_pow-angle;
+            fill_color.b = (int)light_pow-angle;
+
+            //--------------
            
-           //--------------
-           //TODO - shading mode based on normal angle 
-           
-           //polyline_color.b = (int)(i/4);
-           cout << "color is "<< line_color.r << " "<< line_color.g << " "<< line_color.b << "\n";
-           //--------------
-           
-           draw_triangle( RSCALE, p_lineart, p1, p2, p3 , fill_color, line_color);
+            draw_triangle( RSCALE, p_lineart, p1, p2, p3 , fill_color, line_color);
         }
-
-   }//render iterator
+    }//render iterator
 
    //framebuffer::savebmp(outfilename , width, height, dpi, output_image);
    BMP new_outfile(width, height);
@@ -561,18 +609,6 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
    float RSCALE = 1000.0/abs(camera_matrix.m44[14]);
 
    rotate_obj = rotate_obj * camera_matrix.m44;
-
-   // framebuffer draws "upside down" flip the Y with a matrix 
-   
-   // Matrix4 flip_y;    
-   // flip_y.identity();
-   // flip_y.rotateZ(180);
-   // //  |  0  4  8 12 |
-   // //  |  1  5  9 13 |
-   // //  |  2  6 10 14 |
-   // //  |  3  7 11 15 |     
-   // rotate_obj = rotate_obj * flip_y;
-   // ---------------------
 
    //set this to number of faces , or 1 if rendering edges
    for (i=0;i<OBJ.face_count;i++)

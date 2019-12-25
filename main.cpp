@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 
     //test_save_bmp("images/uvmap.bmp", "out.bmp");
 
-    test_BMP();
+    // test_BMP();
 
 
     //obj_file_stuff();

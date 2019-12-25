@@ -45,16 +45,19 @@ class polygon_ops : public point_ops
     
     void hello(void); //test of inheritance 
 
+
     int getnum_verts(void);
 
-    //void z_sort(void);
+    //Vector3 centroid_pts(Vector3 p1, Vector3 p2, Vector3 p3);
+    void triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3);
 
     double triangle_mean_z(Vector3 p1, Vector3 p2, Vector3 p3);
   
-    void triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3);
 
-    // calc_tripoly_normal( three_pts, unitlen)
-    // three_vec3_to_normal( v1, v2, v3, unitlen=False):
+
+    
+    Vector3 three_vec3_to_normal( Vector3 v1, Vector3 v2, Vector3 v3, bool unitlen);
+
 
 
 }; 
