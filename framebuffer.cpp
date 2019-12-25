@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring> //memset 
 
 #include <stdio.h>
 
@@ -9,10 +10,79 @@
 
 #include "include/framebuffer.h"
 
+#include "include/BMP.h"
+
 
 using namespace std; 
 
-/***********************/
+
+
+/*
+    BMP bmp9("t1_24.bmp");
+    bmp9.fill_region(0, 0, 50, 50, 0, 0, 255, 255);
+    bmp9.fill_region(150, 0, 100, 150, 0, 255, 0, 255);
+    bmp9.write("t1_24_copy.bmp");
+
+   
+    BMP bmp10("t2_24.bmp");
+    bmp10.fill_region(0, 0, 50, 50, 0, 0, 255, 255);
+    bmp10.fill_region(150, 0, 100, 150, 0, 255, 0, 255);
+    bmp10.write("t2_24_copy.bmp");
+
+    BMP bmp5("Shapes_24.bmp");
+    bmp5.fill_region(0, 0, 100, 200, 0, 0, 255, 255);
+    bmp5.fill_region(150, 0, 209, 203, 0, 255, 0, 255);
+    bmp5.write("Shapes_24_copy.bmp");
+
+    // Read an image from disk and write it back:
+    BMP bmp("Shapes.bmp");
+    bmp.fill_region(0, 0, 100, 200, 0, 0, 255, 255);
+    bmp.write("Shapes_copy.bmp");
+
+    // Create a BMP image in memory, modify it, save it on disk
+    BMP bmp2(800, 600);
+    bmp2.fill_region(50, 20, 100, 200, 0, 0, 255, 255);
+    bmp2.write("img_test.bmp");
+
+    // Create a 24 bits/pixel BMP image in memory, modify it, save it on disk
+    BMP bmp3(200, 200, false);
+    bmp3.fill_region(50, 20, 100, 100, 255, 0, 255, 255);
+    bmp3.write("img_test_24bits.bmp");
+
+    BMP bmp4("img_test_24bits.bmp");
+    bmp4.write("img_test_24bits_2.bmp");
+
+    BMP bmp6(403, 305, false);
+    bmp6.fill_region(0, 0, 50, 50, 0, 0, 255, 0);
+    bmp6.write("test6.bmp");
+
+    BMP bmp7("test6.bmp");
+    bmp7.fill_region(0, 0, 40, 40, 255, 0, 0, 0);
+    bmp7.write("test6_2.bmp");
+
+    BMP bmp8(200, 200, false);
+    bmp8.fill_region(0, 0, 100, 100, 255, 0, 255, 255);
+    bmp8.write("img_test_24bits_3.bmp");
+
+    BMP bmp11("test_pnet.bmp");
+    bmp11.fill_region(0, 0, 100, 100, 255, 0, 255, 255);
+    bmp11.write("test_pnet_copy.bmp");
+
+*/
+
+
+void test_BMP(void)
+{
+    BMP bmpxx(512, 512);
+    bmpxx.fill_region(0, 0, 50, 50, 0, 0, 255, 255);
+    bmpxx.write("foobartest.bmp");
+}
+
+//     void set_pixel(uint32_t x0, uint32_t y0, uint8_t B, uint8_t G, uint8_t R, uint8_t A) {
+//         if (x0 > (uint32_t)bmp_info_header.width || y0 > (uint32_t)bmp_info_header.height) {
+
+
+/********************************************/
 
 /*
  //RGB color struct
@@ -59,7 +129,7 @@ Eh  4   28 00 00 00   40 bytes  Number of bytes in the DIB header (from this poi
 
 */
 
-/***********************/
+/********************************************/
 
 
  
@@ -121,7 +191,97 @@ void framebuffer::loadbmp (const char *filename, framebuffer::RGBType *data)
       
 
 
-/***********************/
+/********************************************/
+/*
+void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuffer::RGBType *data) {
+    FILE *f;
+    unsigned char *img = NULL;
+    int filesize = 54 + 3*w*h;  //w is your image width, h is image height, both int
+
+    img = (unsigned char *)malloc(3*w*h);
+    std::memset(img,0,3*w*h);
+
+    int x,y = 0;
+    double r,g,b = 0;
+
+    for(int i=0; i<w; i++)
+    {
+        for(int j=0; j<h; j++)
+        {
+            x=i; y=(h-1)-j;
+            
+            r  = (data[(h*y+x)].b)*255;
+            g  = (data[(h*y+x)].g)*255;
+            b  = (data[(h*y+x)].r)*255;
+
+            if (r > 255) r=255;
+            if (g > 255) g=255;
+            if (b > 255) b=255;
+            img[(x+y*w)*3+2] = (unsigned char)(r);
+            img[(x+y*w)*3+1] = (unsigned char)(g);
+            img[(x+y*w)*3+0] = (unsigned char)(b);
+        }
+    }
+
+    unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
+    unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
+    unsigned char bmppad[3] = {0,0,0};
+
+    bmpfileheader[ 2] = (unsigned char)(filesize    );
+    bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
+    bmpfileheader[ 4] = (unsigned char)(filesize>>16);
+    bmpfileheader[ 5] = (unsigned char)(filesize>>24);
+
+    bmpinfoheader[ 4] = (unsigned char)(       w    );
+    bmpinfoheader[ 5] = (unsigned char)(       w>> 8);
+    bmpinfoheader[ 6] = (unsigned char)(       w>>16);
+    bmpinfoheader[ 7] = (unsigned char)(       w>>24);
+    bmpinfoheader[ 8] = (unsigned char)(       h    );
+    bmpinfoheader[ 9] = (unsigned char)(       h>> 8);
+    bmpinfoheader[10] = (unsigned char)(       h>>16);
+    bmpinfoheader[11] = (unsigned char)(       h>>24);
+
+    f = fopen(filename,"wb");
+    fwrite(bmpfileheader,1,14,f);
+    fwrite(bmpinfoheader,1,40,f);
+    for(int i=0; i<h; i++)
+    {
+        fwrite(img+(w*(h-i-1)*3),3,w,f);
+        fwrite(bmppad,1,(4-(w*3)%4)%4,f);
+    }
+
+    free(img);
+    fclose(f);
+
+}
+*/
+
+
+/********************************************/
+
+/*
+
+// setup header structs bmpfile_header and bmp_dib_v3_header before this (see wiki)
+// * note for a windows bitmap you want a negative height if you're starting from the top *
+// * otherwise the image data is expected to go from bottom to top *
+
+FILE * fp = fopen ("file.bmp", "wb");
+fwrite(bmpfile_header, sizeof(bmpfile_header), 1, fp);
+fwrite(bmp_dib_v3_header, sizeof(bmp_dib_v3_header_t), 1, fp);
+
+for (int i = 0; i < 200; i++)  {
+ for (int j = 0; j < 200; j++) {
+  fwrite(&image[j][i][2], 1, 1, fp);
+  fwrite(&image[j][i][1], 1, 1, fp);
+  fwrite(&image[j][i][0], 1, 1, fp);
+ }
+}
+
+fclose(fp);
+
+*/
+
+/********************************************/
 
 void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuffer::RGBType *data) {
 
@@ -176,11 +336,16 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
     {
         framebuffer::RGBType rgb = data[i];
 
-        double red   = (data[i].r)*255;
+        double red   = (data[i].b)*255;
         double green = (data[i].g)*255;
-        double blue  = (data[i].b)*255;
+        double blue  = (data[i].r)*255;
+        
+        //uint8_t red   = (data[i].b)*255;
+        //uint8_t green = (data[i].g)*255;
+        //uint8_t blue  = (data[i].r)*255;
 
-        /*****************/
+        // -------------------------
+
         // OSX complains when compiling with -std-c++11 option  
         // error: non-constant-expression cannot be narrowed from type 'int' to 'unsigned char' in 
         //unsigned char color[3] = { (int)floor(blue),(int)floor(green),(int)floor(red) };
@@ -188,15 +353,16 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
         //this is modified to compile on OSX - not sure its right (or the other one, for that matter!)
         int color[3] = { (int)(blue),(int)(green),(int)(red) };
         
-        /*****************/
+        //-------------------------
 
         fwrite (color, 1,3,f);
     }
     fclose(f);
 
 }
+ 
 
-/***********************/
+/********************************************/
 
 void framebuffer::draw_point ( int xcoord, int ycoord ){
    if (xcoord >framebuffer::bwidth){return;}
@@ -213,7 +379,7 @@ void framebuffer::draw_point ( int xcoord, int ycoord ){
    }
 }
 
-/***********************/
+/********************************************/
 
 void framebuffer::draw_point ( int xcoord, int ycoord, RGBType pcol ){
    if (xcoord >framebuffer::bwidth){return;}
@@ -229,7 +395,7 @@ void framebuffer::draw_point ( int xcoord, int ycoord, RGBType pcol ){
    }
 }
 
-/***********************/
+/********************************************/
 
 void framebuffer::draw_circle ( int x_orig, int y_orig, int dia){
    int plot_x = 0;
@@ -243,6 +409,8 @@ void framebuffer::draw_circle ( int x_orig, int y_orig, int dia){
    }
 }
 
+/********************************************/
+
 void framebuffer::draw_circle ( int x_orig, int y_orig, int dia, RGBType pcol){
    int plot_x = 0;
    int plot_y = 0;
@@ -255,7 +423,7 @@ void framebuffer::draw_circle ( int x_orig, int y_orig, int dia, RGBType pcol){
    }
 }
 
-/***********************/
+/********************************************/
 
 // degree to radian 
 double framebuffer::deg_to_rad ( double deg){
@@ -267,7 +435,7 @@ double framebuffer::rad_to_deg ( double rad){
     return rad * RAD_TO_DEG;
 }
 
-/***********************/ 
+/********************************************/
 
 /* 
    draw_line:
@@ -329,7 +497,8 @@ void framebuffer::draw_line(int x1, int y1, int const x2, int const y2)
     }
 }
 
-/***********************/ 
+/********************************************/
+
 void framebuffer::draw_line(int x1, int y1, int const x2, int const y2, RGBType pcol)
 {
     int delta_x(x2 - x1);

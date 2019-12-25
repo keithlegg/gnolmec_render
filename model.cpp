@@ -94,16 +94,21 @@ void model::show()
 /**********************/
 
 
-bool sort_by_zdist(const zindex_faces &lhs, const zindex_faces &rhs) { return lhs.distance > rhs.distance; }
+bool sort_by_zdist(const zindex_faces &lzif, const zindex_faces &rzif){ 
+
+    // if (lzif.distance == rzif.distance){
+    //     cout << "same! " << lzif.distance;
+    //     return true;
+    // }
+    return lzif.distance > rzif.distance; 
+}
 
 void model::sort_faces_dist(Vector3 campos)
 {
-
-    cout << "z sorting faces "<< face_count <<"\n";
-
-    if (face_count==0){
-        cout << " error - no faces to export ";
-    }
+    
+    // if (face_count==0){
+    //     cout << " error - no faces to export ";
+    // }
 
 
     //sortfaces.clear()
@@ -120,21 +125,28 @@ void model::sort_faces_dist(Vector3 campos)
         fac_tmp.clear();
         fac_tmp = model::faces[i];
         
-        //assume triangle only (3 indices)
+        // assume triangle only (3 indices)
         Vector3 p1 = model::obj_pts[ fac_tmp[0]-1 ];
         Vector3 p2 = model::obj_pts[ fac_tmp[1]-1 ];
         Vector3 p3 = model::obj_pts[ fac_tmp[2]-1 ];                 
 
+        //Vector3 pnt_dist;
+        //triangle_centroid(pnt_dist, p1, p2, p3);
+
+        //use a struct (zipped array-ish) to sort by distance
         zindex_faces tmp;
         tmp.face     = fac_tmp;
         tmp.distance = model::triangle_mean_z(p1,p2,p3);
         
+        //cout << " distance "<< tmp.distance << "\n";
+
         sortfaces[i] = tmp;
 
     }
 
 
     sort(sortfaces.begin(), sortfaces.end(), sort_by_zdist);
+
     // for (zindex_faces &n : sortfaces)
     //     cout << n.distance << " \n ";
 
@@ -142,13 +154,14 @@ void model::sort_faces_dist(Vector3 campos)
     for (int i=0; i<face_count; i++) 
     {
         model::faces[i] = sortfaces[i].face;
+        //cout << "sortfaces "<< i <<" " << sortfaces[i].face[0]<< " " << sortfaces[i].face[1] << " "<< sortfaces[i].face[2] << "\n";
     }
 
 
-    //face_count = 100;
-    //model::vertex_count = vcnt;
+    cout << "face count is " << face_count << " size of sorted is " << j <<"\n";
 
-    //model::save_obj("sorted.obj");
+    //for debugging
+    model::save_obj("sorted.obj");
 }
 
 

@@ -5,6 +5,9 @@
 #define framebuffer_H
 
 
+void test_BMP(void);
+
+
 
 class framebuffer {
 
@@ -25,18 +28,18 @@ class framebuffer {
    
    //RGB color struct
    struct RGBType {
-       short r;
-       short g;
-       short b;
+       int r;
+       int g;
+       int b;
    };
 
    /*
    //RGBA color struct
    struct RGBAType {
-       short r;
-       short g;
-       short b;
-       short a;
+       uint8_t r;
+       uint8_t g;
+       uint8_t b;
+       uint8_t a;
    };*/
 
 

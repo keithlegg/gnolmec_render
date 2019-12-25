@@ -9,6 +9,7 @@
 
 #include "include/framebuffer.h"
 
+#include "include/BMP.h"
 
 using namespace std;
 
@@ -25,16 +26,27 @@ using namespace std;
 
 
 
-void test_load_bmp(char *filename){
+void test_load_save_bmp(char *infile, char *outfile)
+{
+    /* someday I will be able to load BMP files as well as save them ... sigh */  
+    framebuffer::RGBType* imagedata;
+    framebuffer loaded_bmp( 512, 512 );
 
-    /* someday I will be able to load BMP files as well as save them ... sigh */
-  
-    framebuffer::RGBType* input_image;
-    framebuffer loaded_bmp( 1024, 1024 );
+    framebuffer::loadbmp(infile , imagedata);
 
-    framebuffer::loadbmp(filename , input_image);
+    framebuffer::savebmp(outfile, 512, 512, 72, imagedata);
 
 }
+
+
+
+
+
+//temporaily borrowed from here 
+// https://github.com/sol-prog/cpp-bmp-images 
+
+// void test_save_bmp(char *infile, char *outfile){}
+
 
 /***********************************/
 
@@ -106,30 +118,37 @@ void test_image_draw( int width, int height, char *outfile)
         {  
             pix_iterator = y * width + x;     
 
-            test_draw.rgbdata[pix_iterator].r = flat_color;  //= 0x254;      
-            test_draw.rgbdata[pix_iterator].g = flat_color;  //= 0x0
-            test_draw.rgbdata[pix_iterator].b = flat_color;  //= 0x0
+            test_draw.rgbdata[pix_iterator].r = 254;  //= 0x254;      
+            test_draw.rgbdata[pix_iterator].g = 0;  //= 0x0
+            test_draw.rgbdata[pix_iterator].b = 255;  //= 0x0
 
         }
    }
 
 
-   framebuffer::RGBType  drawcolor;
+   framebuffer::RGBType drawcolor;
    drawcolor.r = 0x255;
    drawcolor.g = 0x0;
    drawcolor.b = 0x0;
 
+   /*
    ptest_draw->draw_point(2, 2, drawcolor);
    //ptest_draw->draw_point(11, 11, drawcolor);
    //ptest_draw->draw_point(12, 12, drawcolor);
 
    // instance method 
    ptest_draw->savebmp (outfile, width, height, 300, test_draw.rgbdata) ;
-
-   //static/class method 
+   // static/class method 
    //framebuffer::savebmp (outfile, width, height, 300, test_draw.rgbdata) ;
+   */
 
-}
+
+   BMP new_outfile( width, height);
+   new_outfile.dump_rgba_data(0, 0, width, height, test_draw.rgbdata);
+   new_outfile.write( outfile) ;
+
+
+} 
 
 
 /***********************************/
@@ -148,7 +167,11 @@ int main(int argc, char *argv[])
 
     //test_load_bmp("images/uvmap.bmp");
 
-    //test_image_draw(10, 10, "foeeeeo.bmp");
+    //test_image_draw(255, 255, "foeeeeo.bmp");
+
+    //test_save_bmp("images/uvmap.bmp", "out.bmp");
+
+    test_BMP();
 
 
     //obj_file_stuff();

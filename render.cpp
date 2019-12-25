@@ -9,6 +9,8 @@
 #include "include/render.h"
 #include "include/model.h"
 
+#include "include/BMP.h"
+
 
 using namespace std;
 
@@ -163,24 +165,20 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 /*********************************************************/
 
 
-void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor)
+void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
 {
     int RENDER_SCANLINE   = 1; // do the scan line render loop 
     int RENDER_LINES      = 1; // wireframe edges  
-    int RENDER_VTX_PTS    = 0;
+    int RENDER_VTX_PTS    = 1;
 
     int SHOW_CLIP_AREA    = 0; // show clipping rectangle 
 
 
     framebuffer::RGBType vtx_color; 
-    vtx_color.r = 1;
-    vtx_color.g = 145;
-    vtx_color.b = 40;
+    vtx_color.r = 255;
+    vtx_color.g = 0;
+    vtx_color.b = 0;
 
-    framebuffer::RGBType scanline_color;
-    scanline_color.r = 75;
-    scanline_color.g = 155;
-    scanline_color.b = 1;  
 
     // use the center of the screen as the point to draw geom from 
     double cenx = (double)fb->center_x;
@@ -202,10 +200,10 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     // DEBUG - view clip rectangle 
     if (SHOW_CLIP_AREA == 1)
     {
-        fb->draw_line(clp_x1, clp_y1, clp_x2, clp_y1, fillcolor);
-        fb->draw_line(clp_x2, clp_y1, clp_x2, clp_y2, fillcolor);
-        fb->draw_line(clp_x2, clp_y2, clp_x1, clp_y2, fillcolor);
-        fb->draw_line(clp_x1, clp_y2, clp_x1, clp_y1, fillcolor);
+        fb->draw_line(clp_x1, clp_y1, clp_x2, clp_y1, linecolor);
+        fb->draw_line(clp_x2, clp_y1, clp_x2, clp_y2, linecolor);
+        fb->draw_line(clp_x2, clp_y2, clp_x1, clp_y2, linecolor);
+        fb->draw_line(clp_x1, clp_y2, clp_x1, clp_y1, linecolor);
     }     
 
     //------------------------- 
@@ -258,7 +256,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
 
             if (num_hits==2){
                 //cout << "we have a hit 1! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
-                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, fillcolor); //polygon fill
             }
 
             // intersect the next 2 lines ------------------------------------------------------
@@ -269,7 +267,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
 
             if (num_hits==2){
                 //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
-                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, fillcolor); //polygon fill
             }
 
 
@@ -281,7 +279,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
 
             if (num_hits==2){
                 //cout << "we have a hit 2 ! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
-                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, scanline_color); //polygon fill
+                fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, fillcolor); //polygon fill
             }
 
         }//scanline iterations 
@@ -293,9 +291,9 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     //draw the edges last (on top of fill)
     if (RENDER_LINES == 1)
     {
-        fb->draw_line(scx1, scy1, ecx1, ecy1, fillcolor);
-        fb->draw_line(scx2, scy2, ecx2, ecy2, fillcolor);
-        fb->draw_line(scx3, scy3, ecx3, ecy3, fillcolor);
+        fb->draw_line(scx1, scy1, ecx1, ecy1, linecolor);
+        fb->draw_line(scx2, scy2, ecx2, ecy2, linecolor);
+        fb->draw_line(scx3, scy3, ecx3, ecy3, linecolor);
     }
 
     //-------------------
@@ -334,10 +332,16 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
 
     output_image = lineart.rgbdata;
 
-    framebuffer::RGBType polyline_color; 
-    polyline_color.r = 170;
-    polyline_color.g = 22;
-    polyline_color.b = 170;
+    framebuffer::RGBType line_color; 
+    line_color.r = 240;
+    line_color.g = 0;
+    line_color.b = 0;
+
+
+    framebuffer::RGBType fill_color; 
+    fill_color.r = 40;
+    fill_color.g = 11;
+    fill_color.b = 64;
 
    /***********/
    // clear the background  with a solid color
@@ -386,17 +390,25 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
    //load the camera matrix (via model) and push points around 
    model camera_matrix;
    camera_matrix.load_matrix( matrixfile );
-   float RSCALE = 1000.0/abs(camera_matrix.m44[14]); //hack to scale object based on Z xform 
-   rotate_obj = rotate_obj * camera_matrix.m44;
+   
+   //hack to scale object based on Z xform
+   //float RSCALE = 1000.0/abs(camera_matrix.m44[14]);  
+   
+   //variation of hack to scale object based on Z xform
+   float RSCALE = width*(1/abs(camera_matrix.m44[14])); 
+
+   // perform perspective transform on points from GL matrix
+   rotate_obj = rotate_obj * camera_matrix.m44;  
 
    /***********************/
    // Z sort the faces 
 
    Vector3 campos;
-   campos.set(1,1,1);
-
+   campos.set(camera_matrix.m44[12],camera_matrix.m44[13],camera_matrix.m44[14]);
+   cout << "render clip pos "<< camera_matrix.m44[12] <<" "<< camera_matrix.m44[13] <<" "<< camera_matrix.m44[14] <<"\n";
+   
    // sort of works!!
-   // OBJ.sort_faces_dist(campos);
+   //OBJ.sort_faces_dist(campos);
    
    /***********************/
 
@@ -421,14 +433,24 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
            // Vector3 p1 = OBJ.obj_pts[ int(OBJ.faces[i][0])-1];
            // Vector3 p2 = OBJ.obj_pts[ int(OBJ.faces[i][1])-1];
            // Vector3 p3 = OBJ.obj_pts[ int(OBJ.faces[i][2])-1];
-
-           draw_triangle( RSCALE, p_lineart, p1, p2, p3 , polyline_color);
+           
+           //--------------
+           //TODO - shading mode based on normal angle 
+           
+           //polyline_color.b = (int)(i/4);
+           cout << "color is "<< line_color.r << " "<< line_color.g << " "<< line_color.b << "\n";
+           //--------------
+           
+           draw_triangle( RSCALE, p_lineart, p1, p2, p3 , fill_color, line_color);
         }
 
    }//render iterator
 
-   framebuffer::savebmp(outfilename , width, height, dpi, output_image);
-   
+   //framebuffer::savebmp(outfilename , width, height, dpi, output_image);
+   BMP new_outfile(width, height);
+   new_outfile.dump_rgba_data(0,0,width,height,output_image);
+   new_outfile.write(outfilename) ;
+
    //cout << outfilename << " saved to disk. " << endl;
    cout << "finished rendering." << endl;
 }

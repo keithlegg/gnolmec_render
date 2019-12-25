@@ -10,22 +10,22 @@
 #include "Matrices.h"
 
 
-/*
-class model {
-    public:
-        int vertex_count;
 
-        model(){
-            face_count     = 0;
+class math_ops {
+    public:
+
+        math_ops(){
         };
 
-        ~model(){};
+        ~math_ops(){};
 
-        int getnum_verts();
+        void calc_normal_triangle(Vector3 *nrml, Vector3 pt1, Vector3 pt2, Vector3 pt3);
+        
+        void three_vec3_to_normal(Vector3 *nrml, Vector3 v1, Vector3 v2, Vector3 v3);
 
 };
 
-*/
+
 
 
 

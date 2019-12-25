@@ -50,10 +50,9 @@ class polygon_ops : public point_ops
     //void z_sort(void);
 
     double triangle_mean_z(Vector3 p1, Vector3 p2, Vector3 p3);
+  
+    void triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3);
 
-
-    
-    // centroid_pts( pts);
     // calc_tripoly_normal( three_pts, unitlen)
     // three_vec3_to_normal( v1, v2, v3, unitlen=False):
 
