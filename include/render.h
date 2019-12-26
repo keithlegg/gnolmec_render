@@ -28,7 +28,7 @@ int raster_clip( double x1  , double y1  , double x2  , double y2  ,   // input 
                  double *ox1, double *oy1, double *ox2, double *oy2);  // output line, if any 
 
 
-void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor);
+void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor);
 
 int poly_clip(int width, int height, double *x1, double *y1, double *x2, double *y2);
 

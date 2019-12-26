@@ -139,9 +139,9 @@ int poly_clip(int width, int height, double *x1, double *y1, double *x2, double 
    take a clipping rectangle and 2 lines
    sets pointes to 2 (x,y) coords (line between the 2 intersections) 
    returns number of failures to intersect. 
-      0 = both intersected
+      0 = none intersected
       1 = one intersected 
-      2 = neither line intersected 
+      2 = both intersected 
 */
 
 
@@ -187,20 +187,27 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 /*********************************************************/
 
 
-void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
+void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
 {
     int RENDER_SCANLINE   = 1; // do the scan line render loop 
-    int RENDER_LINES      = 0; // wireframe edges  
+    int RENDER_LINES      = 1; // wireframe edges  
     int RENDER_VTX_PTS    = 0;
-
     int SHOW_CLIP_AREA    = 0; // show clipping rectangle 
 
+    // DEBUG - NEED TO PULL FROM SCREENSIZE  - THIS IS HARDCODED            
+    // define clipping rectangle 
+    double clp_x1  = 1;
+    double clp_y1  = 1;
+    double clp_x2  = width-1;
+    double clp_y2  = height-1;
+    double clipwidth  = abs(clp_x2-clp_x1);
+    double clipheight = abs(clp_y2-clp_y1);
 
+    //------------------------- 
     framebuffer::RGBType vtx_color; 
     vtx_color.r = 255;
     vtx_color.g = 0;
     vtx_color.b = 0;
-
 
     // use the center of the screen as the point to draw geom from 
     double cenx = (double)fb->center_x;
@@ -208,16 +215,6 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     double scx1, scy1, ecx1, ecy1, 
            scx2, scy2, ecx2, ecy2, 
            scx3, scy3, ecx3, ecy3;
-
-    //------------------------- 
-    // DEBUG - PULL FROM SCREENSIZE  - THIS IS HARDCODED            
-    // define clipping rectangle 
-    double clp_x1  = 1;
-    double clp_y1  = 1;
-    double clp_x2  = 511;
-    double clp_y2  = 511;
-    double clipwidth  = abs(clp_x2-clp_x1);
-    double clipheight = abs(clp_y2-clp_y1);
 
     // DEBUG - view clip rectangle 
     if (SHOW_CLIP_AREA == 1)
@@ -238,7 +235,6 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
     double* ph2y = &h2y;
     double* ph3x = &h3x;
     double* ph3y = &h3y;
-
 
     // scale pt1 and translate it to the center of screen  
     scx1 =  ((double)(p1.x * rscale) + cenx );
@@ -271,7 +267,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
             //fb->draw_line(clp_x1, cit, clp_x2, cit, fillcolor);  //debug - full scanline
 
             // intersect the first 2 lines ------------------------------------------------------    
-            num_hits = raster_clip( clp_x1 , cit  , clp_x2  , cit ,  // input line (raster) 
+            num_hits = raster_clip( clp_x1 , cit  , clp_x2  , cit ,      // input line (raster) 
                                     scx1   , scy1    , ecx1   , ecy1  ,  // line1 to intersect
                                     scx2   , scy2    , ecx2   , ecy2  ,  // line2 to intersect
                                     ph1x   , ph1y    , ph2x   , ph2y );  // output line, if any 
@@ -282,7 +278,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
             }
 
             // intersect the next 2 lines ------------------------------------------------------
-            num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
+            num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,      // input line (raster) 
                                     scx2   , scy2    , ecx2   , ecy2 ,  // line1 to intersect
                                     scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
                                     ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
@@ -294,7 +290,7 @@ void draw_triangle( double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vect
 
 
             // intersect the last 2 lines ------------------------------------------------------
-            num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,  // input line (raster) 
+            num_hits = raster_clip( clp_x1 , cit  , clp_x2 , cit ,      // input line (raster) 
                                     scx1   , scy1    , ecx1   , ecy1 ,  // line1 to intersect
                                     scx3   , scy3    , ecx3   , ecy3 ,  // line2 to intersect
                                     ph1x   , ph1y    , ph2x   , ph2y ); // output line, if any 
@@ -345,12 +341,16 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
                                  float RX, float RY, float RZ , char* outfilename)
 {
 
-    int dpi = 72; 
+
+    int dpi = 72; //Not used with newer BMP exporter 
+    Vector3 lightpos = Vector3(0,5,0); 
+    double light_intensity = .8;
+
+    int RENDER_SHADED     = 1; //shaded (lit) or flat color polygon fill 
+
     int n = width * height;
 
-    Vector3 lightpos = Vector3(5,5,5); 
-    double light_intensity = .5;
-
+    //------------------------------
     framebuffer::RGBType* output_image;
     framebuffer lineart( width, height );
     framebuffer *p_lineart = &lineart;
@@ -368,101 +368,98 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     fill_color.g = 11;
     fill_color.b = 64;
 
-   /***********/
-   // clear the background  with a solid color
-   short flat_color = 0; //background grey color 
+    /***********/
+    // clear the background  with a solid color
+    short flat_color = 0; //background grey color 
 
-   // fill each pixel with a color  
-   for (int x = 0; x < width; x++)
-   {    //rotate_obj.show();
-        for (int y = 0; y < height; y++)
-        {  
+    // fill each pixel with a color  
+    for (int x = 0; x < width; x++)
+    {    //rotate_obj.show();
+         for (int y = 0; y < height; y++)
+         {  
             pix_iterator = y * width + x;     
-
             output_image[pix_iterator].r = flat_color;       
             output_image[pix_iterator].g = flat_color;
             output_image[pix_iterator].b = flat_color;
-
         }
-   }
+    }
 
-   /***********/
-   //containers for 3d objects 
-   model OBJ;
-   OBJ.load_obj(objfilename);
+    /***********/
+    //containers for 3d objects 
+    model OBJ;
+    OBJ.load_obj(objfilename);
 
-   /***********/
-   Vector2 thisedge;      //iterator for edges
-   Vector4 poly;          //store vertex id's in a vector4 (4 sided poly) 
-   Vector3 poly3;         //store vertex id's in a vector3 (3 sided poly) 
-   Vector4 vprj[4];       //3 and 4 sided -  projected point coordinates
-   Vector3 v1,v2,v3,v4;   //retrieved point data (xyz)
+    OBJ.showinfo();
 
-   int i = 0;
-   int j = 0;
-   int plycount = 0;
-   int pntcountsave_obj = 0;
+    OBJ.flatten_geom(); 
 
-   /***********************/
-   Matrix4 rotate_obj;    //4X4 rotation matrix
-   rotate_obj.identity();
+    /***********/
+    Vector2 thisedge;      //iterator for edges
+    Vector4 poly;          //store vertex id's in a vector4 (4 sided poly) 
+    Vector3 poly3;         //store vertex id's in a vector3 (3 sided poly) 
+    Vector4 vprj[4];       //3 and 4 sided -  projected point coordinates
+    Vector3 v1,v2,v3,v4;   //retrieved point data (xyz)
+
+    int i = 0;
+    int j = 0;
+    int plycount = 0;
+    int pntcountsave_obj = 0;
+
+    /***********************/
+    Matrix4 rotate_obj;    //4X4 rotation matrix
+    rotate_obj.identity();
   
-   //adjust object rotation
-   rotate_obj.rotateX( RX );
-   rotate_obj.rotateY( RY );
-   rotate_obj.rotateZ( RZ );
+    //adjust object rotation
+    rotate_obj.rotateX( RX );
+    rotate_obj.rotateY( RY );
+    rotate_obj.rotateZ( RZ );
 
-   //load the camera matrix (via model) and push points around 
-   model camera_matrix;
-   camera_matrix.load_matrix( matrixfile );
+    //load the camera matrix (via model) and push points around 
+    model camera_matrix;
+    camera_matrix.load_matrix( matrixfile );
    
-   //hack to scale object based on Z xform
-   //float RSCALE = 1000.0/abs(camera_matrix.m44[14]);  
+    //hack to scale object based on Z xform
+    //float RSCALE = 1000.0/abs(camera_matrix.m44[14]);  
    
-   //variation of hack to scale object based on Z xform
-   float RSCALE = width*(1/abs(camera_matrix.m44[14])); 
+    //variation of hack to scale object based on Z xform
+    float RSCALE = width*(1/abs(camera_matrix.m44[14])); 
 
-   // perform perspective transform on points from GL matrix
-   rotate_obj = rotate_obj * camera_matrix.m44;  
+    // perform perspective transform on points from GL matrix
+    rotate_obj = rotate_obj * camera_matrix.m44;  
 
-   /***********************/
-   // Z sort the faces (broken at the moment )
+    /***********************/
+    // Z sort the faces (broken at the moment )
 
-   Vector3 campos;
-   campos.set(camera_matrix.m44[12],camera_matrix.m44[13],camera_matrix.m44[14]);
-   cout << "render clip pos "<< camera_matrix.m44[12] <<" "<< camera_matrix.m44[13] <<" "<< camera_matrix.m44[14] <<"\n";
+    Vector3 campos;
+    campos.set(camera_matrix.m44[12],camera_matrix.m44[13],camera_matrix.m44[14]);
+    cout << "render clip pos "<< camera_matrix.m44[12] <<" "<< camera_matrix.m44[13] <<" "<< camera_matrix.m44[14] <<"\n";
    
 
-
-   // sort - sort of works!!
-   //OBJ.sort_faces_dist(campos);
+    // sort - sort of works!!
+    OBJ.sort_faces_dist(campos);
    
-   /***********************/
-
-    // set this to number of faces , or 1 if rendering edges
-    for (i=0;i<OBJ.face_count;i++)
+    /***********************/
+    for (i=0;i<OBJ.triangle_count;i++)
     {
         int j = 0;
        
-        int numverts = OBJ.faces[i].size();
-       
-        //only draw triangles for now 
-        if (numverts==3)
+        //int numverts = OBJ.triangles[i].size();
+
+        // look up each face vertex (vector3 X4) 
+        //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.triangles[i][j])-1] << endl ;
+
+        Vector3 p1 = rotate_obj * OBJ.obj_pts[ int(OBJ.triangles[i][0])-1];
+        Vector3 p2 = rotate_obj * OBJ.obj_pts[ int(OBJ.triangles[i][1])-1];
+        Vector3 p3 = rotate_obj * OBJ.obj_pts[ int(OBJ.triangles[i][2])-1];
+
+        // non rotated geom   
+        // Vector3 p1 = OBJ.obj_pts[ int(OBJ.triangles[i][0])-1];
+        // Vector3 p2 = OBJ.obj_pts[ int(OBJ.triangles[i][1])-1];
+        // Vector3 p3 = OBJ.obj_pts[ int(OBJ.triangles[i][2])-1];
+
+        //--------------
+        if (RENDER_SHADED==1)
         {
-            // look up each face vertex (vector3 X4) 
-            //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
-
-            Vector3 p1 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][0])-1];
-            Vector3 p2 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][1])-1];
-            Vector3 p3 = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][2])-1];
-
-            // non rotated geom   
-            // Vector3 p1 = OBJ.obj_pts[ int(OBJ.faces[i][0])-1];
-            // Vector3 p2 = OBJ.obj_pts[ int(OBJ.faces[i][1])-1];
-            // Vector3 p3 = OBJ.obj_pts[ int(OBJ.faces[i][2])-1];
-
-            //--------------
-            
             // get the center of face to move light vector to 
             Vector3 fcntr;
             OBJ.triangle_centroid(&fcntr, p1, p2, p3);
@@ -481,31 +478,32 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
             
             //int angle  = (int)rtd( light_angle );
             int angle  = (int) light_angle ;
-
             int light_pow = light_intensity*256;
-               
+            //cout << "light angle is " << light_angle << "\n";
+
             fill_color.r = (int)light_pow-angle;
             fill_color.g = (int)light_pow-angle;
             fill_color.b = (int)light_pow-angle;
+        
+        }else{
 
-            //--------------
-           
-            draw_triangle( RSCALE, p_lineart, p1, p2, p3 , fill_color, line_color);
+            fill_color.r = 20;
+            fill_color.g = 24;
+            fill_color.b = 68;
         }
+      
+        draw_triangle( width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, line_color);
+        
     }//render iterator
 
-   //framebuffer::savebmp(outfilename , width, height, dpi, output_image);
-   BMP new_outfile(width, height);
-   new_outfile.dump_rgba_data(0,0,width,height,output_image);
-   new_outfile.write(outfilename) ;
+    //framebuffer::savebmp(outfilename , width, height, dpi, output_image);
+    BMP new_outfile(width, height);
+    new_outfile.dump_rgba_data(0,0,width,height,output_image);
+    new_outfile.write(outfilename) ;
 
-   //cout << outfilename << " saved to disk. " << endl;
-   cout << "finished rendering." << endl;
+    //cout << outfilename << " saved to disk. " << endl;
+    cout << "finished rendering." << endl;
 }
-
-
-
-
 
 
 
@@ -610,37 +608,27 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
 
    rotate_obj = rotate_obj * camera_matrix.m44;
 
-   //set this to number of faces , or 1 if rendering edges
-   for (i=0;i<OBJ.face_count;i++)
+   //set this to number of triangles , or 1 if rendering edges
+   for (i=0;i<OBJ.triangle_count;i++)
    {
        int j = 0;
-       
-       int numverts = OBJ.faces[i].size();
+      
+       int numverts = OBJ.triangles[i].size();
 
+       cout << i << " numverts " << numverts << "\n";
+
+           
+       // iterate all points in polygon (triangle) and rotate them with a matrix  
        for (j=0;j<numverts;j++){
-           // look up each face vertex (vector3 X4) 
-           //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.faces[i][j])-1] << endl ;
-           
-           // I did this thinking it was needed , BUT the matrix lib can do it directly. and better ?
-           //draw_poly[j] = rotate_points( rotate_obj, OBJ.obj_pts[ int(OBJ.faces[i][j])-1]);
-           
-           // this will use the matrix library directly 
-           draw_poly[j] = rotate_obj * OBJ.obj_pts[ int(OBJ.faces[i][j])-1] ;
-
-           //cout << "rotated point is " << draw_poly[j] << j << endl; 
+           draw_poly[j] = rotate_obj * OBJ.obj_pts[ int(OBJ.triangles[i][j])-1] ;
        }//
-
-       // loop through the vertices for each face           
+            
+       
+       // iterate all points in polygon (triangle ++) and draw a line conmnecting them           
        for (j=0;j<numverts;j++)
        {
-           // cout << vprj[j].x << " "<< vprj[j].x << " " << vprj[j].z << endl;
-
-           //scoord_x =  (draw_poly[j].x * lineart.center_x * ZVAL) + lineart.center_x;
-           //scoord_y =  (draw_poly[j].y * lineart.center_y * ZVAL) + lineart.center_y;
            double cenx =  (double)lineart.center_x;
            double ceny =  (double)lineart.center_y;
-          
-           // cout << "center_x center_y " <<  cenx << " " << ceny;
 
            scoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx);
            scoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny);
@@ -653,10 +641,7 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
                // cout << "draw a line " << scoord_x << " " << scoord_y << " " << ecoord_x << " " << ecoord_y << endl;
                //poly_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-
-               // get_line_intersection
-
-           }
+           }//connect the dots, except the last 
 
            // last line segment 
            if (j==numverts-1)
@@ -668,7 +653,7 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
                
                //poly_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-           }
+           } // close the last line triangle 
            
            if (RENDER_VTX_PTS){
            
@@ -683,10 +668,10 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
                    lineart.draw_point(scoord_x   , scoord_y+1 , vtx_color);
                    lineart.draw_point(scoord_x   , scoord_y-1 , vtx_color);
                }
-           }
+           }// render points
 
-       } 
-
+       }// loop vertices  
+    
 
    }//render iterator
 

@@ -59,15 +59,22 @@ int model::getnum_faces(){
 
 
 /**********************/
-void model::showinfo()
+void model::showinfo(void)
 {
-   cout << " loded vertex data  "<< model::vertex_count << endl;
-   cout << " loded face data  "<< face_count << endl;
+   cout << "\n-----------------------------------------------\n";   
+   cout << " loded num vertices    "<< model::vertex_count << endl;
+   cout << " total loaded faces    "<< model::face_count << endl;
+   
+   cout << " loded num lines       "<< model::line_count     << endl;
+   cout << " loded num triangles   "<< model::triangle_count << endl;
+   cout << " loded num quads       "<< model::quad_count     << endl;
+   cout << " loded num Nsided      "<< model::nsided_count   << endl;
+
 }
 
 
 /**********************/
-void model::show()
+void model::show(void)
 {
   
     int dnum = 100;
@@ -93,16 +100,54 @@ void model::show()
 
 /**********************/
 
-
 bool sort_by_zdist(const zindex_faces &lzif, const zindex_faces &rzif){ 
 
-    // if (lzif.distance == rzif.distance){
-    //     cout << "same! " << lzif.distance;
-    //     return true;
-    // }
+    //if (lzif.distance == rzif.distance){
+    //    //cout << "same! " << lzif.distance;
+    //    return true;
+    //}
+
     return lzif.distance > rzif.distance; 
 }
 
+
+/**********************/
+
+void model::triangulate(void)
+{
+    /* 
+    int i,j = 0;
+
+    // bfr_faces[MAX_NUM_FACES];  // faces of work area 
+    // bfr_pts[MAX_NUM_VERTICES]; // vertices of work area
+
+    // walk the faces and do stuff 
+    for (int i=0; i<face_count; i++) 
+    {
+    
+        fac_tmp.clear();
+        fac_tmp = model::faces[i];
+        
+        cout << model::faces[i][0] <<" foo \n";
+    }
+    */
+
+}
+
+/**********************/
+
+/*
+    scan all loaded geom and prep for rendering 
+    mostly just get things into triangles 
+*/
+void model::flatten_geom(void)
+{
+
+
+}
+
+
+/**********************/
 void model::sort_faces_dist(Vector3 campos)
 {
     
@@ -145,7 +190,7 @@ void model::sort_faces_dist(Vector3 campos)
     }
 
 
-    sort(sortfaces.begin(), sortfaces.end(), sort_by_zdist);
+    //sort(sortfaces.begin(), sortfaces.end(), sort_by_zdist);
 
     // for (zindex_faces &n : sortfaces)
     //     cout << n.distance << " \n ";
@@ -279,21 +324,51 @@ void model::load_obj(char* filename){
                
                 // cout << " i is "<< i << " |  num_tok  " << n << endl; 
 
-                // if end of line is hit - store loaded data and reset 
+                // if end of line is not hit, store loaded data 
                 if (i < n-1 ) 
                 {
                     //keep adding fids  
-                    fac_tmp.push_back( atof(token[i]) );fac_cnt++;
+                    fac_tmp.push_back( atof(token[i]) );
                 }
+
+                // if end of line is hit - store loaded data and reset                
                 if (i == n-1 ) 
                 {
-                    //add one more fid before we stop to get lest 
-                    fac_tmp.push_back( atof(token[i]) );fac_cnt++;
+                    // add one more fid before we stop to get lest 
+                    fac_tmp.push_back( atof(token[i]) );
+                    
+                    // 2 sided polygons (lines) 
+                    if(i==2)
+                    {
+                        lines[line_count] = fac_tmp; 
+                        fac_tmp.clear();   
+                        line_count++; face_count++;   
+                    }
 
-                    faces[face_count] = fac_tmp; 
-                    fac_cnt = 1;     // fid count on line
-                    fac_tmp.clear(); // tmp face buffer 
-                    face_count++;    // total face count in object 
+                    // 3 sided polygons 
+                    if(i==3)
+                    {
+                        
+                        triangles[triangle_count] = fac_tmp; 
+                        fac_tmp.clear();   
+                        triangle_count++; face_count++;                         
+                    }
+                    
+                    // 4 sided polygons 
+                    if(i==4)
+                    {
+                        quads[quad_count] = fac_tmp;  
+                        fac_tmp.clear();   
+                        quad_count++; face_count++;                             
+                    }   
+
+                    // N sided polygons 
+                    if(i>4)
+                    {
+                        faces[nsided_count] = fac_tmp; 
+                        fac_tmp.clear(); // tmp face buffer 
+                        nsided_count++; face_count++;    // total face count in object 
+                    }
                 }
             }
            
@@ -395,6 +470,8 @@ void model::make_cube(double scale){
     faces[5] = {5,6,7,8};
 
     face_count = 6;  
+    quad_count = 6;
+
     model::vertex_count = 8;
 }
 
