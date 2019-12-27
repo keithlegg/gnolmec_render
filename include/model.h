@@ -86,7 +86,7 @@ class model: public polygon_ops {
         /***********************************/        
 
         void add_tri(int vid1, int vid2, int vid3);
-        void add_tri_ridx(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2, int vid3);
+        void append_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2, int vid3);
         
         // void copy_tri(int index);
         // void del_tri(int index);

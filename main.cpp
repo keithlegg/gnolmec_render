@@ -198,10 +198,10 @@ int main(int argc, char *argv[])
     //obj_file_stuff();
 
     /* * * * * * * * * */
-    if (argc < 8){
-        cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
-        return 0;
-    }
+    // if (argc < 8){
+    //     cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
+    //     return 0;
+    // }
 
  
    // --------------------------
@@ -221,11 +221,9 @@ int main(int argc, char *argv[])
         really_simple_render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
                                     atof(argv[5]), atof(argv[6]),  atof(argv[7]),  argv[8]);
     }else{
-        // ARGS:  render_model( int width, int height, char* objfilename, char* matrixfile, 
-        //                      float RX, float RY, float RZ , char* outfilename)
+        // ARGS:  render_model( int width, int height, char* renderscript, char* outfilename)
 
-        render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4], 
-                                     atof(argv[5]), atof(argv[6]),  atof(argv[7]), argv[8] );
+        render_model( atoi(argv[1]), atoi(argv[2]), argv[3], argv[4]);
    
     }
 

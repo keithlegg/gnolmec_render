@@ -1,6 +1,7 @@
  
 #include <iostream>
 #include <stdio.h>
+#include <cstring>
 
 #include "include/Vectors.h"
 #include "include/Matrices.h"
@@ -19,6 +20,79 @@ using namespace std;
 #define MAX_POLYGON_VERTS 10
 
 int pix_iterator;//index to a pixel on the framebuffer
+
+
+int MAX_CHARS_PER_LINE = 100;
+int MAX_TOKENS_PER_LINE = 100;
+
+/*
+    there is a stupid bug that the line needs multiple breaks for this to work 
+    Obviously I need to learn a lot more about strtok(), and strings in C 
+*/
+void sceneloader::load_file( char* filepath )
+{
+    cout << "sceneloader loading file "<< filepath << "\n";
+
+    ifstream fin;
+    fin.open(filepath); // open a file
+    if (!fin.good()){ 
+        cout << "scene file \""<< filepath <<"\" appears to be missing." << endl;
+        exit (EXIT_FAILURE); // exit if file not found
+    }
+
+    int n = 0;
+
+    int line_ct = 0;
+    while (!fin.eof())
+    {
+        char buf[MAX_CHARS_PER_LINE];
+        fin.getline(buf, MAX_CHARS_PER_LINE);
+
+        const char* token[MAX_TOKENS_PER_LINE] = {};
+        token[0] = strtok(buf, " ");
+         
+        //if line has data on it ...  
+        if (token[0]) 
+        {
+            // walk the space delineated tokens 
+            for (n=1; n < MAX_TOKENS_PER_LINE; n++)
+            {
+                token[n] = strtok(0, " ");
+                if (!token[n]) break;  
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"obj_path"))
+            {        
+                strcpy( object_path, token[1]);
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"cam_matrix_path"))
+            {            
+                strcpy( cam_matrix_path, token[1]);
+            }
+
+           
+            //////
+            line_ct ++; 
+
+        } 
+
+
+    }
+
+    // ################# 
+    // obj_path 3d_obj/monkey.obj
+    // cam_matrix_path camera_matrix.olm
+    // # THIS IS A TEST OF A COMMENT  
+
+    // object_path;
+    // cam_matrix_path;
+    // proj_matrix_path;
+
+}
+
 
 /*********************************************************/
 
@@ -345,11 +419,12 @@ void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vecto
     }
     
 }
-/*********************************************************/
 
+
+/*********************************************************/
+//render_model( int width, int height, char* objfilename, char* renderscript, char* outfilename)
 //top render function 
-void render_model( int width, int height, char* objfilename, char* matrixfile, 
-                                 float RX, float RY, float RZ , char* outfilename)
+void render_model( int width, int height, char* renderscript, char* outfilename)
 {
 
     Vector3 lightpos = Vector3(0,5,0); 
@@ -394,11 +469,6 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     }
 
     /***********/
-    //containers for 3d objects 
-    model OBJ;
-    OBJ.load_obj(objfilename);
-
-    /***********/
     Vector2 thisedge;      //iterator for edges
     Vector4 poly;          //store vertex id's in a vector4 (4 sided poly) 
     Vector3 poly3;         //store vertex id's in a vector3 (3 sided poly) 
@@ -411,18 +481,26 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     int pntcountsave_obj = 0;
 
     /***********************/
+    /***********************/
+    sceneloader RS;
+
+    RS.load_file(renderscript);
+
+
     Matrix4 rotate_obj;    //4X4 rotation matrix
     rotate_obj.identity();
   
     //adjust object rotation
-    rotate_obj.rotateX( RX );
-    rotate_obj.rotateY( RY );
-    rotate_obj.rotateZ( RZ );
+    // rotate_obj.rotateX( RX );
+    // rotate_obj.rotateY( RY );
+    // rotate_obj.rotateZ( RZ );
 
     //load the camera matrix (via model) and push points around 
     model camera_matrix;
-    camera_matrix.load_matrix( matrixfile );
+    camera_matrix.load_matrix( RS.cam_matrix_path );
    
+
+
     //hack to scale object based on Z xform
     //float RSCALE = 1000.0/abs(camera_matrix.m44[14]);  
    
@@ -433,6 +511,11 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     rotate_obj = rotate_obj * camera_matrix.m44;  
 
     /***********************/
+    /***********************/
+    // load the renderscript file 
+
+    cout << "## loading renderscript "<< renderscript << "\n";
+
     // Z sort the faces (broken at the moment )
 
     Vector3 campos;
@@ -440,15 +523,18 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     cout << "render clip pos "<< camera_matrix.m44[12] <<" "<< camera_matrix.m44[13] <<" "<< camera_matrix.m44[14] <<"\n";
    
 
-    OBJ.showinfo();
+    model OBJ;
+    OBJ.load_obj( RS.object_path );
+
+    //OBJ.showinfo();
 
     OBJ.op_triangulate();
 
     // sort - sort of works!!
-    //OBJ.op_zsort(campos);
+    OBJ.op_zsort(campos);
 
     OBJ.showinfo();
-    OBJ.show();
+    //OBJ.show();
 
     //OBJ.flatten_edits(); 
 

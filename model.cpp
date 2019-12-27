@@ -149,6 +149,7 @@ bool sort_by_zdist(const zindex_faces &lzif, const zindex_faces &rzif){
 // bfr_pts    // general point buffer   ( tmp work area )
 // bfr_faces  // general polygon buffer ( tmp work area ) 
 
+// clear geometry work area for operations 
 void model::reset_buffers(void)
 {
     // bfr_faces[MAX_NUM_FACES];  // faces of work area 
@@ -161,10 +162,11 @@ void model::reset_buffers(void)
 }
 
 /**********************************************************/
-// add a triangle using existing vertices
+// add a new triangle using existing vertices
 void model::add_tri(int vid1, int vid2, int vid3)
 {
 
+    // debug - use fac_tmp instead? 
     vector<int> newtri;
     newtri.push_back(vid1);
     newtri.push_back(vid2);
@@ -178,10 +180,17 @@ void model::add_tri(int vid1, int vid2, int vid3)
 }
 
 /**********************************************************/
-// add a triangle and re-index 
-void model::add_tri_ridx(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2, int vid3)
+// add a new triangle AND new points 
+void model::append_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2, int vid3)
 {
-    /*
+
+    vertex_count++;
+    obj_pts[vertex_count] = pt1 ;
+    vertex_count++;
+    obj_pts[vertex_count] = pt2 ;
+    vertex_count++;
+    obj_pts[vertex_count] = pt3 ;    
+    //--------------------
     vector<int> newtri;
     newtri.push_back(vid1);
     newtri.push_back(vid2);
@@ -191,16 +200,16 @@ void model::add_tri_ridx(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vi
     triangle_count++;
 
     face_count++;  // DEBUG - deal with the NSIDED/ TOTAL FACE index issue now!
-    */
-
 }
 
 /**********************************************************/
+
+// turn a single 4 sided polygon into two 3 sided 
 void model::op_triangulate(void)
 {
     reset_buffers();
 
-    cout << "begin triangulate \n";
+    //cout << "begin triangulate \n";
    
     int i,j = 0;
 
@@ -223,7 +232,7 @@ void model::op_triangulate(void)
         }
     }
 
-    cout << "end triangulate \n";
+   // cout << "end triangulate \n";
 }
 
 /**********************************************************/
@@ -301,6 +310,8 @@ void model::flatten_edits(void)
 
 
 /**********************************************************/
+
+//re order face indices of a 3D object based on distance from a point 
 void model::op_zsort(Vector3 campos)
 {
     
@@ -364,6 +375,8 @@ void model::op_zsort(Vector3 campos)
 
 
 /**********************************************************/
+
+//save geometry in memory to an OBJ file on disk 
 void model::save_obj( char* filename)
 {
     ofstream myfile;
@@ -584,7 +597,8 @@ void model::load_obj(char* filename){
 
 /**********************************************************/
 /*
-   load a 4X4 matrix from disk to project geometry in render
+   load a 4X4 matrix from disk 
+   used as a projection matrix for render geometry 
 */
 void model::load_matrix(char* filename)
 {
@@ -640,6 +654,8 @@ void model::load_matrix(char* filename)
 
 
 /**********************************************************/
+
+//sample 3d object - may not be the "proper" way to do it 
 void model::make_cube(double scale){
 
     // vertices
@@ -678,6 +694,7 @@ void model::make_cube(double scale){
 }
 
 /**********************************************************/
+//sample 3d object - may not be the "proper" way to do it
  void model::make_circle(int divs, double scale)
  {
 
@@ -722,6 +739,7 @@ void model::make_cube(double scale){
  }     
 
 /**********************************************************/
+ //sample 3d object - may not be the "proper" way to do it
  void model::make_square(double scale)
  {
     fac_tmp.clear();
@@ -748,6 +766,7 @@ void model::make_cube(double scale){
 
 
 /**********************************************************/
+ //sample 3d object - may not be the "proper" way to do it
  void model::make_triangle(double scale)
  {
     fac_tmp.clear();
@@ -784,6 +803,7 @@ void model::make_cube(double scale){
 
 
 /**********************************************************/
+ //sample 3d object - may not be the "proper" way to do it
  void model::make_line(double scale)
  {
     // vertices - (3d vectors)

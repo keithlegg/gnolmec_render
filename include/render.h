@@ -37,13 +37,70 @@ int poly_clip(int width, int height, double *x1, double *y1, double *x2, double 
 
 void test_framebuffer(void);
 
-void render_model( int width, int height, char* objfilename, char* matrixfile, float RX, float RY, float RZ , char* outfilename);
+void render_model( int width, int height, char* renderscript, char* outfilename);
+
 
 //void render_model( int width, int height, char* objfilename ,float RX, float RY, float RZ ,char* outfilename, double RSCALE, int which); 
 
 void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, float RX, float RY, float RZ, char* outfilename);
 
 
+
+
+class sceneloader
+{
+
+    public:	
+        sceneloader(){
+            object_path[0]      = 0;
+            cam_matrix_path[0]  = 0;
+            proj_matrix_path[0] = 0;
+        };
+
+        ~sceneloader(){};
+
+        //----------------------
+
+        framebuffer::RGBType vtx_color; 
+        framebuffer::RGBType line_color; 
+        framebuffer::RGBType fill_color; 
+		
+        char object_path[100];
+		char cam_matrix_path[100];
+		char proj_matrix_path[100];
+
+
+        Matrix4 camera_matrix;
+        Matrix4 projection_matrix;
+
+        //----------------------
+
+        void load_file( char* filepath );
+        //void load_file( char* filepath );
+        
+        void load_camera_matrix();
+        void load_projection_matrix();
+
+
+        void set_linecolor(){
+        	//vtx_color.r = 255;
+            //vtx_color.g = 0;
+            //vtx_color.b = 0;
+        }
+
+        void set_vtxcolor(){
+        	//vtx_color.r = 255;
+            //vtx_color.g = 0;
+            //vtx_color.b = 0;
+        }
+
+        void set_fillcolor(){
+        	//vtx_color.r = 255;
+            //vtx_color.g = 0;
+            //vtx_color.b = 0;
+        }
+
+};
 
 
 
