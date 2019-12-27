@@ -24,8 +24,12 @@ const int MAX_TOKENS_PER_LINE = 20;
 const char* const DELIMITER = " ";
 
 // tokens to parse out of .OBJ file
-const char* v_chr = "v";  // vertex identifier in OBJ file 
-const char* f_chr = "f";  // face identifier in OBJ file 
+const char* v_chr    = "v";   // vertex identifier in OBJ file 
+const char* f_chr    = "f";   // face identifier in OBJ file 
+const char* uv_chr   = "vt";  // UV identifier in OBJ file 
+const char* nrml_chr = "vn";  // UV identifier in OBJ file 
+const char* line_chr = "l";   // Line identifier in OBJ file 
+
 
 
 
@@ -50,105 +54,254 @@ double rad_to_deg ( double rad){
 
 
 int model::getnum_verts(){
-   return sizeof( obj_pts ) / sizeof( obj_pts[0] );
+    return sizeof( obj_pts ) / sizeof( obj_pts[0] );
 }
 
 int model::getnum_faces(){
-   return sizeof( faces ) / sizeof( faces[0] );
+    return sizeof( faces ) / sizeof( faces[0] );
 }
 
 
-/**********************/
+/**********************************************************/
 void model::showinfo(void)
 {
-   cout << "\n-----------------------------------------------\n";   
-   cout << " loded num vertices    "<< model::vertex_count << endl;
-   cout << " total loaded faces    "<< model::face_count << endl;
-   
-   cout << " loded num lines       "<< model::line_count     << endl;
-   cout << " loded num triangles   "<< model::triangle_count << endl;
-   cout << " loded num quads       "<< model::quad_count     << endl;
-   cout << " loded num Nsided      "<< model::nsided_count   << endl;
+    cout << "\n-----------------------------------------------\n";   
+    cout << " loded num vertices    "<< model::vertex_count   << endl;
+    cout << " total num faces       "<< model::face_count     << endl;
+    cout << " loded num lines       "<< model::line_count     << endl;
+    cout << " loded num triangles   "<< model::triangle_count << endl;
+    cout << " loded num quads       "<< model::quad_count     << endl;
+    cout << " loded num Nsided      "<< model::nsided_count   << endl;
+    //cout << " getnumverts           "<< getnum_verts() << " \n";
+    //cout << " getnumfaces           "<< getnum_faces() << " \n";   
 
+    cout << "-------------------------------------------------\n\n";
 }
 
 
-/**********************/
+/**********************************************************/
+
+
 void model::show(void)
 {
-  
-    int dnum = 100;
 
-    int numv = getnum_verts();
-    for (int xx=0;xx<numv;xx++){
-        if (xx<dnum){
-            cout << obj_pts[xx] << endl;
+    //int numv = getnum_verts();
+    for (int xx=0;xx<vertex_count;xx++)
+    {
+        cout << obj_pts[xx] << endl;
+    }
+
+    //----------------
+    //  lines[MAX_NUM_FACES];      // 2 sided faces 
+
+    //----------------
+    cout << "## TRIANGLES \n";
+    for (int xx=0;xx<triangle_count;xx++)
+    {
+        for (int y=0;y<triangles[xx].size();y++)
+        {
+           cout << triangles[xx][y] << " ";   
         }
+        cout << "\n";
     }
 
 
-    int numf = getnum_faces();
-    for (int xx=0;xx<numf;xx++){
-        if (xx<dnum){
-            // cout << faces[xx] << endl;
+    //----------------
+    cout << "## QUADS \n";
+    for (int xx=0;xx<quad_count;xx++)
+    {
+        for (int y=0;y<quads[xx].size();y++)
+        {
+           cout << quads[xx][y] << " ";   
         }
-
+        cout << "\n";
+    }
+    //----------------
+    cout << "## N-SIDED  \n";
+    for (int xx=0;xx<face_count;xx++)
+    {
+        for (int y=0;y<faces[xx].size();y++)
+        {
+           cout << faces[xx][y] << " ";   
+        }
+        cout << "\n";
     }
 
+    cout << "-------------------------------------------------\n\n";
 }
 
 
-/**********************/
+/**********************************************************/
 
 bool sort_by_zdist(const zindex_faces &lzif, const zindex_faces &rzif){ 
-
-    //if (lzif.distance == rzif.distance){
-    //    //cout << "same! " << lzif.distance;
-    //    return true;
-    //}
-
+    // lambda for sort function 
     return lzif.distance > rzif.distance; 
 }
 
 
-/**********************/
+/**********************************************************/
 
-void model::triangulate(void)
+// obj_pts    // vertices of model    
+// lines      // 2 sided faces 
+// triangles  // 3 sided 
+// quads      // 4 sided 
+// faces      // >4, N sided faces 
+// bfr_pts    // general point buffer   ( tmp work area )
+// bfr_faces  // general polygon buffer ( tmp work area ) 
+
+void model::reset_buffers(void)
 {
-    /* 
-    int i,j = 0;
-
     // bfr_faces[MAX_NUM_FACES];  // faces of work area 
     // bfr_pts[MAX_NUM_VERTICES]; // vertices of work area
 
-    // walk the faces and do stuff 
-    for (int i=0; i<face_count; i++) 
-    {
-    
-        fac_tmp.clear();
-        fac_tmp = model::faces[i];
-        
-        cout << model::faces[i][0] <<" foo \n";
-    }
+    vtx_cnt = 0;
+    fac_cnt = 0;
+    vtx_tmp.clear();
+    fac_tmp.clear();
+}
+
+/**********************************************************/
+// add a triangle using existing vertices
+void model::add_tri(int vid1, int vid2, int vid3)
+{
+
+    vector<int> newtri;
+    newtri.push_back(vid1);
+    newtri.push_back(vid2);
+    newtri.push_back(vid3);
+
+    triangles[ triangle_count ] = newtri;  // 3 sided 
+    triangle_count++;
+
+    face_count++;  // DEBUG - deal with the NSIDED/ TOTAL FACE index issue now!
+
+}
+
+/**********************************************************/
+// add a triangle and re-index 
+void model::add_tri_ridx(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2, int vid3)
+{
+    /*
+    vector<int> newtri;
+    newtri.push_back(vid1);
+    newtri.push_back(vid2);
+    newtri.push_back(vid3);
+
+    triangles[ triangle_count ] = newtri;  // 3 sided 
+    triangle_count++;
+
+    face_count++;  // DEBUG - deal with the NSIDED/ TOTAL FACE index issue now!
     */
 
 }
 
-/**********************/
+/**********************************************************/
+void model::op_triangulate(void)
+{
+    reset_buffers();
+
+    cout << "begin triangulate \n";
+   
+    int i,j = 0;
+
+    // bfr_faces[MAX_NUM_FACES];  // faces of work area 
+    // bfr_pts[MAX_NUM_VERTICES]; // vertices of work area
+    // i vtx_cnt;
+    // i fac_cnt;
+    // <> vtx_tmp;
+    // <> fac_tmp;  
+
+    if (quad_count>0)
+    {
+        // walk the faces, assume there are ALWAYS 4 indices (quad) 
+        for (int i=0; i<quad_count; i++) 
+        {
+            //cout << quads[i][0]-1 <<" "<< quads[i][1]-1 <<" "<< quads[i][2]-1 << "\n";
+  
+            add_tri(quads[i][0],quads[i][1],quads[i][2]);
+            add_tri(quads[i][2],quads[i][3],quads[i][0]);           
+        }
+    }
+
+    cout << "end triangulate \n";
+}
+
+/**********************************************************/
 
 /*
+    a "render-constructor". 
+
     scan all loaded geom and prep for rendering 
     mostly just get things into triangles 
 */
-void model::flatten_geom(void)
-{
 
+void model::prep_render(void)
+{
+    
+    model::op_triangulate();
+    model::flatten_edits();
 
 }
 
+/**********************************************************/
 
-/**********************/
-void model::sort_faces_dist(Vector3 campos)
+/*
+    Idea to get around having to re-order polygons each time:
+
+
+    - stack up polygon operations  
+    - mark deleted verts or faces with a -1 index 
+    - set geom_edited to true 
+    
+    - wash, rinse repeat 
+
+    - when you are done, run a cleanup function that re orders the -1 indices, 
+    - set geom_edited = false
+*/
+
+
+void model::flatten_edits(void)
+{
+    cout << "begin flatten \n";
+
+
+
+    if (model::geom_edited == true)
+    {
+        // check points for (??)
+            /*
+                iterate all points 
+                if NOT -1 copy to buffer 
+                swap buffer with points if any -1 found 
+            */   
+
+        // check lines for -1 
+
+        // check triangles for -1 
+            /*
+                iterate all points 
+                if NOT -1 copy to buffer 
+                swap buffer with points if any -1 found 
+            */  
+
+        // check quads for -1 
+            /*
+                iterate all points 
+                if NOT -1 copy to buffer 
+                swap buffer with points if any -1 found 
+            */  
+
+        // check faces for -1  
+        
+
+    }
+
+    cout << "end flatten \n";
+}
+
+
+/**********************************************************/
+void model::op_zsort(Vector3 campos)
 {
     
     // if (face_count==0){
@@ -210,7 +363,7 @@ void model::sort_faces_dist(Vector3 campos)
 }
 
 
-/**********************/
+/**********************************************************/
 void model::save_obj( char* filename)
 {
     ofstream myfile;
@@ -237,23 +390,62 @@ void model::save_obj( char* filename)
     int ff = 0; 
     int xx = 0;
 
+    //----------------------
+
+    /*
     // export array of N sided faces
-    for (xx=0; xx<face_count; xx++)
+    if (face_count>0)
     {
-        myfile << "f ";
-        for (ff=0; ff < faces[xx].size();ff++)
+        for (xx=0; xx<face_count; xx++)
         {
-            myfile << faces[xx][ff] << " "; 
+            myfile << "f ";
+            for (ff=0; ff < faces[xx].size();ff++)
+            {
+                myfile << faces[xx][ff] << " "; 
+            }
+            myfile << "\n";
         }
-        myfile << "\n";
+    }*/
+    
+    //----------------------
+
+    // export array triangles
+    if(triangle_count>0)
+    {
+        for (xx=0; xx<triangle_count; xx++)
+        {
+            myfile << "f ";
+            for (ff=0; ff < triangles[xx].size();ff++)
+            {
+                myfile << triangles[xx][ff] << " "; 
+            }
+            myfile << "\n";
+        }
     }
-        
+
+    //----------------------
+    // export array quads
+    if(quad_count>0)
+    {
+        for (xx=0; xx<quad_count; xx++)
+        {
+            myfile << "f ";
+            for (ff=0; ff < quads[xx].size();ff++)
+            {
+                myfile << quads[xx][ff] << " "; 
+            }
+            myfile << "\n";
+        }
+    }
+
+    //----------------------
+
     myfile.close();
     cout << endl << "obj file " << filename << " exported." << endl;
 
 }
 
-/**********************/
+/**********************************************************/
 void model::load_obj(char* filename){
     ifstream fin;
     fin.open(filename); // open a file
@@ -371,7 +563,18 @@ void model::load_obj(char* filename){
                     }
                 }
             }
-           
+
+            /**********/
+            // normal tokens "vn"
+            //if (!strcmp(token[0],nrml_chr)){}
+            /**********/
+            // UV tokens "vt"
+            //if (!strcmp(token[0],uv_chr)){}
+            /**********/
+            // line tokens "l"
+            //if (!strcmp(token[0],line_chr)){}
+
+
         }//iterate tokens
        
   
@@ -379,7 +582,7 @@ void model::load_obj(char* filename){
 }//load object
 
 
-/**********************/
+/**********************************************************/
 /*
    load a 4X4 matrix from disk to project geometry in render
 */
@@ -433,11 +636,10 @@ void model::load_matrix(char* filename)
         line_ct ++; 
     }
 
-    //m44.transpose();
 }
 
 
-/**********************/
+/**********************************************************/
 void model::make_cube(double scale){
 
     // vertices
@@ -475,7 +677,7 @@ void model::make_cube(double scale){
     model::vertex_count = 8;
 }
 
-/**********************/
+/**********************************************************/
  void model::make_circle(int divs, double scale)
  {
 
@@ -519,7 +721,7 @@ void model::make_cube(double scale){
     model::vertex_count = vcnt;
  }     
 
-/**********************/
+/**********************************************************/
  void model::make_square(double scale)
  {
     fac_tmp.clear();
@@ -534,14 +736,18 @@ void model::make_cube(double scale){
     obj_pts[3].set(-scale, 1, -scale);
 
     // face indices are NOT zero indexed 
-    faces[0] = {1,2,3,4};
+    
+    // faces[0] = {1,2,3,4};
+    // face_count = 1;
 
-    face_count = 1;
-    model::vertex_count =4;
+    quads[0] = {1,2,3,4};
+    quad_count = 1;
+
+    vertex_count =4;
  }    
 
 
-/**********************/
+/**********************************************************/
  void model::make_triangle(double scale)
  {
     fac_tmp.clear();
@@ -561,20 +767,23 @@ void model::make_cube(double scale){
     // obj_pts[1].set( 0      ,0 ,  scale );
     // obj_pts[2].set( scale  ,0 ,  0     );
 
-    // // Z axis 
+    // // // Z axis 
     obj_pts[0].set( -scale ,  0    , 0 );
     obj_pts[1].set( 0      ,  scale, 0 );
     obj_pts[2].set( scale  ,  0    , 0 );
+    
+    // faces[0] = {1,2,3};
+    // face_count = 1;
+    
+    vertex_count = 3;
+    add_tri(1,2,3);
+    add_tri(2,1,3);
 
-    faces[0] = {1,2,3};
-
-    face_count = 1;
-    model::vertex_count = 3;
  }    
 
 
 
-/**********************/
+/**********************************************************/
  void model::make_line(double scale)
  {
     // vertices - (3d vectors)

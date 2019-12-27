@@ -22,7 +22,7 @@ int pix_iterator;//index to a pixel on the framebuffer
 
 /*********************************************************/
 
-
+//test BMP saving functions 
 void make_image(int width, int height, char *outfile)
 {
 
@@ -136,9 +136,20 @@ int poly_clip(int width, int height, double *x1, double *y1, double *x2, double 
 
 /*********************************************************/
 /*
-   take a clipping rectangle and 2 lines
-   sets pointes to 2 (x,y) coords (line between the 2 intersections) 
-   returns number of failures to intersect. 
+   intersect a line with 2 others 
+   
+   (used for 2 sides of a triangle and a horizontal raster line to fill triangles)  
+   
+          /\
+     ----*--*-----   <----- line 3  
+        /    \          * are the intersections
+       /      \ 
+     line     line
+      1        2
+
+
+   create a new line segment consisting of the intersection of the other two. 
+   returns number of intersections found. 
       0 = none intersected
       1 = one intersected 
       2 = both intersected 
@@ -186,7 +197,7 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 
 /*********************************************************/
 
-
+// core of render engine - draw and fill triangles 
 void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
 {
     int RENDER_SCANLINE   = 1; // do the scan line render loop 
@@ -336,13 +347,11 @@ void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vecto
 }
 /*********************************************************/
 
-
+//top render function 
 void render_model( int width, int height, char* objfilename, char* matrixfile, 
                                  float RX, float RY, float RZ , char* outfilename)
 {
 
-
-    int dpi = 72; //Not used with newer BMP exporter 
     Vector3 lightpos = Vector3(0,5,0); 
     double light_intensity = .8;
 
@@ -389,10 +398,6 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     model OBJ;
     OBJ.load_obj(objfilename);
 
-    OBJ.showinfo();
-
-    OBJ.flatten_geom(); 
-
     /***********/
     Vector2 thisedge;      //iterator for edges
     Vector4 poly;          //store vertex id's in a vector4 (4 sided poly) 
@@ -435,9 +440,18 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
     cout << "render clip pos "<< camera_matrix.m44[12] <<" "<< camera_matrix.m44[13] <<" "<< camera_matrix.m44[14] <<"\n";
    
 
+    OBJ.showinfo();
+
+    OBJ.op_triangulate();
+
     // sort - sort of works!!
-    OBJ.sort_faces_dist(campos);
-   
+    //OBJ.op_zsort(campos);
+
+    OBJ.showinfo();
+    OBJ.show();
+
+    //OBJ.flatten_edits(); 
+
     /***********************/
     for (i=0;i<OBJ.triangle_count;i++)
     {
@@ -510,7 +524,7 @@ void render_model( int width, int height, char* objfilename, char* matrixfile,
 /*********************************************************/
 /*********************************************************/
 
-
+// old top render function - example of a simple as posible wire renderer (not using any other functions)
 void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
                                  float RX, float RY, float RZ, char* outfilename)
 {
@@ -614,9 +628,6 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
        int j = 0;
       
        int numverts = OBJ.triangles[i].size();
-
-       cout << i << " numverts " << numverts << "\n";
-
            
        // iterate all points in polygon (triangle) and rotate them with a matrix  
        for (j=0;j<numverts;j++){
@@ -637,11 +648,8 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
            {
                ecoord_x =  ((double)(draw_poly[j+1].x * RSCALE) + cenx );//+lineart.center_x
                ecoord_y =  ((double)(draw_poly[j+1].y * RSCALE) + ceny );//+lineart.center_y 
-
-               // cout << "draw a line " << scoord_x << " " << scoord_y << " " << ecoord_x << " " << ecoord_y << endl;
-               //poly_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
-           }//connect the dots, except the last 
+           } // connect the dots, except the last 
 
            // last line segment 
            if (j==numverts-1)
@@ -650,8 +658,6 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
                scoord_y =  ((double)(draw_poly[0].y * RSCALE) + ceny);
                ecoord_x =  ((double)(draw_poly[j].x * RSCALE) + cenx );//+lineart.center_x
                ecoord_y =  ((double)(draw_poly[j].y * RSCALE) + ceny );//+lineart.center_y 
-               
-               //poly_clip(width, height, &scoord_x, &scoord_y, &ecoord_x, &ecoord_y);
                lineart.draw_line(scoord_x, scoord_y, ecoord_x, ecoord_y, poly_color);
            } // close the last line triangle 
            
@@ -673,12 +679,10 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
        }// loop vertices  
     
 
-   }//render iterator
+   } // render iterator
 
    framebuffer::savebmp(outfilename , width, height, dpi, output_image);
-   
-   //cout << outfilename << " saved to disk. " << endl;
-   //cout << "# Done Rendering ! " << endl;
+
 }
 
 

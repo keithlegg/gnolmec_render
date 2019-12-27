@@ -66,28 +66,7 @@ void test_intersection(void){
 
 }
 
-/***********************************/
 
-
-void obj_file_stuff(void){
-    /* test of loading and saving an OBJ file with my 3D model class*/
-
-    model MOBJ;
-    
-    MOBJ.make_cube(1.1);
-    
-    //MOBJ.make_circle( 10, 5.2);
-    //MOBJ.make_line( .2);   
-    //MOBJ.make_square(2);
-    
-    //MOBJ.make_triangle( .2);  
-
-    // MOBJ.load_obj("3d_obj/monkey.obj");
-
-    //MOBJ.save_obj("3d_obj/triangle.obj");
-    MOBJ.save_obj("cube.obj");
-
-}
 
 /***********************************/
 /*
@@ -150,6 +129,39 @@ void test_image_draw( int width, int height, char *outfile)
 
 } 
 
+/***********************************/
+
+
+void test_obj_stuff(void)
+{
+    /* test of loading and saving an OBJ file with my 3D model class*/
+
+    model MOBJ;
+    
+    // MOBJ.make_cube(1.1);
+    
+    // MOBJ.make_circle( 10, 5.2);
+    // MOBJ.make_line( .2);   
+    MOBJ.make_triangle( .2);  
+    // MOBJ.load_obj("3d_obj/monkey.obj");
+
+
+    //MOBJ.make_square(2);
+    
+    //MOBJ.showinfo();
+    //MOBJ.show();
+
+    //MOBJ.op_triangulate();
+    //MOBJ.flatten_edits();
+
+    MOBJ.showinfo();
+    MOBJ.show();
+
+    //MOBJ.save_obj("3d_obj/triangle.obj");
+    MOBJ.save_obj("test_objfunkz.obj");
+
+}
+
 
 /***********************************/
 
@@ -164,6 +176,8 @@ void test_image_draw( int width, int height, char *outfile)
 
 int main(int argc, char *argv[])
 {
+
+    // test_obj_stuff(); return 0;
 
     //test_load_bmp("images/uvmap.bmp");
 
