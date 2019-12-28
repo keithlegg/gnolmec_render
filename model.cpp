@@ -54,11 +54,13 @@ double rad_to_deg ( double rad){
 
 
 int model::getnum_verts(){
-    return sizeof( obj_pts ) / sizeof( obj_pts[0] );
+    //return sizeof( obj_pts ) / sizeof( obj_pts[0] );
+    return vertex_count;
 }
 
 int model::getnum_faces(){
-    return sizeof( faces ) / sizeof( faces[0] );
+    //return sizeof( faces ) / sizeof( faces[0] );
+    return line_count + triangle_count + quad_count + nsided_count;
 }
 
 
@@ -67,7 +69,7 @@ void model::showinfo(void)
 {
     cout << "\n-----------------------------------------------\n";   
     cout << " loded num vertices    "<< model::vertex_count   << endl;
-    cout << " total num faces       "<< model::face_count     << endl;
+    //cout << " total num faces       "<< model::face_count     << endl;
     cout << " loded num lines       "<< model::line_count     << endl;
     cout << " loded num triangles   "<< model::triangle_count << endl;
     cout << " loded num quads       "<< model::quad_count     << endl;
@@ -118,7 +120,7 @@ void model::show(void)
     }
     //----------------
     cout << "## N-SIDED  \n";
-    for (int xx=0;xx<face_count;xx++)
+    for (int xx=0;xx<nsided_count;xx++)
     {
         for (int y=0;y<faces[xx].size();y++)
         {
@@ -175,8 +177,6 @@ void model::add_tri(int vid1, int vid2, int vid3)
     triangles[ triangle_count ] = newtri;  // 3 sided 
     triangle_count++;
 
-    face_count++;  // DEBUG - deal with the NSIDED/ TOTAL FACE index issue now!
-
 }
 
 /**********************************************************/
@@ -198,8 +198,6 @@ void model::append_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2
 
     triangles[ triangle_count ] = newtri;  // 3 sided 
     triangle_count++;
-
-    face_count++;  // DEBUG - deal with the NSIDED/ TOTAL FACE index issue now!
 }
 
 /**********************************************************/
@@ -329,7 +327,7 @@ void model::op_zsort(Vector3 campos)
     vector <zindex_faces> sortfaces(MAX_NUM_FACES);
 
     // walk the faces and do stuff 
-    for (int i=0; i<face_count; i++) 
+    for (int i=0; i<triangle_count; i++) 
     {
         fac_tmp.clear();
         fac_tmp = model::faces[i];
@@ -360,14 +358,14 @@ void model::op_zsort(Vector3 campos)
     //     cout << n.distance << " \n ";
 
     // overwrite sorted faces with sorted faces 
-    for (int i=0; i<face_count; i++) 
+    for (int i=0; i<triangle_count; i++) 
     {
         model::faces[i] = sortfaces[i].face;
         //cout << "sortfaces "<< i <<" " << sortfaces[i].face[0]<< " " << sortfaces[i].face[1] << " "<< sortfaces[i].face[2] << "\n";
     }
 
 
-    cout << "face count is " << face_count << " size of sorted is " << j <<"\n";
+    cout << "triangle count is " << triangle_count << " size of sorted is " << j <<"\n";
 
     //for debugging
     model::save_obj("sorted.obj");
@@ -384,7 +382,7 @@ void model::save_obj( char* filename)
 
     myfile << "#Exported with Keith's little graphics tool\n";
     myfile << "#number of verticies "<< model::vertex_count  <<"\n";
-    myfile << "#number of faces     "<< face_count <<"\n";
+    myfile << "#number of triangles     "<< triangle_count <<"\n";
     myfile <<"\n";
 
     //DEBUG why is vertex_count an attribute ?? - cant we just get the size of the array - DEBUG!
@@ -394,11 +392,11 @@ void model::save_obj( char* filename)
 
     myfile <<"\n";
     
-    if (face_count==0){
+    if (triangle_count==0){
         cout << " error - no faces to export ";
     }
 
-    // cout << " face count is  " << face_count << endl;
+    // cout << " triangle count is  " << triangle_count << endl;
 
     int ff = 0; 
     int xx = 0;
@@ -407,9 +405,9 @@ void model::save_obj( char* filename)
 
     /*
     // export array of N sided faces
-    if (face_count>0)
+    if (nsided_count>0)
     {
-        for (xx=0; xx<face_count; xx++)
+        for (xx=0; xx<nsided_count; xx++)
         {
             myfile << "f ";
             for (ff=0; ff < faces[xx].size();ff++)
@@ -547,7 +545,7 @@ void model::load_obj(char* filename){
                     {
                         lines[line_count] = fac_tmp; 
                         fac_tmp.clear();   
-                        line_count++; face_count++;   
+                        line_count++;    
                     }
 
                     // 3 sided polygons 
@@ -556,7 +554,7 @@ void model::load_obj(char* filename){
                         
                         triangles[triangle_count] = fac_tmp; 
                         fac_tmp.clear();   
-                        triangle_count++; face_count++;                         
+                        triangle_count++;                           
                     }
                     
                     // 4 sided polygons 
@@ -564,7 +562,7 @@ void model::load_obj(char* filename){
                     {
                         quads[quad_count] = fac_tmp;  
                         fac_tmp.clear();   
-                        quad_count++; face_count++;                             
+                        quad_count++;                              
                     }   
 
                     // N sided polygons 
@@ -572,7 +570,7 @@ void model::load_obj(char* filename){
                     {
                         faces[nsided_count] = fac_tmp; 
                         fac_tmp.clear(); // tmp face buffer 
-                        nsided_count++; face_count++;    // total face count in object 
+                        nsided_count++;  
                     }
                 }
             }
@@ -687,7 +685,6 @@ void model::make_cube(double scale){
     faces[4] = {4,8,5,1};
     faces[5] = {5,6,7,8};
 
-    face_count = 6;  
     quad_count = 6;
 
     model::vertex_count = 8;
@@ -733,7 +730,7 @@ void model::make_cube(double scale){
 
 
     faces[0] = fac_tmp;
-    face_count = 1;
+    nsided_count = 1;
 
     model::vertex_count = vcnt;
  }     
@@ -812,7 +809,7 @@ void model::make_cube(double scale){
 
     faces[0] = {1,2}; //notice this is only a 2 point poly (line)
 
-    face_count = 1;
+    line_count = 1;
 
     model::vertex_count =4;
  }     

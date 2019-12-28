@@ -61,6 +61,7 @@ class sceneloader
 
         //----------------------
 
+        framebuffer::RGBType bg_color; 
         framebuffer::RGBType vtx_color; 
         framebuffer::RGBType line_color; 
         framebuffer::RGBType fill_color; 
@@ -70,14 +71,22 @@ class sceneloader
 		char proj_matrix_path[100];
 
 
+        Vector3 lightpos; 
+        float lightintensity;
+        
+
         Matrix4 camera_matrix;
         Matrix4 projection_matrix;
 
         //----------------------
+        
+        void show( void );
 
         void load_file( char* filepath );
-        //void load_file( char* filepath );
+
+
         
+        /*
         void load_camera_matrix();
         void load_projection_matrix();
 
@@ -98,7 +107,8 @@ class sceneloader
         	//vtx_color.r = 255;
             //vtx_color.g = 0;
             //vtx_color.b = 0;
-        }
+        }*/
+
 
 };
 

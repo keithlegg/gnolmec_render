@@ -29,6 +29,7 @@ int MAX_TOKENS_PER_LINE = 100;
     there is a stupid bug that the line needs multiple breaks for this to work 
     Obviously I need to learn a lot more about strtok(), and strings in C 
 */
+
 void sceneloader::load_file( char* filepath )
 {
     cout << "sceneloader loading file "<< filepath << "\n";
@@ -72,7 +73,57 @@ void sceneloader::load_file( char* filepath )
             {            
                 strcpy( cam_matrix_path, token[1]);
             }
+           
+            //----------------------
+            if (!strcmp(token[0],"light_pos"))
+            {            
+                //cout << " light position is " <<  atof(token[1]) << " " <<  atof(token[2]) << " " <<  atof(token[3]) << "\n";
+                lightpos = Vector3( atof(token[1]), atof(token[2]), atof(token[3]) );
 
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"light_intensity"))
+            {            
+                lightintensity = atof(token[1]);
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"bg_color"))
+            {            
+                bg_color.r = atoi(token[1]);
+                bg_color.g = atoi(token[2]);
+                bg_color.b = atoi(token[3]);                                
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"line_color"))
+            {            
+ 
+                //cout << " line_color is " <<  atof(token[1]) << " " <<  atof(token[2]) << " " <<  atof(token[3]) << "\n";
+                line_color.r = atoi(token[1]);
+                line_color.g = atoi(token[2]);
+                line_color.b = atoi(token[3]);
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"fill_color"))
+            {            
+                //cout << " fill_color is " <<  atof(token[1]) << " " <<  atof(token[2]) << " " <<  atof(token[3]) << "\n";
+                fill_color.r = atoi(token[1]);
+                fill_color.g = atoi(token[2]);
+                fill_color.b = atoi(token[3]);
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"vtx_color"))
+            {   
+                //cout << " vtx_color is " <<  atof(token[1]) << " " <<  atof(token[2]) << " " <<  atof(token[3]) << "\n";
+                vtx_color.r = atoi(token[1]);
+                vtx_color.g = atoi(token[2]);
+                vtx_color.b = atoi(token[3]);                
+            }
+            
            
             //////
             line_ct ++; 
@@ -93,6 +144,16 @@ void sceneloader::load_file( char* filepath )
 
 }
 
+
+
+void sceneloader::show()
+{
+
+   cout << " 3D object       " << object_path      << "\n";
+   cout << " camera matrix   " << cam_matrix_path  << "\n";
+   cout << " proj matrix     " << proj_matrix_path << "\n";      
+
+}
 
 /*********************************************************/
 
@@ -427,46 +488,7 @@ void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vecto
 void render_model( int width, int height, char* renderscript, char* outfilename)
 {
 
-    Vector3 lightpos = Vector3(0,5,0); 
-    double light_intensity = .8;
-
-    int RENDER_SHADED     = 1; //shaded (lit) or flat color polygon fill 
-
-    int n = width * height;
-
-    //------------------------------
-    framebuffer::RGBType* output_image;
-    framebuffer lineart( width, height );
-    framebuffer *p_lineart = &lineart;
-
-    output_image = lineart.rgbdata;
-
-    framebuffer::RGBType line_color; 
-    line_color.r = 240;
-    line_color.g = 0;
-    line_color.b = 0;
-
-
-    framebuffer::RGBType fill_color; 
-    fill_color.r = 40;
-    fill_color.g = 11;
-    fill_color.b = 64;
-
-    /***********/
-    // clear the background  with a solid color
-    short flat_color = 0; //background grey color 
-
-    // fill each pixel with a color  
-    for (int x = 0; x < width; x++)
-    {    //rotate_obj.show();
-         for (int y = 0; y < height; y++)
-         {  
-            pix_iterator = y * width + x;     
-            output_image[pix_iterator].r = flat_color;       
-            output_image[pix_iterator].g = flat_color;
-            output_image[pix_iterator].b = flat_color;
-        }
-    }
+    //int n = width * height;
 
     /***********/
     Vector2 thisedge;      //iterator for edges
@@ -474,6 +496,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     Vector3 poly3;         //store vertex id's in a vector3 (3 sided poly) 
     Vector4 vprj[4];       //3 and 4 sided -  projected point coordinates
     Vector3 v1,v2,v3,v4;   //retrieved point data (xyz)
+    framebuffer::RGBType fill_color; 
 
     int i = 0;
     int j = 0;
@@ -482,9 +505,33 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
 
     /***********************/
     /***********************/
+
     sceneloader RS;
 
     RS.load_file(renderscript);
+    
+    //RS.show();
+
+    int RENDER_SHADED     = 1; //shaded (lit) or flat color polygon fill 
+
+    //------------------------------
+    framebuffer::RGBType* output_image;
+    framebuffer lineart( width, height );
+    framebuffer *p_lineart = &lineart;
+    
+    output_image = lineart.rgbdata;
+ 
+    // fill each pixel with a color  
+    for (int x = 0; x < width; x++)
+    {     
+         for (int y = 0; y < height; y++)
+         {  
+            pix_iterator = y * width + x;     
+            output_image[pix_iterator].r = RS.bg_color.r;       
+            output_image[pix_iterator].g = RS.bg_color.g;
+            output_image[pix_iterator].b = RS.bg_color.b;
+        }
+    }
 
 
     Matrix4 rotate_obj;    //4X4 rotation matrix
@@ -498,13 +545,8 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     //load the camera matrix (via model) and push points around 
     model camera_matrix;
     camera_matrix.load_matrix( RS.cam_matrix_path );
-   
-
-
-    //hack to scale object based on Z xform
-    //float RSCALE = 1000.0/abs(camera_matrix.m44[14]);  
-   
-    //variation of hack to scale object based on Z xform
+  
+    // hack to scale object based on Z xform
     float RSCALE = width*(1/abs(camera_matrix.m44[14])); 
 
     // perform perspective transform on points from GL matrix
@@ -526,9 +568,11 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     model OBJ;
     OBJ.load_obj( RS.object_path );
 
-    //OBJ.showinfo();
-
-    OBJ.op_triangulate();
+    OBJ.showinfo();
+    
+    if (OBJ.quad_count>0){
+        OBJ.op_triangulate();
+    }
 
     // sort - sort of works!!
     OBJ.op_zsort(campos);
@@ -570,7 +614,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             //cout << "## face normal is " <<fac_normal.x <<" "<< fac_normal.y <<" "<< fac_normal.z << "\n";
                     
             //# build a vector between face center and light position  
-            Vector3 to_light = fcntr - lightpos; 
+            Vector3 to_light = fcntr - RS.lightpos; 
 
             // calculate the angle between face and light vectors 
             // treating the 3D light position as a vector
@@ -578,21 +622,23 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             
             //int angle  = (int)rtd( light_angle );
             int angle  = (int) light_angle ;
-            int light_pow = light_intensity*256;
-            //cout << "light angle is " << light_angle << "\n";
 
-            fill_color.r = (int)light_pow-angle;
-            fill_color.g = (int)light_pow-angle;
-            fill_color.b = (int)light_pow-angle;
+            int lpow_r = RS.lightintensity * RS.fill_color.r;
+            int lpow_g = RS.lightintensity * RS.fill_color.g;
+            int lpow_b = RS.lightintensity * RS.fill_color.b;            
+
+            fill_color.r = (int)lpow_r-angle;
+            fill_color.g = (int)lpow_g-angle;
+            fill_color.b = (int)lpow_b-angle;
         
         }else{
 
-            fill_color.r = 20;
-            fill_color.g = 24;
-            fill_color.b = 68;
+            fill_color.r = RS.fill_color.r;
+            fill_color.g = RS.fill_color.g;
+            fill_color.b = RS.fill_color.b;
         }
       
-        draw_triangle( width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, line_color);
+        draw_triangle( width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, RS.line_color);
         
     }//render iterator
 

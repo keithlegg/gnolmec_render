@@ -33,7 +33,7 @@ class model: public polygon_ops {
         int triangle_count; // 3 sided polygons (triangles )
         int quad_count;     // 4 sided polygons 
         int nsided_count;   // all polygons that are not 1,2,3 sided 
-        int face_count;     // sum of ALL faces combined  
+        //int face_count;     // sum of ALL faces combined  
 
         int uv_count;       
         int normal_count;
@@ -60,9 +60,14 @@ class model: public polygon_ops {
         Matrix4 m44;
 
         model(){
-            face_count     = 0;
+            vtx_cnt        = 1; //? why 1?
+
             vertex_count   = 0;
-            vtx_cnt        = 1; 
+            line_count     = 0;  // 2 sided polygons (lines)      
+            triangle_count = 0;  // 3 sided polygons (triangles )
+            quad_count     = 0;  // 4 sided polygons 
+            nsided_count   = 0;  // all polygons that are not 1,2,3 sided 
+
         };
 
         ~model(){};
