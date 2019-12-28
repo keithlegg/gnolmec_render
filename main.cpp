@@ -139,14 +139,19 @@ void test_obj_stuff(void)
     model MOBJ;
     
     // MOBJ.make_cube(1.1);
-    
     // MOBJ.make_circle( 10, 5.2);
     // MOBJ.make_line( .2);   
-    MOBJ.make_triangle( .2);  
-    // MOBJ.load_obj("3d_obj/monkey.obj");
+    // MOBJ.make_triangle( .2);
+    // MOBJ.make_square(2);
 
+    MOBJ.load_obj("3d_obj/cone.obj");
 
-    //MOBJ.make_square(2);
+    //--------------
+    // Vector3 nrml = MOBJ.get_triface_normal(0);
+    // cout << "normal is " << nrml << "\n";
+
+    //--------------
+
     
     //MOBJ.showinfo();
     //MOBJ.show();
@@ -154,8 +159,8 @@ void test_obj_stuff(void)
     //MOBJ.op_triangulate();
     //MOBJ.flatten_edits();
 
-    MOBJ.showinfo();
-    MOBJ.show();
+    //MOBJ.showinfo();
+    //MOBJ.show();
 
     //MOBJ.save_obj("3d_obj/triangle.obj");
     MOBJ.save_obj("test_objfunkz.obj");
@@ -177,7 +182,7 @@ void test_obj_stuff(void)
 int main(int argc, char *argv[])
 {
 
-    // test_obj_stuff(); return 0;
+    test_obj_stuff(); return 0;
 
     //test_load_bmp("images/uvmap.bmp");
 

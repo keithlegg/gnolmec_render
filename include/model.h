@@ -111,7 +111,7 @@ class model: public polygon_ops {
 
         // get_pt_ids(self, fids=None):
         // get_face_pts(self, fid):
-        // get_face_normal(self, fid=None, unitlen=False ):
+        Vector3 get_triface_normal(int fid);
 
         // void op_extrude(int fid, double dist);
         // void op_calc_bbox(int fid, double dist);

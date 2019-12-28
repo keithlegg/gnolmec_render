@@ -58,10 +58,45 @@ int model::getnum_verts(){
     return vertex_count;
 }
 
+
 int model::getnum_faces(){
     //return sizeof( faces ) / sizeof( faces[0] );
     return line_count + triangle_count + quad_count + nsided_count;
 }
+
+
+
+
+/**********************************************************/
+
+Vector3 model::get_triface_normal(int fid)
+{
+    
+    Vector3 fac_normal;
+    
+    std::vector<int> tri_face;
+
+    if (triangle_count>0){
+        tri_face = triangles[fid];
+    } 
+
+    if (tri_face.size()==3)
+    {
+        Vector3 pt1 = obj_pts[ tri_face[0] ];
+        Vector3 pt2 = obj_pts[ tri_face[1] ];
+        Vector3 pt3 = obj_pts[ tri_face[2] ];
+      
+        fac_normal = model::three_vec3_to_normal( pt1, pt2, pt3, true);
+        //cout << "pt1 idx "<< tri_face[0] << " is " << pt1 << "\n";
+        //cout << "normal is " << fac_normal << "\n";
+    }
+
+    return fac_normal;
+
+}
+
+
+ 
 
 
 /**********************************************************/
