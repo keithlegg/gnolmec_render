@@ -1,0 +1,18 @@
+## Generated with Gnolmec.  ##
+
+obj_path 3d_obj/sphere.obj #
+
+cam_matrix_path cam_matrix.olm #
+
+# light setup #
+light_pos 0 0 -10 #
+light_intensity 1.8 #
+
+# colors      #
+bg_color 20 15 15 #
+line_color 0 0 100 #
+fill_color 100 100 100 #
+
+# render prefs    #
+rendermode litshaded #
+

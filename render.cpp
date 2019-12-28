@@ -336,7 +336,7 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
 {
     int RENDER_SCANLINE   = 1; // do the scan line render loop 
-    int RENDER_LINES      = 1; // wireframe edges  
+    int RENDER_LINES      = 0; // wireframe edges  
     int RENDER_VTX_PTS    = 0;
     int SHOW_CLIP_AREA    = 0; // show clipping rectangle 
 

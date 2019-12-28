@@ -12,7 +12,7 @@
 #include "point_ops.h"
 
 #define MAX_NUM_VERTICES 10000
-#define MAX_NUM_FACES 7000
+#define MAX_NUM_FACES 10000
 
 
 // experiment to sort faces based on a z value 
