@@ -163,7 +163,7 @@ void test_obj_stuff(void)
     //MOBJ.show();
 
     //MOBJ.save_obj("3d_obj/triangle.obj");
-    MOBJ.save_obj("test_objfunkz.obj");
+    MOBJ.save_obj("gnocore.obj");
 
 }
 
@@ -182,7 +182,7 @@ void test_obj_stuff(void)
 int main(int argc, char *argv[])
 {
 
-    test_obj_stuff(); return 0;
+    //test_obj_stuff(); return 0;
 
     //test_load_bmp("images/uvmap.bmp");
 

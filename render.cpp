@@ -123,8 +123,27 @@ void sceneloader::load_file( char* filepath )
                 vtx_color.g = atoi(token[2]);
                 vtx_color.b = atoi(token[3]);                
             }
-            
            
+            //----------------------
+            if (!strcmp(token[0],"show_vtx"))
+            {   
+                if (!strcmp(token[1],"true"))
+                {
+                    show_vtx = true;
+                }
+            }
+
+            //----------------------
+            if (!strcmp(token[0],"show_lines"))
+            {   
+                if (!strcmp(token[1],"true"))
+                {
+                    show_lines = true;
+                }
+                cout << "show lines "<< show_lines << "\n";
+            } 
+
+
             //////
             line_ct ++; 
 
@@ -333,11 +352,11 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 /*********************************************************/
 
 // core of render engine - draw and fill triangles 
-void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
+void draw_triangle( sceneloader* prs, int width, int height, double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
 {
     int RENDER_SCANLINE   = 1; // do the scan line render loop 
-    int RENDER_LINES      = 0; // wireframe edges  
-    int RENDER_VTX_PTS    = 0;
+    //int RENDER_LINES      = 0; // wireframe edges  
+    //int RENDER_VTX_PTS    = 0;
     int SHOW_CLIP_AREA    = 0; // show clipping rectangle 
 
     // DEBUG - NEED TO PULL FROM SCREENSIZE  - THIS IS HARDCODED            
@@ -453,7 +472,7 @@ void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vecto
     //-------------------
 
     //draw the edges last (on top of fill)
-    if (RENDER_LINES == 1)
+    if (prs->show_lines == 1)
     {
         fb->draw_line(scx1, scy1, ecx1, ecy1, linecolor);
         fb->draw_line(scx2, scy2, ecx2, ecy2, linecolor);
@@ -464,7 +483,7 @@ void draw_triangle( int width, int height, double rscale, framebuffer* fb, Vecto
     //finally - draw the points (on top of everything)
 
     //draw a dot to show the polygon vertices  
-    if (RENDER_VTX_PTS == 1)
+    if (prs->show_vtx == 1)
     {
         int wasclipped = 0;
         wasclipped = poly_clip(clipwidth, clipheight, &scx1, &scy1, &ecx1, &ecy1);                  
@@ -638,7 +657,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             fill_color.b = RS.fill_color.b;
         }
       
-        draw_triangle( width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, RS.line_color);
+        draw_triangle( &RS, width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, RS.line_color);
         
     }//render iterator
 
