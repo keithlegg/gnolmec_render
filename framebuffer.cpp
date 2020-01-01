@@ -365,8 +365,8 @@ void framebuffer::savebmp (const char *filename, int w, int h, int dpi, framebuf
 /********************************************/
 
 void framebuffer::draw_point ( int xcoord, int ycoord ){
-   if (xcoord >framebuffer::bwidth){return;}
-   if (ycoord >framebuffer::bheight){return;}
+   if (xcoord >bwidth){return;}
+   if (ycoord >bheight){return;}
    
    if (xcoord > 0 && xcoord > 1){
        if (xcoord < framebuffer::bwidth && xcoord < framebuffer::bheight){
@@ -382,8 +382,8 @@ void framebuffer::draw_point ( int xcoord, int ycoord ){
 /********************************************/
 
 void framebuffer::draw_point ( int xcoord, int ycoord, RGBType pcol ){
-   if (xcoord >framebuffer::bwidth){return;}
-   if (ycoord >framebuffer::bheight){return;}
+   if (xcoord >bwidth){return;}
+   if (ycoord >bheight){return;}
    
    if (xcoord > 0 && xcoord > 1){  
        if (xcoord < framebuffer::bwidth && xcoord < framebuffer::bheight){  
@@ -398,6 +398,10 @@ void framebuffer::draw_point ( int xcoord, int ycoord, RGBType pcol ){
 /********************************************/
 
 void framebuffer::draw_circle ( int x_orig, int y_orig, int dia){
+
+   if (x_orig> bwidth){return;}
+   if (y_orig> bheight){return;}
+
    int plot_x = 0;
    int plot_y = 0;
 
@@ -412,6 +416,9 @@ void framebuffer::draw_circle ( int x_orig, int y_orig, int dia){
 /********************************************/
 
 void framebuffer::draw_circle ( int x_orig, int y_orig, int dia, RGBType pcol){
+   if (x_orig> bwidth){return;}
+   if (y_orig> bheight){return;}
+
    int plot_x = 0;
    int plot_y = 0;
 
@@ -452,6 +459,9 @@ double framebuffer::rad_to_deg ( double rad){
 
 void framebuffer::draw_line(int x1, int y1, int const x2, int const y2)
 {
+   if (x1> bwidth){return;}
+   if (y1> bheight){return;}
+
     int delta_x(x2 - x1);
     // if x1 == x2, then it does not matter what we set here
     signed char const ix((delta_x > 0) - (delta_x < 0));
@@ -501,6 +511,9 @@ void framebuffer::draw_line(int x1, int y1, int const x2, int const y2)
 
 void framebuffer::draw_line(int x1, int y1, int const x2, int const y2, RGBType pcol)
 {
+    if (x1> bwidth){return;}
+    if (y1> bheight){return;}
+
     int delta_x(x2 - x1);
     // if x1 == x2, then it does not matter what we set here
     signed char const ix((delta_x > 0) - (delta_x < 0));

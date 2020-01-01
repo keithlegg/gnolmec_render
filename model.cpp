@@ -1,12 +1,9 @@
 #include <iostream>
 using namespace std; 
 
-#include <stdio.h>
-
 #include <fstream>
 #include <cstring>
 #include <vector>
-#include <stdlib.h> 
 #include <algorithm>
 
 

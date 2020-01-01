@@ -504,6 +504,8 @@ void draw_triangle( sceneloader* prs, int width, int height, double rscale, fram
 /*********************************************************/
 //render_model( int width, int height, char* objfilename, char* renderscript, char* outfilename)
 //top render function 
+
+// DEBUG - WIREFRAMES WILL CRASH IF ATTEMPT TO DRAW OFF SCREEN 
 void render_model( int width, int height, char* renderscript, char* outfilename)
 {
 
