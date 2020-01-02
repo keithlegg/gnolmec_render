@@ -49,7 +49,7 @@ void sceneloader::load_file( char* filepath )
         char buf[MAX_CHARS_PER_LINE];
         fin.getline(buf, MAX_CHARS_PER_LINE);
 
-        const char* token[MAX_TOKENS_PER_LINE] = {};
+        const char* token[MAX_TOKENS_PER_LINE];
         token[0] = strtok(buf, " ");
          
         //if line has data on it ...  
