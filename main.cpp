@@ -48,8 +48,13 @@ void test_load_save_ngc(char *infile, char *outfile)
     //foo.load_obj("3d_obj/cone.obj");
     
     foo.load_ngc("3d_obj/arcspiral.ngc");
+    foo.convert_to_3d();
 
     foo.show();
+
+    foo.showinfo();
+
+    foo.save_obj("arcspiral.obj");
 
 }
 

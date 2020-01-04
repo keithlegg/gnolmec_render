@@ -65,6 +65,8 @@ class ngc_model: public model
         void save_ngc( char* filename );
         void load_ngc( char* filename );
 
+        void convert_to_3d( void );
+
 
 };
 

@@ -425,7 +425,7 @@ void model::save_obj( char* filename)
     myfile <<"\n";
     
     if (triangle_count==0){
-        cout << " error - no faces to export ";
+        cout << " warning - no faces to export ";
     }
 
     // cout << " triangle count is  " << triangle_count << endl;
@@ -449,7 +449,21 @@ void model::save_obj( char* filename)
             myfile << "\n";
         }
     }*/
-    
+
+    // export array triangles
+    if(line_count>0)
+    {
+        for (xx=0; xx<line_count; xx++)
+        {
+            myfile << "f ";
+            for (ff=0; ff < lines[xx].size();ff++)
+            {
+                myfile << lines[xx][ff] << " "; 
+            }
+            myfile << "\n";
+        }
+    }
+
     //----------------------
 
     // export array triangles

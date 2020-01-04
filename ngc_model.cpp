@@ -157,19 +157,19 @@ void ngc_model::load_ngc(char* filename)
             	{
                     sy = token[i];            		
                     removeCharsFromString(sy, "y");            		
-                    //cout << " Y " << sy << "\n";             
 
-                    cout << "arc radius " << sr << " " << sx << " " << sy << "\n";
-            		// // now we have what we need to build an arc 
-            		// arctmp.r = stof(sr);
-            		// arctmp.x = stof(sx);
-            		// arctmp.y = stof(sy);
-            		// arcs[arc_count] = arctmp;
+                    //cout << "arc radius " << sr << " " << sx << " " << sy << "\n";
+            		// now we have what we need to build an arc 
+            		arctmp.r = stof(sr);
+            		arctmp.x = stof(sx);
+            		arctmp.y = stof(sy);
 
+            		arcs.push_back( arctmp );
+                    arc_count++;
             	}
 
 
-            }
+            }//arc radius 
 			
             //------------
 
@@ -178,37 +178,6 @@ void ngc_model::load_ngc(char* filename)
             tidx++;
         }//iterate tokens
 
-
-        /**********/
-        /*
-        // arc radius elements 
-        if (!strcmp(token[0], arc_chr))
-        {
-           
-            cout << " arc found  "<< i << " |  num_tok  " << n << endl; 
-
-            // if end of line is not hit, store loaded data 
-            if (i < n-1 ) 
-            {
-                //keep adding fids  
-                //fac_tmp.push_back( atof(token[i]) );
-            }
-
-            // if end of line is hit - store loaded data and reset                
-            if (i == n-1 ) 
-            {
-                // add one more fid before we stop to get lest 
-                //fac_tmp.push_back( atof(token[i]) );
-                
-                // 2 sided polygons (lines) 
-                if(i==2)
-                {
- 
-                }
-            }//
-        
-        }//arc radius 
-        */
         
         //------------------------------ 
         line_ct ++;
@@ -222,7 +191,38 @@ void ngc_model::load_ngc(char* filename)
 
 
 
+void ngc_model::convert_to_3d( void )
+{
 
+	cout << "convert to 3d " << arc_count << "\n";
+    
+    double false_z = 0.0;
+
+    int a = 0; 
+    
+    std::vector<int> linetmp;
+
+    for (a=0;a<arc_count;a++)
+    {
+        linetmp.clear();
+        
+    	//cout << "cvt 3d " << a << " "<< arcs[a].r << "\n";
+        
+        obj_pts[a]=( Vector3(arcs[a].x, arcs[a].y, false_z ) ); vertex_count++;
+        
+        //fake line geom for testing 
+        if (a>0)
+        {
+        	linetmp.push_back( a-1);
+        	linetmp.push_back( a );
+        	lines[line_count] = linetmp;
+        	line_count++;      	
+        }
+    } 
+
+
+
+}
 
 
 
