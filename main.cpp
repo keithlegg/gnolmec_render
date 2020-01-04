@@ -48,13 +48,14 @@ void test_load_save_ngc(char *infile, char *outfile)
     //foo.load_obj("3d_obj/cone.obj");
     
     foo.load_ngc("3d_obj/arcspiral.ngc");
-    foo.convert_to_3d();
+    
+    //foo.convert_to_3d();
+    //foo.show();
+    //foo.showinfo();
 
-    foo.show();
+    foo.save_ngc("3d_obj/genrated.ngc");
 
-    foo.showinfo();
-
-    foo.save_obj("arcspiral.obj");
+    //foo.save_obj("arcspiral.obj");
 
 }
 
@@ -194,7 +195,7 @@ void test_obj_stuff(void)
 int main(int argc, char *argv[])
 {
 
-    //test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
+    test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
 
     /* * * * * * * * * */ 
 

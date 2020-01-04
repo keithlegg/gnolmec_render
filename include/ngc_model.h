@@ -11,6 +11,7 @@
 
 
 void removeCharsFromString( string &str, char* charsToRemove );
+vector<string> split(const char *str, char c);
 
 
 class arc_rad
@@ -31,6 +32,27 @@ class arc_rad
 };
 
 
+class headmove
+{
+    public:
+        headmove(){
+        };
+
+        ~headmove(){};
+
+    int move_type = 0; //0 - G0 rapid, 1 G1 - Linear , 2/3 - G2/G3 Arc I J K or R, P
+    
+    double x;
+    double y;
+    double z;     
+
+    // allows you to omit some axes 
+    bool do_x;
+    bool do_y;
+    bool do_z; 
+
+};
+
 
 class ngc_model: public model 
 {
@@ -39,19 +61,25 @@ class ngc_model: public model
         int spindle_dir =    0; //0 CW   , 1 CCW 
         int spindle_rpm = 3000; 
 
-
         ngc_model(){
             arc_count = 0;
+            origin.set(0,0,0);
         };
 
         ~ngc_model(){};
 
+        Vector3 origin;
+
         int arc_count;
+        int move_count;
         
+        //store in case it is not explicitly specified on each line 
+        int last_move_type; // 0, 1, 2/3 
+
         arc_rad arctmp;
 
         std::vector<arc_rad> arcs;        
-        std::vector<double> linesegs[MAX_NUM_FACES];    
+        std::vector<headmove> moves[MAX_NUM_FACES]; 
 
 
         // inherited containers 

@@ -48,9 +48,9 @@ const char* arc_chr    = "r";
 // g2 r1.997999 x1.613302 y-1.178668
 
 
-  // G0		                         Rapid Move
-  // G1		                         Linear Move
-  // G2,G3	       I J K or R, P     Arc Move
+  // G0                            Rapid Move
+  // G1                            Linear Move
+  // G2,G3         I J K or R, P     Arc Move
 
 /**********************************************************/
 
@@ -59,6 +59,31 @@ void removeCharsFromString( string &str, char* charsToRemove ) {
       str.erase( remove(str.begin(), str.end(), charsToRemove[i]), str.end() );
    }
 }
+
+
+
+//not used but study anyway 
+vector<string> split(const char *str, char c)
+{
+    vector<string> result;
+
+    do
+    {
+        const char *begin = str;
+
+        while(*str != c && *str)
+            str++;
+
+        result.push_back(string(begin, str));
+    } while (0 != *str++);
+
+    return result;
+}
+
+
+// parse_xyz_fr_string(token)
+
+
 
 /**********************************************************/
 
@@ -78,7 +103,7 @@ void ngc_model::load_ngc(char* filename)
     int line_ct = 0;
     int tidx, i,n = 0;
 
-    string sr, sx, sy;
+    string  sx, sy;
 
     while (!fin.eof())
     {
@@ -104,80 +129,120 @@ void ngc_model::load_ngc(char* filename)
         }
 
         /******************************/
-        // cout << "## token 0 " << token[0] << " " << " \n";
-        // // process the tokens ( to last depth )
-        // for (i=1; i<n; i++)
-        // {
-        //     cout << "## token "<< i <<" "<< token[i] << " \n";
-        //     // vertex tokens "v"
-        //     if (!strcmp(token[0], lnum))
-        //     {
-        //         // first 2 of 3 vertices
-        //         if (vtx_cnt<=2){
-        //             //vtx_tmp.push_back( atof(token[i]) );
-        //         }
-        //         // third vertex 
-        //         if (vtx_cnt==3){
-        //         }
-        //         vtx_cnt++;
-        //     }
-        // }//iterate tokens
-
-        /******************************/        
-        //cout << "## token 0 " << token[0] << " " << " \n";
-
-        // process the tokens ( to last depth )
-        for (i=1; i<n; i++)
+        if (token[0])
         {
-            //cout << "## token "<< i <<" "<< token[i] << " \n";
-             
-            // // numbered lines 
-            // if (!strcmp(token[0], lnum))
-            // {
-            // }
+            string t0 = token[0];
+            //cout << "## token 0 " << t0 << " " << " \n";
 
-            //------------
-          
-            //if arc radius 
-            sr = token[0];
-			if (sr.find('r') != string::npos)
+            //-------------------------
+
+            // process the tokens ( to last depth )
+            for (i=1; i<n; i++)
             {
+                //cout << "## token "<< i <<" "<< token[i] << " \n";
 
-                removeCharsFromString(sr, "r");
-			    //cout << "arc radius is " << sr << "\n";
+                //------------
+                // NUMBERED LINES                  
+                // // numbered lines 
+                // if (!strcmp(token[0], lnum))
+                // {
+                // }
 
-            	if (tidx==0)
-            	{
-                    sx = token[i];            		
-                    removeCharsFromString(sx, "x");            		
-                    //cout << " X " << sx << "\n"; 
-                }
+                //------------
+                // NON NUMBERED LINES 
 
-            	if (tidx==1)
-            	{
-                    sy = token[i];            		
-                    removeCharsFromString(sy, "y");            		
+                //if arc radius 
+                if (t0.find("r") != string::npos)
+                {
 
-                    //cout << "arc radius " << sr << " " << sx << " " << sy << "\n";
-            		// now we have what we need to build an arc 
-            		arctmp.r = stof(sr);
-            		arctmp.x = stof(sx);
-            		arctmp.y = stof(sy);
+                    removeCharsFromString(t0, "r");
+                    //cout << "arc radius is " << t0 << "\n";
 
-            		arcs.push_back( arctmp );
-                    arc_count++;
-            	}
+                    if (tidx==0)
+                    {
+                        sx = token[i];                
+                        removeCharsFromString(sx, "x");               
+                        //cout << " X " << sx << "\n"; 
+                    }
 
+                    if (tidx==1)
+                    {
+                        sy = token[i];                
+                        removeCharsFromString(sy, "y");               
 
-            }//arc radius 
-			
-            //------------
+                        //cout << "arc radius " << t0 << " " << sx << " " << sy << "\n";
+                        // now we have what we need to build an arc 
+                        arctmp.r = stof(t0);
+                        arctmp.x = stof(sx);
+                        arctmp.y = stof(sy);
 
-            //------------
+                        arcs.push_back( arctmp );
+                        arc_count++;
+                    }
+                }//arc radius 
+                
+                //------------ 
+                if (t0.find("g0") != string::npos || t0.find("G0") != string::npos)  
+                {
+                    last_move_type = 0; 
+                    cout << token[0] <<" "<< n << "\n"; 
+                }//rapid move 
+     
+                //------------            
 
-            tidx++;
-        }//iterate tokens
+                //------------ 
+                if (t0.find("g1") != string::npos || t0.find("G1") != string::npos)  
+                {
+                    last_move_type = 1;                
+                    cout << token[0] <<" "<< n <<"\n"; 
+                }//linear move 
 
+                //------------ 
+
+                if (strcmp(token[0],"g20") && strcmp(token[0],"G20"))
+                {
+                    if (t0.find("g2") != string::npos || t0.find("G2") != string::npos ) 
+                    {
+                        if (token[1] && token[2] && token[3])
+                        {
+                            string t1 = token[1];
+                            string t2 = token[2];
+                            string t3 = token[3];
+           
+                            if (t1.find("r") != string::npos)
+                            {
+
+                                removeCharsFromString(t1, "r");
+                                removeCharsFromString(t2, "x");               
+                                removeCharsFromString(t3, "y");               
+                                
+                                cout << "G2 WITH : r" << t1 << " x" << t2 << " y"<< t3 << "\n";
+
+                                arctmp.r = stof(t1);
+                                arctmp.x = stof(t2);
+                                arctmp.y = stof(t3);
+                                arcs.push_back( arctmp );arc_count++;
+                                last_move_type = 2; 
+                                
+                            }//arc radius 
+
+                        }//g2 with 3 tokens after it 
+                        cout << t0 << " G2 " << token[i] <<" "<< n << "\n";
+                    }
+                }// arc move (2) and NOT G20 
+
+                //------------ 
+                if (t0.find("g3") != string::npos ||  t0.find("G3") != string::npos)
+                {
+                    last_move_type = 3;
+                    cout << token[0] <<" "<< n <<"\n"; 
+                }//arc move (3)
+
+                //------------
+
+                tidx++;
+            }//iterate tokens
+        }//if line is not empty 
         
         //------------------------------ 
         line_ct ++;
@@ -197,7 +262,7 @@ void ngc_model::load_ngc(char* filename)
 void ngc_model::convert_to_3d( void )
 {
 
-	cout << "convert to 3d " << arc_count << "\n";
+  cout << "convert to 3d " << arc_count << "\n";
     
     double false_z = 0.0;
 
@@ -209,17 +274,17 @@ void ngc_model::convert_to_3d( void )
     {
         linetmp.clear();
 
-    	//cout << "cvt 3d " << a << " "<< arcs[a].r << "\n";
+      //cout << "cvt 3d " << a << " "<< arcs[a].r << "\n";
         
         obj_pts[a]=( Vector3(arcs[a].x, arcs[a].y, false_z ) ); vertex_count++;
         
         //fake line geom for testing 
         if (a>0)
         {
-        	linetmp.push_back( a-1);
-        	linetmp.push_back( a );
-        	lines[line_count] = linetmp;
-        	line_count++;      	
+          linetmp.push_back( a-1);
+          linetmp.push_back( a );
+          lines[line_count] = linetmp;
+          line_count++;       
         }
     } 
 
@@ -238,20 +303,48 @@ void ngc_model::save_ngc( char* filename)
     ofstream myfile;
     myfile.open (filename);
 
-    myfile << "#Exported with Keith's little graphics tool\n";
-    myfile << "#number of verticies "<< model::vertex_count  <<"\n";
-    myfile << "#number of triangles     "<< triangle_count <<"\n";
+    myfile << ";Exported with Keith's little graphics tool\n";
+    //myfile << ";number of verticies     "<< model::vertex_count  <<"\n";
+    //myfile << ";number of triangles     "<< triangle_count <<"\n";
+
+    if (linear_unit==0){
+        myfile <<"g20 g64\n";
+    }
+
+    if (linear_unit==1){
+        myfile <<"g21 g64\n"; //untested 
+    }
+ 
+    if (spindle_dir==0){
+
+    }
+    if (spindle_dir==1){
+
+    }
+
+    myfile <<"s"<<spindle_rpm <<" m3\n";  
+
     myfile <<"\n";
 
-    // for (int xx=0;xx<model::vertex_count;xx++){
-    //     myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] <<"\n";
-    // }
+    for (int xx=0;xx<arcs.size();xx++)
+    {
+        arc_rad ar = arcs[xx];
+        
+        // myfile << "r"<<setfill('0') << setw(8)<<ar.r 
+        //        <<" x"<<setfill('0') << setw(8)<<ar.x
+        //        <<" y"<<setfill('0') << setw(8)<<ar.y<<"\n";
+        
+        myfile << "r"<<ar.r 
+               <<" x"<<ar.x
+               <<" y"<<ar.y<<"\n";
+
+    }
 
     myfile <<"\n";
     
-    if (triangle_count==0){
-        cout << " error - no faces to export ";
-    }
+    // if (triangle_count==0){
+    //     cout << " warning - no faces to export ";
+    // }
 
     // cout << " triangle count is  " << triangle_count << endl;
 
@@ -351,124 +444,124 @@ void ngc_model::save_ngc( char* filename)
 
   // http://linuxcnc.org/docs/html/gcode.html
 
-  G0		                         Rapid Move
-  G1		                         Linear Move
-  G2,G3	       I J K or R, P         Arc Move
-  G4	       P	                 Dwell
-  G5	       I J  P Q	             Cubic Spline
-  G5.1	       I J	                 Quadratic Spline
-  G5.2	       P L	                 NURBS
-  G38.2-G38.5		                 Straight Probe
-  G33	       K                     Spindle Synchronized Motion
-  G33.1	       K	                 Rigid Tapping
-  G80 		                         Cancel Canned Cycle
+  G0                             Rapid Move
+  G1                             Linear Move
+  G2,G3        I J K or R, P         Arc Move
+  G4         P                   Dwell
+  G5         I J  P Q              Cubic Spline
+  G5.1         I J                   Quadratic Spline
+  G5.2         P L                   NURBS
+  G38.2-G38.5                    Straight Probe
+  G33        K                     Spindle Synchronized Motion
+  G33.1        K                   Rigid Tapping
+  G80                              Cancel Canned Cycle
 
-## Canned cycles	(X Y Z or U V W apply to canned cycles, depending on active plane)
-  G81	       R L (P)	             Drilling Cycle
-  G82	       R L (P)	             Drilling Cycle, Dwell
-  G83	       R L Q	             Drilling Cycle, Peck
-  G73	       R L Q	             Drilling Cycle, Chip Breaking
-  G85	       R L (P)	             Boring Cycle, Feed Out
-  G89	       R L (P)	             Boring Cycle, Dwell, Feed Out
-  G76	       P Z I J R K Q H L E	 Threading Cycle
+## Canned cycles  (X Y Z or U V W apply to canned cycles, depending on active plane)
+  G81        R L (P)               Drilling Cycle
+  G82        R L (P)               Drilling Cycle, Dwell
+  G83        R L Q               Drilling Cycle, Peck
+  G73        R L Q               Drilling Cycle, Chip Breaking
+  G85        R L (P)               Boring Cycle, Feed Out
+  G89        R L (P)               Boring Cycle, Dwell, Feed Out
+  G76        P Z I J R K Q H L E   Threading Cycle
 
 ## Distance Mode
-  G90, G91		                     Distance Mode
-  G90.1, G91.1		                 Arc Distance Mode
-  G7		                         Lathe Diameter Mode
-  G8		                         Lathe Radius Mode
+  G90, G91                         Distance Mode
+  G90.1, G91.1                     Arc Distance Mode
+  G7                             Lathe Diameter Mode
+  G8                             Lathe Radius Mode
 
 ##Feed Rate Mode
-  G93, G94, G95	                     Feed Rate Mode
+  G93, G94, G95                      Feed Rate Mode
 
 ##Spindle Control
-  M3, M4, M5	     S	             Spindle Control
-  M19		                         Orient Spindle
-  G96, G97	     S D                 Spindle Control Mode
+  M3, M4, M5       S               Spindle Control
+  M19                            Orient Spindle
+  G96, G97       S D                 Spindle Control Mode
 
 ##Coolant
   M7, M8, M9                        Coolant Control
 
 ##Tool Length Offset
-  G43 	         H               	 Tool Length Offset
-  G43.1 		                     Dynamic Tool Length Offset
-  G43.2 	     H                   Apply additional Tool Length Offset
-  G49 		                         Cancel Tool Length Compensation
+  G43            H                 Tool Length Offset
+  G43.1                          Dynamic Tool Length Offset
+  G43.2        H                   Apply additional Tool Length Offset
+  G49                              Cancel Tool Length Compensation
 
 ##Stopping
-  M0, M1	                         Program Pause
-  M2, M30	                         Program End
-  M60		                         Pallet Change Pause
+  M0, M1                           Program Pause
+  M2, M30                          Program End
+  M60                            Pallet Change Pause
 
 ##Units
   G20                               Units inch
-  G21	  	                        Units mm
+  G21                             Units mm
 
-##Plane Selection 	(affects G2, G3, G81…G89, G40…G42)
-  G17 - G19.1		                 Plane Select
+##Plane Selection   (affects G2, G3, G81…G89, G40…G42)
+  G17 - G19.1                    Plane Select
 
 ##Cutter Radius Compensation
-  G40		                         Compensation Off
-  G41,G42	           D	         Cutter Compensation
-  G41.1, G42.1	       D L	         Dynamic Cutter Compensation
+  G40                            Compensation Off
+  G41,G42            D           Cutter Compensation
+  G41.1, G42.1         D L           Dynamic Cutter Compensation
 
 ##Path Control Mode
-  G61 G61.1		                     Exact Path Mode
-  G64	               P Q	         Path Blending
+  G61 G61.1                        Exact Path Mode
+  G64                P Q           Path Blending
 
 ##Return Mode in Canned Cycles
-  G98, G99		                     Canned Cycle Return Level
+  G98, G99                         Canned Cycle Return Level
 
 ##Other Modal Codes
-  F		                             Set Feed Rate
-  S		                             Set Spindle Speed
-  T		                             Select Tool)
-  M48, M49		                     Speed and Feed Override Control
-  M50	P0 (off) or P1 (on)	         Feed Override Control
-  M51	P0 (off) or P1 (on)	         Spindle Speed Override Control
-  M52	P0 (off) or P1 (on)	         Adaptive Feed Control
-  M53	P0 (off) or P1 (on)	         Feed Stop Control
-  G54-G59.3		                     Select Coordinate System
+  F                                Set Feed Rate
+  S                                Set Spindle Speed
+  T                                Select Tool)
+  M48, M49                         Speed and Feed Override Control
+  M50 P0 (off) or P1 (on)          Feed Override Control
+  M51 P0 (off) or P1 (on)          Spindle Speed Override Control
+  M52 P0 (off) or P1 (on)          Adaptive Feed Control
+  M53 P0 (off) or P1 (on)          Feed Stop Control
+  G54-G59.3                        Select Coordinate System
 
 ##Flow-control Codes
-  o_sub	                          	 Subroutines, sub/endsub call
-  o_while		                     Looping, while/endwhile do/while
-  o_if		                         Conditional, if/else/endif
-  o_repeat		                     Repeat a loop of code
-  []		                         Indirection
-  o_call		                     Call named file
-  M70		                         Save modal state
-  M71		                         Invalidate stored state
-  M72		                         Restore modal state
-  M73		                         Save and Auto-restore modal state
+  o_sub                              Subroutines, sub/endsub call
+  o_while                        Looping, while/endwhile do/while
+  o_if                             Conditional, if/else/endif
+  o_repeat                         Repeat a loop of code
+  []                             Indirection
+  o_call                         Call named file
+  M70                            Save modal state
+  M71                            Invalidate stored state
+  M72                            Restore modal state
+  M73                            Save and Auto-restore modal state
 
 ##Input/Output Codes
-  M62 - M65	P	                     Digital Output Control
-  M66	P E L Q	                     Wait on Input
-  M67	T	                         Analog Output,Synchronized
-  M68	T	                         Analog Output, Immediate
+  M62 - M65 P                      Digital Output Control
+  M66 P E L Q                      Wait on Input
+  M67 T                          Analog Output,Synchronized
+  M68 T                          Analog Output, Immediate
 
 ##Non-modal Codes
-  M6	           T	             Tool Change
-  M61	           Q	             Set Current Tool
-  G10 L1	       P Q R	         Set Tool Table
-  G10 L10	       P	             Set Tool Table
-  G10 L11	       P	             Set Tool Table
-  G10 L2	       P R	             Set Coordinate System
-  G10 L20	       P	             Set Coordinate System
-  G28, G28.1		                 Go/Set Predefined Position
-  G30, G30.1		                 Go/Set Predefined Position
-  G53		                         Move in Machine Coordinates
-  G92		                         Coordinate System Offset
-  G92.1, G92.2		                 Reset G92 Offsets
-  G92.3		                         Restore G92 Offsets
-  M101 - M199	P Q	                 User Defined Commands
+  M6             T               Tool Change
+  M61            Q               Set Current Tool
+  G10 L1         P Q R           Set Tool Table
+  G10 L10        P               Set Tool Table
+  G10 L11        P               Set Tool Table
+  G10 L2         P R               Set Coordinate System
+  G10 L20        P               Set Coordinate System
+  G28, G28.1                     Go/Set Predefined Position
+  G30, G30.1                     Go/Set Predefined Position
+  G53                            Move in Machine Coordinates
+  G92                            Coordinate System Offset
+  G92.1, G92.2                     Reset G92 Offsets
+  G92.3                            Restore G92 Offsets
+  M101 - M199 P Q                  User Defined Commands
 
 ##Comments & Messages
-  ; (…)		                         Comments
-  (MSG,…)		                     Messages
-  (DEBUG,…)		                     Debug Messages
-  (PRINT,…)		                     Print Messages
+  ; (…)                            Comments
+  (MSG,…)                        Messages
+  (DEBUG,…)                        Debug Messages
+  (PRINT,…)                        Print Messages
 
 //--------------------------------------------------
 
@@ -482,32 +575,32 @@ void ngc_model::save_ngc( char* filename)
 */
 
 /*
-	A  A axis of machine
-	B  B axis of machine
-	C  C axis of machine
-	D  Tool radius compensation number
-	F  Feed rate
-	G  General function (See table Modal Groups)
-	H  Tool length offset index
-	I  X offset for arcs and G87 canned cycles
-	J  Y offset for arcs and G87 canned cycles
-	K  Z offset for arcs and G87 canned cycles.
-	   Spindle-Motion Ratio for G33 synchronized movements.
-	L  generic parameter word for G10, M66 and others
-	M  Miscellaneous function (See table Modal Groups)
-	N  Line number
-	P  Dwell time in canned cycles and with G4.
-	   Key used with G10.
-	Q  Feed increment in G73, G83 canned cycles
-	R  Arc radius or canned cycle plane
-	S  Spindle speed
-	T  Tool selection
-	U  U axis of machine
-	V  V axis of machine
-	W  W axis of machine
-	X  X axis of machine
-	Y  Y axis of machine
-	Z  Z axis of machine
+  A  A axis of machine
+  B  B axis of machine
+  C  C axis of machine
+  D  Tool radius compensation number
+  F  Feed rate
+  G  General function (See table Modal Groups)
+  H  Tool length offset index
+  I  X offset for arcs and G87 canned cycles
+  J  Y offset for arcs and G87 canned cycles
+  K  Z offset for arcs and G87 canned cycles.
+     Spindle-Motion Ratio for G33 synchronized movements.
+  L  generic parameter word for G10, M66 and others
+  M  Miscellaneous function (See table Modal Groups)
+  N  Line number
+  P  Dwell time in canned cycles and with G4.
+     Key used with G10.
+  Q  Feed increment in G73, G83 canned cycles
+  R  Arc radius or canned cycle plane
+  S  Spindle speed
+  T  Tool selection
+  U  U axis of machine
+  V  V axis of machine
+  W  W axis of machine
+  X  X axis of machine
+  Y  Y axis of machine
+  Z  Z axis of machine
 
 */
 
