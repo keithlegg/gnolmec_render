@@ -450,7 +450,7 @@ void model::save_obj( char* filename)
         }
     }*/
 
-    // export array triangles
+    // export array of lines
     if(line_count>0)
     {
         for (xx=0; xx<line_count; xx++)
@@ -458,7 +458,11 @@ void model::save_obj( char* filename)
             myfile << "f ";
             for (ff=0; ff < lines[xx].size();ff++)
             {
-                myfile << lines[xx][ff] << " "; 
+                if (ff<lines[xx].size()-1){ 
+                    myfile << lines[xx][ff] << " ";
+                } else{
+                    myfile << lines[xx][ff];                    
+                }
             }
             myfile << "\n";
         }
@@ -466,7 +470,7 @@ void model::save_obj( char* filename)
 
     //----------------------
 
-    // export array triangles
+    // export array of triangles
     if(triangle_count>0)
     {
         for (xx=0; xx<triangle_count; xx++)
@@ -481,7 +485,7 @@ void model::save_obj( char* filename)
     }
 
     //----------------------
-    // export array quads
+    // export array of quads
     if(quad_count>0)
     {
         for (xx=0; xx<quad_count; xx++)

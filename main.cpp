@@ -194,35 +194,12 @@ void test_obj_stuff(void)
 int main(int argc, char *argv[])
 {
 
-    //test_obj_stuff(); return 0;
-
-    //test_load_bmp("images/uvmap.bmp");
-
-    //test_image_draw(255, 255, "foeeeeo.bmp");
-
-    //test_save_bmp("images/uvmap.bmp", "out.bmp");
-
-    // test_BMP();
-
-    test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
-
-    //obj_file_stuff();
+    //test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
 
     /* * * * * * * * * */ 
 
-    /* * * * * * * * * */
-
-    // test_intersection();
-    //obj_file_stuff();
-
-    /* * * * * * * * * */
-    // if (argc < 8){
-    //     cout << "ARGS: xres yres inputfile X Y Z outputfile renderscale which\n";
-    //     return 0;
-    // }
-
  
-   // --------------------------
+    // --------------------------
 
     //test_framebuffer();
 

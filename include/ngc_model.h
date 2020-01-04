@@ -35,7 +35,10 @@ class arc_rad
 class ngc_model: public model 
 {
     public:
-        //Matrix4 m44;
+        int linear_unit =    0; //0 inch , 1 mm 
+        int spindle_dir =    0; //0 CW   , 1 CCW 
+        int spindle_rpm = 3000; 
+
 
         ngc_model(){
             arc_count = 0;

@@ -189,7 +189,10 @@ void ngc_model::load_ngc(char* filename)
 
 /**********************************************************/
 
+/*
 
+   convert a loaded gcode file into a renderable .obj file for viewing 
+*/
 
 void ngc_model::convert_to_3d( void )
 {
@@ -205,7 +208,7 @@ void ngc_model::convert_to_3d( void )
     for (a=0;a<arc_count;a++)
     {
         linetmp.clear();
-        
+
     	//cout << "cvt 3d " << a << " "<< arcs[a].r << "\n";
         
         obj_pts[a]=( Vector3(arcs[a].x, arcs[a].y, false_z ) ); vertex_count++;
