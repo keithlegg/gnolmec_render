@@ -14,15 +14,15 @@
 using namespace std;
 
 
-
+#include "include/ngc_model.h"
 
 
 /*
    TO RUN: 
 
        ./renderthing 500 500 3d_obj/triangle.obj 0 60 0 foo.bmp 50 2
-
 */
+
 
 
 
@@ -40,12 +40,19 @@ void test_load_save_bmp(char *infile, char *outfile)
 
 
 
+void test_load_save_ngc(char *infile, char *outfile)
+{
 
+    ngc_model foo;
 
-//temporaily borrowed from here 
-// https://github.com/sol-prog/cpp-bmp-images 
+    //foo.load_obj("3d_obj/cone.obj");
+    
+    foo.load_ngc("3d_obj/arcspiral.ngc");
 
-// void test_save_bmp(char *infile, char *outfile){}
+    foo.show();
+
+}
+
 
 
 /***********************************/
@@ -192,6 +199,7 @@ int main(int argc, char *argv[])
 
     // test_BMP();
 
+    test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
 
     //obj_file_stuff();
 
