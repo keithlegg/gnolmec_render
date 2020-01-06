@@ -632,7 +632,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         {
             // get the center of face to move light vector to 
             Vector3 fcntr;
-            OBJ->triangle_centroid(&fcntr, p1, p2, p3);
+            OBJ->centroid(&fcntr, p1, p2, p3);
             //cout << "## face center is " <<f_cntr.x <<" "<< f_cntr.y <<" "<< f_cntr.z << "\n";
 
             // super simple shading model 

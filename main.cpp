@@ -186,34 +186,48 @@ void test_obj_stuff(void)
 void test_point_ops(void)
 {
     
-    model MOBJ;
-    model MOBJ2;
+    model* MOBJ = new(model);
+    model* MOBJ2 = new(model);
 
     double scale = .5;
 
     // raw geom modeling 
-    // MOBJ.obj_pts[0].set( -scale ,  0    , 0 );
-    // MOBJ.obj_pts[1].set( 0      ,  scale, 0 );
-    // MOBJ.obj_pts[2].set( scale  ,  0    , 0 );
-    // MOBJ.vertex_count = 3;
-    // MOBJ.add_tri(1,2,3);
+    // MOBJ->obj_pts[0].set( -scale ,  0    , 0 );
+    // MOBJ->obj_pts[1].set( 0      ,  scale, 0 );
+    // MOBJ->obj_pts[2].set( scale  ,  0    , 0 );
+    // MOBJ->vertex_count = 3;
+    // MOBJ->add_tri(1,2,3);
 
+    //-------------
 
-    Vector3 p1 = Vector3(1,1,1);
-    Vector3 p2 = Vector3(-1,0,-1);
-    Vector3 p3 = Vector3(0,-2,0);
+    Vector3 p1 = Vector3(1 ,0 ,0);
+    Vector3 p2 = Vector3(0 ,1 ,0);
+    Vector3 p3 = Vector3(-1,0 ,0);
+    MOBJ->add_tri(p1,p2,p3);
+
+    //MOBJ2->vec3_as_line(p1);
+    //MOBJ2->vec3_as_line(p2);
+
+    //MOBJ2->vec3_as_line( );
+ 
+    // triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3)
     
-    MOBJ.add_tri(p1,p2,p3);
+    MOBJ->vec3_as_line_atpos( MOBJ->triangle_pt_vec3(p1,p2,p3, Vector3(2,2,2) ), 
+                              MOBJ->centroid( p1, p2, p3) );
 
-    MOBJ.vec3_as_line(p1);
-    MOBJ.vec3_as_line(p2);
+    MOBJ->vec3_as_line_atpos( MOBJ->three_vec3_to_normal(p1,p2,p3, true ), 
+                              MOBJ->centroid( p1, p2, p3) );
 
-    MOBJ.between_2vecs_as_line( p1, p2 );
+    //MOBJ->between_2vecs_as_line( p1, p2 );
 
-    MOBJ.save_obj("point_ops.obj");
 
-    // triangle_pt_vec3();
 
+    MOBJ->save_obj("point_ops.obj");
+    //MOBJ2->save_obj("point_ops2.obj");
+
+
+    delete(MOBJ);
+    delete(MOBJ2);    
 
 }
 
@@ -232,7 +246,7 @@ void test_point_ops(void)
 int main(int argc, char *argv[])
 {
 
-    test_point_ops(); return 0;
+    //test_point_ops(); return 0;
 
     // test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
 

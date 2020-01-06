@@ -52,8 +52,8 @@ class polygon_ops : public point_ops
     //Vector3 centroid_pts( array_of_vector3 );
     //bool pt_is_near( pt1, pt2, dist );
     
-
-    void triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3);
+    Vector3 centroid(Vector3 p1, Vector3 p2, Vector3 p3);
+    void centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3);
 
     Vector3 triangle_pt_vec3(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 dpt);
     double triangle_mean_z(Vector3 p1, Vector3 p2, Vector3 p3);

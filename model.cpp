@@ -194,6 +194,7 @@ void model::reset_buffers(void)
 // UNTESTED add vector as a line segment  
 void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2)  
 {
+    //ADD COLOR!!!  
 
     vector<int> newline;
 
@@ -210,16 +211,36 @@ void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2)
     
 
 }
+/**********************************************************/
+/*
+    add vector as a line segment, 
+    but position it off origin at a position
+*/
+
+void model::vec3_as_line_atpos( Vector3 pt1 , Vector3 atpos)
+{
+
+    vector<int> newline;
+
+    obj_pts[vertex_count] = atpos;
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+    
+    obj_pts[vertex_count] = atpos+pt1;
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+
+    lines[ line_count ] = newline;  
+    line_count++;
+
+}
 
 /**********************************************************/
 // UNTESTED add vector as a line segment  
 void model::vec3_as_line(Vector3 pt1)
 {
-    
-   
     //ADD COLOR!!!  
-
-  
+ 
     vector<int> newline;
 
     obj_pts[vertex_count] = Vector3(0,0,0);
@@ -261,7 +282,7 @@ void model::add_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3)
 }
 
 /**********************************************************/
-// add a new triangle using existing vertices
+// add a new triangle using Face Indices to existing vertices
 void model::add_tri(int vid1, int vid2, int vid3)
 {
 
@@ -298,8 +319,15 @@ void model::append_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2
 }
 
 /**********************************************************/
+/*
+    turn a single 4 sided polygon into two 3 sided 
+    
+    +--+              +--+ 
+    |  |              | /|  
+    |  |   Becomes    |/ |  
+    +--+              +--+  
+*/
 
-// turn a single 4 sided polygon into two 3 sided 
 void model::op_triangulate(void)
 {
     reset_buffers();

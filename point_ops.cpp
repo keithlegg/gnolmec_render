@@ -95,10 +95,12 @@ Vector3 polygon_ops::three_vec3_to_normal( Vector3 v1, Vector3 v2, Vector3 v3, b
    
 }
 
-/**********************************************/
 
-// UNTESTED - vector from triangle centroid to a point
-Vector3 polygon_ops::triangle_pt_vec3(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 dpt)
+/**********************************************/
+// UNTESTED - vector from a triangle centroid to a point
+Vector3 polygon_ops::triangle_pt_vec3(Vector3 p1, Vector3 p2, Vector3 p3, 
+                                                              Vector3 dpt
+                                     )
 {
     Vector3 tmp; 
     
@@ -109,7 +111,8 @@ Vector3 polygon_ops::triangle_pt_vec3(Vector3 p1, Vector3 p2, Vector3 p3, Vector
     return dpt-tmp;
 }
 
-
+/**********************************************/
+// Z axis only centroid 
 double  polygon_ops::triangle_mean_z(Vector3 p1, Vector3 p2, Vector3 p3)
 {
     double z1 = p1.z;
@@ -118,9 +121,21 @@ double  polygon_ops::triangle_mean_z(Vector3 p1, Vector3 p2, Vector3 p3)
     return (z1+z2+z3)/3;
 }
 
+
 /**********************************************/
 
-void polygon_ops::triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3)
+// XYZ centroid of a triangle 
+Vector3 polygon_ops::centroid(Vector3 p1, Vector3 p2, Vector3 p3)
+{
+    Vector3 out;
+    out.x = (p1.x + p2.x + p3.x)/3;
+    out.y = (p1.y + p2.y + p3.y)/3;
+    out.z = (p1.z + p2.z + p3.z)/3; 
+    return out;
+}
+
+// XYZ centroid of a triangle 
+void polygon_ops::centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3)
 {
 
     out->x = (p1.x + p2.x + p3.x)/3;

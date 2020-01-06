@@ -15,3 +15,7 @@ clean:
 	rm -f *.o 
 	rm -f *.bmp	
 
+
+copy:
+	#cp ./point_ops.obj ../3d_obj/point_ops.obj
+	cp ./*.obj ../3d_obj
