@@ -37,7 +37,7 @@ class sceneloader
         char cam_matrix_path[100];
         char proj_matrix_path[100];
 
-
+        Vector3 campos; 
         Vector3 lightpos; 
         float lightintensity;
         

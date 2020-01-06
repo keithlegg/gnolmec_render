@@ -165,12 +165,7 @@ void model::show(void)
 }
 
 
-/**********************************************************/
 
-bool sort_by_zdist(const zindex_faces &lzif, const zindex_faces &rzif){ 
-    // lambda for sort function 
-    return lzif.distance > rzif.distance; 
-}
 
 
 /**********************************************************/
@@ -193,6 +188,76 @@ void model::reset_buffers(void)
     fac_cnt = 0;
     vtx_tmp.clear();
     fac_tmp.clear();
+}
+
+/**********************************************************/
+// UNTESTED add vector as a line segment  
+void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2)  
+{
+
+    vector<int> newline;
+
+    obj_pts[vertex_count] = pt1;
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+    
+    obj_pts[vertex_count] = pt2;
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+
+    lines[ line_count ] = newline;  
+    line_count++;
+    
+
+}
+
+/**********************************************************/
+// UNTESTED add vector as a line segment  
+void model::vec3_as_line(Vector3 pt1)
+{
+    
+   
+    //ADD COLOR!!!  
+
+  
+    vector<int> newline;
+
+    obj_pts[vertex_count] = Vector3(0,0,0);
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+    
+    obj_pts[vertex_count] = pt1;
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+
+    lines[ line_count ] = newline;  
+    line_count++;
+    
+
+}
+
+
+/**********************************************************/
+// UNTESTED add a new triangle using 3 vector3 
+void model::add_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3)
+{
+    vector<int> newtri;
+
+    obj_pts[vertex_count] = pt1;
+    newtri.push_back(vertex_count+1);
+    vertex_count++;
+    
+    obj_pts[vertex_count] = pt2;
+    newtri.push_back(vertex_count+1);
+    vertex_count++;
+    
+    obj_pts[vertex_count] = pt3;
+    newtri.push_back(vertex_count+1);
+    vertex_count++;
+
+    triangles[ triangle_count ] = newtri;  
+    triangle_count++;
+
 }
 
 /**********************************************************/
@@ -341,16 +406,16 @@ void model::flatten_edits(void)
 
 /**********************************************************/
 
+bool sort_by_zdist(const zindex_faces &lzif, const zindex_faces &rzif){ 
+    // lambda for sort function 
+    return lzif.distance > rzif.distance; 
+}
+
+/*******/
+
 //re order face indices of a 3D object based on distance from a point 
 void model::op_zsort(Vector3 campos)
 {
-    
-    // if (face_count==0){
-    //     cout << " error - no faces to export ";
-    // }
-
-
-    //sortfaces.clear()
 
     // obj_pts[vcnt].set( sin(deg_to_rad(a))*scale, cos(deg_to_rad(a))*scale, 0 ); 
 
@@ -384,10 +449,9 @@ void model::op_zsort(Vector3 campos)
     }
 
 
-    //sort(sortfaces.begin(), sortfaces.end(), sort_by_zdist);
+    sort(sortfaces.begin(), sortfaces.end(), sort_by_zdist);
 
-    // for (zindex_faces &n : sortfaces)
-    //     cout << n.distance << " \n ";
+    //cout << "sortfaces length " << sortfaces.size() << "\n";
 
     // overwrite sorted faces with sorted faces 
     for (int i=0; i<triangle_count; i++) 
@@ -397,7 +461,7 @@ void model::op_zsort(Vector3 campos)
     }
 
 
-    cout << "triangle count is " << triangle_count << " size of sorted is " << j <<"\n";
+    //cout << "triangle count is " << triangle_count << " size of sorted is " << j <<"\n";
 
     //for debugging
     model::save_obj("sorted.obj");
@@ -449,6 +513,8 @@ void model::save_obj( char* filename)
             myfile << "\n";
         }
     }*/
+
+    // -----------------------
 
     // export array of lines
     if(line_count>0)
@@ -843,7 +909,7 @@ void model::make_cube(double scale){
     
     vertex_count = 3;
     add_tri(1,2,3);
-    add_tri(2,1,3);
+    //add_tri(2,1,3);
 
  }    
 

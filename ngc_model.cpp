@@ -103,7 +103,7 @@ void ngc_model::load_ngc(char* filename)
     int line_ct = 0;
     int tidx, i,n = 0;
 
-    string  sx, sy;
+    string  t0,t1,t2 ;
 
     while (!fin.eof())
     {
@@ -119,20 +119,44 @@ void ngc_model::load_ngc(char* filename)
         //if line has data on it ...  
         if (token[0]) 
         {
+            string t0 = token[0];
+
             // walk the space delineated tokens 
             for (n=1; n < MAX_TOKENS_PER_LINE; n++)
             {
-                token[n] = strtok(0, DELIMITER);
-                if (!token[n]) break;  
+                
+                // // look for parameters 
+                // if (!t0.compare(0,2,"#<") )
+                // {
+                //     cout << "param! " << token[0] << " " << "\n";
+                // 
+                // }
+
+                // //numbered lines
+                // if (!t0.compare(0,1,"N")
+                // {
+                //    ; 
+                // }
+
+                // ignore comments and parameters
+                if ( t0.compare(0,1,"(") !=0 && t0.compare(0,2,"#<") !=0)
+                {
+                    token[n] = strtok(0, DELIMITER);
+                    if (!token[n]) break; 
+                }
+
             }
 
         }
 
         /******************************/
-        if (token[0])
+        if (token[0] && token[1])
         {
             string t0 = token[0];
-            //cout << "## token 0 " << t0 << " " << " \n";
+            
+            cout << "## token 0 " << t0 << " " << " \n";
+      
+    
 
             //-------------------------
 
@@ -141,64 +165,42 @@ void ngc_model::load_ngc(char* filename)
             {
                 //cout << "## token "<< i <<" "<< token[i] << " \n";
 
-                //------------
+                /********************************************/
+                /********************************************/
+
                 // NUMBERED LINES                  
                 // // numbered lines 
                 // if (!strcmp(token[0], lnum))
                 // {
                 // }
 
-                //------------
+                /********************************************/
                 // NON NUMBERED LINES 
 
-                //if arc radius 
-                if (t0.find("r") != string::npos)
-                {
 
-                    removeCharsFromString(t0, "r");
-                    //cout << "arc radius is " << t0 << "\n";
-
-                    if (tidx==0)
-                    {
-                        sx = token[i];                
-                        removeCharsFromString(sx, "x");               
-                        //cout << " X " << sx << "\n"; 
-                    }
-
-                    if (tidx==1)
-                    {
-                        sy = token[i];                
-                        removeCharsFromString(sy, "y");               
-
-                        //cout << "arc radius " << t0 << " " << sx << " " << sy << "\n";
-                        // now we have what we need to build an arc 
-                        arctmp.r = stof(t0);
-                        arctmp.x = stof(sx);
-                        arctmp.y = stof(sy);
-
-                        arcs.push_back( arctmp );
-                        arc_count++;
-                    }
-                }//arc radius 
                 
-                //------------ 
+                /********************************************/ 
                 if (t0.find("g0") != string::npos || t0.find("G0") != string::npos)  
                 {
+                    // string t0 = token[0];
+                    // string t1 = token[1];
+                    // string t2 = token[2];
+
                     last_move_type = 0; 
-                    cout << token[0] <<" "<< n << "\n"; 
+                    cout << token[1] <<" "<< t0 <<" "<< n << "\n"; 
                 }//rapid move 
      
-                //------------            
+                /********************************************/            
 
-                //------------ 
                 if (t0.find("g1") != string::npos || t0.find("G1") != string::npos)  
                 {
                     last_move_type = 1;                
                     cout << token[0] <<" "<< n <<"\n"; 
                 }//linear move 
 
-                //------------ 
+                /********************************************/
 
+                //if command g2 (NOT G20) with arc on them  
                 if (strcmp(token[0],"g20") && strcmp(token[0],"G20"))
                 {
                     if (t0.find("g2") != string::npos || t0.find("G2") != string::npos ) 
@@ -209,37 +211,70 @@ void ngc_model::load_ngc(char* filename)
                             string t2 = token[2];
                             string t3 = token[3];
            
-                            if (t1.find("r") != string::npos)
-                            {
+                            if (tidx==2)
+                            {           
+                                if (t1.find("r") != string::npos)
+                                {
 
-                                removeCharsFromString(t1, "r");
-                                removeCharsFromString(t2, "x");               
-                                removeCharsFromString(t3, "y");               
-                                
-                                cout << "G2 WITH : r" << t1 << " x" << t2 << " y"<< t3 << "\n";
-
-                                arctmp.r = stof(t1);
-                                arctmp.x = stof(t2);
-                                arctmp.y = stof(t3);
-                                arcs.push_back( arctmp );arc_count++;
-                                last_move_type = 2; 
-                                
-                            }//arc radius 
-
+                                    removeCharsFromString(t1, "r");
+                                    removeCharsFromString(t2, "x");               
+                                    removeCharsFromString(t3, "y");               
+                                    
+                                    cout << "G2 WITH : r" << t1 << " x" << t2 << " y"<< t3 << "\n";
+                                    
+                                    headtmp.type = 2;                                   
+                                    headtmp.r = stof(t1);
+                                    headtmp.x = stof(t2);
+                                    headtmp.y = stof(t3);
+                                    moves.push_back(headtmp);
+                                    move_count++;
+                             
+                                    last_move_type = 2; 
+                                    
+                                }//arc radius 
+                            } 
                         }//g2 with 3 tokens after it 
-                        cout << t0 << " G2 " << token[i] <<" "<< n << "\n";
+                        //cout << t0 << " G2 " << token[i] <<" "<< n << "\n";
                     }
                 }// arc move (2) and NOT G20 
 
-                //------------ 
+                /********************************************/ 
                 if (t0.find("g3") != string::npos ||  t0.find("G3") != string::npos)
                 {
                     last_move_type = 3;
                     cout << token[0] <<" "<< n <<"\n"; 
                 }//arc move (3)
 
-                //------------
+                /********************************************/ 
+                //if arc radius without command G2 
+                if (t0.find("r") != string::npos)
+                {
+                
+                    removeCharsFromString(t0, "r");
+                    //cout << "arc radius is " << t0 << "\n";
+                    if (token[0] && token[1] && token[2])
+                    {
+                        string t0 = token[0];
+                        string t1 = token[1];
+                        string t2 = token[2];
+             
+                        removeCharsFromString(t0, "r"); 
+                        removeCharsFromString(t1, "x");               
+                        removeCharsFromString(t2, "y");               
+                        
+                        cout << "arc radius " << t0 << " " << t1 << " " << t2 << "\n";
+                        // now we have what we need to build an arc 
 
+                        arctmp.r = stof(t0);
+                        arctmp.x = stof(t1);
+                        arctmp.y = stof(t2);
+                        arcs.push_back( arctmp );
+                        arc_count++;
+                    }
+                }//arc radius 
+
+                /********************************************/
+                /********************************************/
                 tidx++;
             }//iterate tokens
         }//if line is not empty 
@@ -300,19 +335,17 @@ void ngc_model::convert_to_3d( void )
 //save geometry in memory to an OBJ file on disk 
 void ngc_model::save_ngc( char* filename)
 {
-    ofstream myfile;
-    myfile.open (filename);
+    ofstream exp_file;
+    exp_file.open (filename);
 
-    myfile << ";Exported with Keith's little graphics tool\n";
-    //myfile << ";number of verticies     "<< model::vertex_count  <<"\n";
-    //myfile << ";number of triangles     "<< triangle_count <<"\n";
+    exp_file << ";Exported with Keith's little graphics tool\n";
 
     if (linear_unit==0){
-        myfile <<"g20 g64\n";
+        exp_file <<"g20 g64\n";
     }
 
     if (linear_unit==1){
-        myfile <<"g21 g64\n"; //untested 
+        exp_file <<"g21 g64\n"; //untested 
     }
  
     if (spindle_dir==0){
@@ -322,87 +355,46 @@ void ngc_model::save_ngc( char* filename)
 
     }
 
-    myfile <<"s"<<spindle_rpm <<" m3\n";  
+    exp_file <<"s"<<spindle_rpm <<" m3\n";  
 
-    myfile <<"\n";
+    exp_file <<"\n";
 
+    //export moves
+    for (int xx=0;xx<moves.size();xx++)
+    {
+        headmove hm_tmp = moves[xx];
+        
+        //headmove.type
+        if ( hm_tmp.type==2)
+        {
+            exp_file << "g2 r"<< hm_tmp.r << " x" <<  hm_tmp.x << " y" <<  hm_tmp.y << "\n";
+        }
+
+    }
+
+    //export arcs 
     for (int xx=0;xx<arcs.size();xx++)
     {
         arc_rad ar = arcs[xx];
         
-        // myfile << "r"<<setfill('0') << setw(8)<<ar.r 
+        // exp_file << "r"<<setfill('0') << setw(8)<<ar.r 
         //        <<" x"<<setfill('0') << setw(8)<<ar.x
         //        <<" y"<<setfill('0') << setw(8)<<ar.y<<"\n";
         
-        myfile << "r"<<ar.r 
+        exp_file << "r"<<ar.r 
                <<" x"<<ar.x
                <<" y"<<ar.y<<"\n";
 
     }
 
-    myfile <<"\n";
-    
-    // if (triangle_count==0){
-    //     cout << " warning - no faces to export ";
-    // }
+   
+    exp_file <<"g0z1\n"; // bring Z up 
+    exp_file <<"m2\n";   // end program 
 
-    // cout << " triangle count is  " << triangle_count << endl;
-
-    int ff = 0; 
-    int xx = 0;
 
     //----------------------
 
-    /*
-    // export array of N sided faces
-    if (nsided_count>0)
-    {
-        for (xx=0; xx<nsided_count; xx++)
-        {
-            myfile << "f ";
-            for (ff=0; ff < faces[xx].size();ff++)
-            {
-                myfile << faces[xx][ff] << " "; 
-            }
-            myfile << "\n";
-        }
-    }*/
-    
-    //----------------------
- 
-    // // export array triangles
-    // if(triangle_count>0)
-    // {
-    //     for (xx=0; xx<triangle_count; xx++)
-    //     {
-    //         myfile << "f ";
-    //         for (ff=0; ff < triangles[xx].size();ff++)
-    //         {
-    //             myfile << triangles[xx][ff] << " "; 
-    //         }
-    //         myfile << "\n";
-    //     }
-    // }
-
-    //----------------------
-    
-    // // export array quads
-    // if(quad_count>0)
-    // {
-    //     for (xx=0; xx<quad_count; xx++)
-    //     {
-    //         myfile << "f ";
-    //         for (ff=0; ff < quads[xx].size();ff++)
-    //         {
-    //             myfile << quads[xx][ff] << " "; 
-    //         }
-    //         myfile << "\n";
-    //     }
-    // }
-
-    //----------------------
-
-    myfile.close();
+    exp_file.close();
     cout << endl << "obj file " << filename << " exported." << endl;
 
 }

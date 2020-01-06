@@ -46,14 +46,16 @@ void test_load_save_ngc(char *infile, char *outfile)
     ngc_model foo;
 
     //foo.load_obj("3d_obj/cone.obj");
-    
-    foo.load_ngc("3d_obj/arcspiral.ngc");
-    
+    //foo.load_ngc("3d_obj/arcspiral.ngc");
+    foo.load_ngc("3d_obj/3dtest.ngc");
+
+    //foo.load_ngc("3d_obj/3D_Chips.ngc");
+
     //foo.convert_to_3d();
     //foo.show();
     //foo.showinfo();
 
-    foo.save_ngc("3d_obj/genrated.ngc");
+    foo.save_ngc("3d_obj/generated.ngc");
 
     //foo.save_obj("arcspiral.obj");
 
@@ -181,6 +183,41 @@ void test_obj_stuff(void)
 }
 
 
+void test_point_ops(void)
+{
+    
+    model MOBJ;
+    model MOBJ2;
+
+    double scale = .5;
+
+    // raw geom modeling 
+    // MOBJ.obj_pts[0].set( -scale ,  0    , 0 );
+    // MOBJ.obj_pts[1].set( 0      ,  scale, 0 );
+    // MOBJ.obj_pts[2].set( scale  ,  0    , 0 );
+    // MOBJ.vertex_count = 3;
+    // MOBJ.add_tri(1,2,3);
+
+
+    Vector3 p1 = Vector3(1,1,1);
+    Vector3 p2 = Vector3(-1,0,-1);
+    Vector3 p3 = Vector3(0,-2,0);
+    
+    MOBJ.add_tri(p1,p2,p3);
+
+    MOBJ.vec3_as_line(p1);
+    MOBJ.vec3_as_line(p2);
+
+    MOBJ.between_2vecs_as_line( p1, p2 );
+
+    MOBJ.save_obj("point_ops.obj");
+
+    // triangle_pt_vec3();
+
+
+}
+
+
 /***********************************/
 
 /*
@@ -195,7 +232,9 @@ void test_obj_stuff(void)
 int main(int argc, char *argv[])
 {
 
-    test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
+    test_point_ops(); return 0;
+
+    // test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
 
     /* * * * * * * * * */ 
 

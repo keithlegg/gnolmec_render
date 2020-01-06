@@ -62,6 +62,8 @@ void sceneloader::load_file( char* filepath )
                 if (!token[n]) break;  
             }
 
+
+
             //----------------------
             if (!strcmp(token[0],"obj_path"))
             {        
@@ -73,7 +75,13 @@ void sceneloader::load_file( char* filepath )
             {            
                 strcpy( cam_matrix_path, token[1]);
             }
-           
+
+            //----------------------
+            if (!strcmp(token[0],"cam_pos"))
+            {        
+                campos = Vector3( atof(token[1]), atof(token[2]), atof(token[3]) );
+            }
+
             //----------------------
             if (!strcmp(token[0],"light_pos"))
             {            
@@ -574,37 +582,34 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     rotate_obj = rotate_obj * camera_matrix.m44;  
 
     /***********************/
-    /***********************/
-    // load the renderscript file 
-
-    cout << "## loading renderscript "<< renderscript << "\n";
 
     // Z sort the faces (broken at the moment )
 
     Vector3 campos;
-    campos.set(camera_matrix.m44[12],camera_matrix.m44[13],camera_matrix.m44[14]);
-    cout << "render clip pos "<< camera_matrix.m44[12] <<" "<< camera_matrix.m44[13] <<" "<< camera_matrix.m44[14] <<"\n";
+    campos.set( RS.campos.x,  RS.campos.y, RS.campos.z);
+    //campos.set(camera_matrix.m44[12],camera_matrix.m44[13],camera_matrix.m44[14]);
+    cout << "render clip pos "<< RS.campos.x << " "<< RS.campos.y <<" "<< RS.campos.z <<"\n";
    
 
-    model OBJ;
-    OBJ.load_obj( RS.object_path );
+    model * OBJ = new model;
+    OBJ->load_obj( RS.object_path );
 
-    OBJ.showinfo();
+    OBJ->showinfo();
     
-    if (OBJ.quad_count>0){
-        OBJ.op_triangulate();
+    if (OBJ->quad_count>0){
+        OBJ->op_triangulate();
     }
 
     // sort - sort of works!!
-    OBJ.op_zsort(campos);
+    OBJ->op_zsort(campos);
 
-    OBJ.showinfo();
+    //OBJ.showinfo();
     //OBJ.show();
 
     //OBJ.flatten_edits(); 
 
     /***********************/
-    for (i=0;i<OBJ.triangle_count;i++)
+    for (i=0;i<OBJ->triangle_count;i++)
     {
         int j = 0;
        
@@ -613,9 +618,9 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         // look up each face vertex (vector3 X4) 
         //cout << "point looked up is " << OBJ.obj_pts[ int(OBJ.triangles[i][j])-1] << endl ;
 
-        Vector3 p1 = rotate_obj * OBJ.obj_pts[ int(OBJ.triangles[i][0])-1];
-        Vector3 p2 = rotate_obj * OBJ.obj_pts[ int(OBJ.triangles[i][1])-1];
-        Vector3 p3 = rotate_obj * OBJ.obj_pts[ int(OBJ.triangles[i][2])-1];
+        Vector3 p1 = rotate_obj * OBJ->obj_pts[ int(OBJ->triangles[i][0])-1];
+        Vector3 p2 = rotate_obj * OBJ->obj_pts[ int(OBJ->triangles[i][1])-1];
+        Vector3 p3 = rotate_obj * OBJ->obj_pts[ int(OBJ->triangles[i][2])-1];
 
         // non rotated geom   
         // Vector3 p1 = OBJ.obj_pts[ int(OBJ.triangles[i][0])-1];
@@ -627,11 +632,11 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         {
             // get the center of face to move light vector to 
             Vector3 fcntr;
-            OBJ.triangle_centroid(&fcntr, p1, p2, p3);
+            OBJ->triangle_centroid(&fcntr, p1, p2, p3);
             //cout << "## face center is " <<f_cntr.x <<" "<< f_cntr.y <<" "<< f_cntr.z << "\n";
 
             // super simple shading model 
-            Vector3 fac_normal = OBJ.three_vec3_to_normal( p1, p2, p3, true);           
+            Vector3 fac_normal = OBJ->three_vec3_to_normal( p1, p2, p3, true);           
             //cout << "## face normal is " <<fac_normal.x <<" "<< fac_normal.y <<" "<< fac_normal.z << "\n";
                     
             //# build a vector between face center and light position  
@@ -670,6 +675,9 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
 
     //cout << outfilename << " saved to disk. " << endl;
     cout << "finished rendering." << endl;
+    
+    delete(OBJ);
+
 }
 
 

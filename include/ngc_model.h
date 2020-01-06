@@ -14,6 +14,20 @@ void removeCharsFromString( string &str, char* charsToRemove );
 vector<string> split(const char *str, char c);
 
 
+class param
+{
+    public:
+        param(){
+
+        };
+
+        ~param(){};
+
+       string name;
+       string value;         
+};
+
+
 class arc_rad
 {
     public:
@@ -34,14 +48,15 @@ class arc_rad
 
 class headmove
 {
-    public:
+    public: 
         headmove(){
         };
 
         ~headmove(){};
 
-    int move_type = 0; //0 - G0 rapid, 1 G1 - Linear , 2/3 - G2/G3 Arc I J K or R, P
-    
+    int type = 0; //0 - G0 rapid, 1 G1 - Linear , 2/3 - G2/G3 Arc I J K or R, P
+
+    double r;    
     double x;
     double y;
     double z;     
@@ -77,9 +92,10 @@ class ngc_model: public model
         int last_move_type; // 0, 1, 2/3 
 
         arc_rad arctmp;
+        headmove headtmp;
 
         std::vector<arc_rad> arcs;        
-        std::vector<headmove> moves[MAX_NUM_FACES]; 
+        std::vector<headmove> moves; 
 
 
         // inherited containers 

@@ -14,6 +14,8 @@
 #define MAX_NUM_VERTICES 10000
 #define MAX_NUM_FACES 10000
 
+using namespace std;
+
 
 // experiment to sort faces based on a z value 
 struct zindex_faces
@@ -33,7 +35,6 @@ class model: public polygon_ops {
         int triangle_count; // 3 sided polygons (triangles )
         int quad_count;     // 4 sided polygons 
         int nsided_count;   // all polygons that are not 1,2,3 sided 
-        //int face_count;     // sum of ALL faces combined  
 
         int uv_count;       
         int normal_count;
@@ -42,19 +43,18 @@ class model: public polygon_ops {
         int vtx_cnt;
         int fac_cnt;
 
-        std::vector<double> vtx_tmp;
-        std::vector<int>    fac_tmp;  
+        vector<double> vtx_tmp;
+        vector<int>    fac_tmp;  
 
         // --- 
         Vector3 obj_pts[MAX_NUM_VERTICES];          // vertices of model    
-        // --- 
-        std::vector<int> lines[MAX_NUM_FACES];      // 2 sided faces 
-        std::vector<int> triangles[MAX_NUM_FACES];  // 3 sided 
-        std::vector<int> quads[MAX_NUM_FACES];      // 4 sided 
-        std::vector<int> faces[MAX_NUM_FACES];      // >4, N sided faces 
+        vector<int> lines[MAX_NUM_FACES];      // 2 sided faces 
+        vector<int> triangles[MAX_NUM_FACES];  // 3 sided 
+        vector<int> quads[MAX_NUM_FACES];      // 4 sided 
+        vector<int> faces[MAX_NUM_FACES];      // >4, N sided faces 
         // ---
         Vector3 bfr_pts[MAX_NUM_VERTICES];          // general point buffer   ( tmp work area )
-        std::vector<int> bfr_faces[MAX_NUM_FACES];  // general polygon buffer ( tmp work area ) 
+        vector<int> bfr_faces[MAX_NUM_FACES];  // general polygon buffer ( tmp work area ) 
 
         // ---
         Matrix4 m44;
@@ -89,8 +89,13 @@ class model: public polygon_ops {
         // int getnum_normals();
 
         /***********************************/        
-
+        
+        void add_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3);
         void add_tri(int vid1, int vid2, int vid3);
+
+        void vec3_as_line(Vector3 pt1);
+        void between_2vecs_as_line(Vector3 pt1, Vector3 pt2);        
+
         void append_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2, int vid3);
         
         // void copy_tri(int index);

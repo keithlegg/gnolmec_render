@@ -55,11 +55,8 @@ class polygon_ops : public point_ops
 
     void triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3);
 
+    Vector3 triangle_pt_vec3(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 dpt);
     double triangle_mean_z(Vector3 p1, Vector3 p2, Vector3 p3);
-  
-
-
-
 
 
     
