@@ -21,7 +21,7 @@ using namespace std;
 struct zindex_faces
 {
     double distance;
-    std::vector<int> face; 
+    std::vector<int> triangle; 
 };
 
 

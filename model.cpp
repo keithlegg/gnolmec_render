@@ -436,7 +436,7 @@ void model::flatten_edits(void)
 
 bool sort_by_zdist(const zindex_faces &lzif, const zindex_faces &rzif){ 
     // lambda for sort function 
-    return lzif.distance > rzif.distance; 
+    return lzif.distance > rzif.distance;
 }
 
 /*******/
@@ -449,43 +449,42 @@ void model::op_zsort(Vector3 campos)
 
     int i,j = 0;
 
-    vector <zindex_faces> sortfaces(MAX_NUM_FACES);
-
-    // walk the faces and do stuff 
+    vector <zindex_faces> sort_tris(MAX_NUM_FACES);
+    
+    cout << "camera pos is " << campos << "\n";
+    
+    // walk the triangles 
     for (int i=0; i<triangle_count; i++) 
     {
         fac_tmp.clear();
-        fac_tmp = model::faces[i];
+        fac_tmp = model::triangles[i];
         
         // assume triangle only (3 indices)
         Vector3 p1 = model::obj_pts[ fac_tmp[0]-1 ];
         Vector3 p2 = model::obj_pts[ fac_tmp[1]-1 ];
         Vector3 p3 = model::obj_pts[ fac_tmp[2]-1 ];                 
 
-        //Vector3 pnt_dist;
-        //triangle_centroid(pnt_dist, p1, p2, p3);
-
-        //use a struct (zipped array-ish) to sort by distance
+        Vector3 centr = centroid(p1, p2, p3);
+    
+        //use a struct (zipped array-ish) to sort triangles by distance to camera
         zindex_faces tmp;
-        tmp.face     = fac_tmp;
-        tmp.distance = model::triangle_mean_z(p1,p2,p3);
-        
-        //cout << " distance "<< tmp.distance << "\n";
+        tmp.triangle = fac_tmp;
+        tmp.distance = centr.distance(campos);
 
-        sortfaces[i] = tmp;
+        sort_tris[i] = tmp;
 
     }
 
 
-    sort(sortfaces.begin(), sortfaces.end(), sort_by_zdist);
+    sort(sort_tris.begin(), sort_tris.end(), sort_by_zdist);
 
-    //cout << "sortfaces length " << sortfaces.size() << "\n";
+    //cout << "sort_tris length " << sort_tris.size() << "\n";
 
     // overwrite sorted faces with sorted faces 
     for (int i=0; i<triangle_count; i++) 
     {
-        model::faces[i] = sortfaces[i].face;
-        //cout << "sortfaces "<< i <<" " << sortfaces[i].face[0]<< " " << sortfaces[i].face[1] << " "<< sortfaces[i].face[2] << "\n";
+        model::triangles[i] = sort_tris[i].triangle;
+        //cout << "sort_tris "<< i <<" " << sort_tris[i].face[0]<< " " << sort_tris[i].face[1] << " "<< sort_tris[i].face[2] << "\n";
     }
 
 

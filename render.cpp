@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cstring>
+#include <algorithm>
 
 #include "include/Vectors.h"
 #include "include/Matrices.h"
@@ -582,8 +583,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     rotate_obj = rotate_obj * camera_matrix.m44;  
 
     /***********************/
-
-    // Z sort the faces (broken at the moment )
+    // Z sort the faces   (still not right, need to occlude the hidden faces)
 
     Vector3 campos;
     campos.set( RS.campos.x,  RS.campos.y, RS.campos.z);
@@ -635,33 +635,42 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             OBJ->centroid(&fcntr, p1, p2, p3);
             //cout << "## face center is " <<f_cntr.x <<" "<< f_cntr.y <<" "<< f_cntr.z << "\n";
 
-            // super simple shading model 
-            Vector3 fac_normal = OBJ->three_vec3_to_normal( p1, p2, p3, true);           
-            //cout << "## face normal is " <<fac_normal.x <<" "<< fac_normal.y <<" "<< fac_normal.z << "\n";
-                    
-            //# build a vector between face center and light position  
-            Vector3 to_light = fcntr - RS.lightpos; 
+            // Lambertian reflectance from here:
+            // https://en.wikipedia.org/wiki/Lambertian_reflectance
 
-            // calculate the angle between face and light vectors 
-            // treating the 3D light position as a vector
-            double light_angle = (  fac_normal.angle( to_light ) );
+            // face normal 
+            Vector3 N = OBJ->three_vec3_to_normal( p1, p2, p3, true);     
+
+            // light direction vector   
+            Vector3 L = fcntr - RS.lightpos; 
             
-            //int angle  = (int)rtd( light_angle );
-            int angle  = (int) light_angle ;
+            //normalized light direction (messing with color DEBUG ) 
+            Vector3 Lnrml = L.normalize();
 
-            int lpow_r = RS.lightintensity * RS.fill_color.r;
-            int lpow_g = RS.lightintensity * RS.fill_color.g;
-            int lpow_b = RS.lightintensity * RS.fill_color.b;            
+            double dotprod = N.dot(Lnrml);
 
-            fill_color.r = (int)lpow_r-angle;
-            fill_color.g = (int)lpow_g-angle;
-            fill_color.b = (int)lpow_b-angle;
-        
+            Vector3 color = Vector3(RS.fill_color.r, RS.fill_color.g, RS.fill_color.b);
+            
+            ////keith did this to fix color difference
+            //double average = (Lnrml.x * Lnrml.y * Lnrml.z) / 3;
+            //color.x = dotprod * average * color.x * RS.lightintensity;
+            //color.y = dotprod * average * color.y * RS.lightintensity;
+            //color.z = dotprod * average * color.z * RS.lightintensity;            
+            
+            double average = (Lnrml.x * Lnrml.y * Lnrml.z) / 3;
+            color.x = dotprod * Lnrml.x * color.x * RS.lightintensity;
+            color.y = dotprod * Lnrml.y * color.y * RS.lightintensity;
+            color.z = dotprod * Lnrml.z * color.z * RS.lightintensity;  
+
+            fill_color.r = clamp((int)color.x, 0, 255);
+            fill_color.g = clamp((int)color.y, 0, 255);
+            fill_color.b = clamp((int)color.z, 0, 255);
+
         }else{
 
-            fill_color.r = RS.fill_color.r;
-            fill_color.g = RS.fill_color.g;
-            fill_color.b = RS.fill_color.b;
+            fill_color.r = clamp((int)RS.fill_color.r, 0, 255);
+            fill_color.g = clamp((int)RS.fill_color.g, 0, 255);
+            fill_color.b = clamp((int)RS.fill_color.b, 0, 255);
         }
       
         draw_triangle( &RS, width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, RS.line_color);
