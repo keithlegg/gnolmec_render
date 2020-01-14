@@ -48,6 +48,8 @@ class model: public polygon_ops {
 
         // --- 
         Vector3 obj_pts[MAX_NUM_VERTICES];          // vertices of model    
+        Vector3 vtx_rgb[MAX_NUM_VERTICES];          // vertices of model  
+
         vector<int> lines[MAX_NUM_FACES];      // 2 sided faces 
         vector<int> triangles[MAX_NUM_FACES];  // 3 sided 
         vector<int> quads[MAX_NUM_FACES];      // 4 sided 
@@ -93,15 +95,23 @@ class model: public polygon_ops {
         void add_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3);
         void add_tri(int vid1, int vid2, int vid3);
 
-        void vec3_as_line_atpos( Vector3 pt1 , Vector3 atpos);
-        void vec3_as_line(Vector3 pt1);
+        void vec3_as_geom_atpos( Vector3 pt1 , Vector3 atpos, Vector3 color);
+        void vec3_as_geom_atpos( Vector3 pt1 , Vector3 atpos);
+        void vec3_as_geom(Vector3 pt1);
+
+        void vec3_as_pt_geom(Vector3 pt1, double siz=.1);
+        void vec3_as_pt_geom(Vector3 pt1, Vector3 color, double siz=.1);
+
         void between_2vecs_as_line(Vector3 pt1, Vector3 pt2);        
+        void between_2vecs_as_line(Vector3 pt1, Vector3 pt2, Vector3 color);
+
 
         void append_tri(Vector3 pt1, Vector3 pt2, Vector3 pt3, int vid1, int vid2, int vid3);
         
         // void copy_tri(int index);
         // void del_tri(int index);
         
+        void print(Vector3 in);
 
 
         // void copy_quad
@@ -118,7 +128,8 @@ class model: public polygon_ops {
         // get_pt_ids(self, fids=None):
         // get_face_pts(self, fid):
         Vector3 get_triface_normal(int fid);
-
+        //Vector3 between(Vector3 pt1);
+        
         // void op_extrude(int fid, double dist);
         // void op_calc_bbox(int fid, double dist);
 

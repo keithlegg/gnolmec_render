@@ -205,20 +205,20 @@ void test_point_ops(void)
     Vector3 p3 = Vector3(-1,0 ,0);
     MOBJ->add_tri(p1,p2,p3);
 
-    //MOBJ2->vec3_as_line(p1);
-    //MOBJ2->vec3_as_line(p2);
+    //MOBJ2->vec3_as_geom(p1);
+    //MOBJ2->vec3_as_geom(p2);
 
-    //MOBJ2->vec3_as_line( );
+    //MOBJ2->vec3_as_geom( );
  
     // triangle_centroid(Vector3 *out, Vector3 p1, Vector3 p2, Vector3 p3)
     
-    MOBJ->vec3_as_line_atpos( MOBJ->triangle_pt_vec3(p1,p2,p3, Vector3(2,2,2) ), 
+    MOBJ->vec3_as_geom_atpos( MOBJ->triangle_pt_vec3(p1,p2,p3, Vector3(2,2,2) ), 
                               MOBJ->centroid( p1, p2, p3) );
 
-    MOBJ->vec3_as_line_atpos( MOBJ->three_vec3_to_normal(p1,p2,p3, true ), 
+    MOBJ->vec3_as_geom_atpos( MOBJ->three_vec3_to_normal(p1,p2,p3, true ), 
                               MOBJ->centroid( p1, p2, p3) );
 
-    //MOBJ->between_2vecs_as_line( p1, p2 );
+    //MOBJ->between_2vecs_as_geom( p1, p2 );
 
 
 

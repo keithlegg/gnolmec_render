@@ -40,3 +40,25 @@ void three_vec3_to_normal(Vector3 *nrml, Vector3 v1, Vector3 v2, Vector3 v3) //,
 }
 */
 
+
+/*
+
+    // https://www.bfilipek.com/2012/06/select-mouse-opengl.html
+
+    // pseudo code found at: 
+    // http://www.gamedev.net/topic/221071-simple-raysphere-collision/ 
+    Vec3d ClosestPoint(const Vec3d A, const Vec3d B, 
+                       const Vec3d P, double *t) 
+    { 
+        Vec3d AB = B - A; 
+        double ab_square = DotProduct(AB, AB); 
+        Vec3d AP = P - A; 
+        double ap_dot_ab = DotProduct(AP, AB); 
+        // t is a projection param when we project vector AP onto AB 
+        *t = ap_dot_ab / ab_square; 
+        // calculate the closest point 
+        Vec3d Q = A + AB * (*t); 
+        return Q; 
+    }  
+*/
+

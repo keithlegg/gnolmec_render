@@ -518,7 +518,6 @@ void draw_triangle( sceneloader* prs, int width, int height, double rscale, fram
 void render_model( int width, int height, char* renderscript, char* outfilename)
 {
 
-    //int n = width * height;
 
     /***********/
     Vector2 thisedge;      //iterator for edges
@@ -542,7 +541,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     
     //RS.show();
 
-    int RENDER_SHADED     = 1; //shaded (lit) or flat color polygon fill 
+    bool RENDER_SHADED     = false; //shaded (lit) or flat color polygon fill 
 
     //------------------------------
     framebuffer::RGBType* output_image;
@@ -587,9 +586,6 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
 
     Vector3 campos;
     campos.set( RS.campos.x,  RS.campos.y, RS.campos.z);
-    //campos.set(camera_matrix.m44[12],camera_matrix.m44[13],camera_matrix.m44[14]);
-    cout << "render clip pos "<< RS.campos.x << " "<< RS.campos.y <<" "<< RS.campos.z <<"\n";
-   
 
     model * OBJ = new model;
     OBJ->load_obj( RS.object_path );
@@ -600,13 +596,16 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         OBJ->op_triangulate();
     }
 
-    // sort - sort of works!!
+    //sort faces based on distance to camera
     OBJ->op_zsort(campos);
 
     //OBJ.showinfo();
     //OBJ.show();
 
     //OBJ.flatten_edits(); 
+
+    model* test_vectors = new(model);
+    test_vectors->vec3_as_pt_geom( RS.lightpos );
 
     /***********************/
     for (i=0;i<OBJ->triangle_count;i++)
@@ -627,8 +626,16 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         // Vector3 p2 = OBJ.obj_pts[ int(OBJ.triangles[i][1])-1];
         // Vector3 p3 = OBJ.obj_pts[ int(OBJ.triangles[i][2])-1];
 
+        //------------------------
+
+        //start with simple flat color - shaders will be layered on 
+        fill_color.r = RS.fill_color.r;
+        fill_color.g = RS.fill_color.g;
+        fill_color.b = RS.fill_color.b;
+
+
         //--------------
-        if (RENDER_SHADED==1)
+        if ( RENDER_SHADED == true)
         {
             // get the center of face to move light vector to 
             Vector3 fcntr;
@@ -642,41 +649,52 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             Vector3 N = OBJ->three_vec3_to_normal( p1, p2, p3, true);     
 
             // light direction vector   
-            Vector3 L = fcntr - RS.lightpos; 
+            Vector3 L = RS.lightpos - fcntr; 
+
+            // cout << "tri center ";
+            // test_vectors->print( fcntr);    
+            // cout << "Light ";
+            // test_vectors->print( RS.lightpos);
+            // test_vectors->print( L );
+            // cout << " Normal ";
+            // test_vectors->print(N);
+            // cout << "\n";
+
+
             
+            test_vectors->vec3_as_pt_geom( RS.lightpos, Vector3(1, 1, 0) );
+            test_vectors->vec3_as_geom_atpos( L ,Vector3(0,0,0), Vector3(0, 1, 0) );
+           
+
             //normalized light direction (messing with color DEBUG ) 
             Vector3 Lnrml = L.normalize();
 
             double dotprod = N.dot(Lnrml);
 
             Vector3 color = Vector3(RS.fill_color.r, RS.fill_color.g, RS.fill_color.b);
-            
-            ////keith did this to fix color difference
-            //double average = (Lnrml.x * Lnrml.y * Lnrml.z) / 3;
-            //color.x = dotprod * average * color.x * RS.lightintensity;
-            //color.y = dotprod * average * color.y * RS.lightintensity;
-            //color.z = dotprod * average * color.z * RS.lightintensity;            
-            
-            double average = (Lnrml.x * Lnrml.y * Lnrml.z) / 3;
+
             color.x = dotprod * Lnrml.x * color.x * RS.lightintensity;
             color.y = dotprod * Lnrml.y * color.y * RS.lightintensity;
             color.z = dotprod * Lnrml.z * color.z * RS.lightintensity;  
 
-            fill_color.r = clamp((int)color.x, 0, 255);
-            fill_color.g = clamp((int)color.y, 0, 255);
-            fill_color.b = clamp((int)color.z, 0, 255);
+            //more ambient, flatter looking 
+            fill_color.r = clamp((int) color.x ,0 , 255);
+            fill_color.g = clamp((int) color.y ,0 , 255);
+            fill_color.b = clamp((int) color.z ,0 , 255);
 
-        }else{
-
-            fill_color.r = clamp((int)RS.fill_color.r, 0, 255);
-            fill_color.g = clamp((int)RS.fill_color.g, 0, 255);
-            fill_color.b = clamp((int)RS.fill_color.b, 0, 255);
         }
-      
+
+        // //clamp the color before using it 
+        // fill_color.r = clamp(fill_color.r, 0, 255);
+        // fill_color.g = clamp(fill_color.g, 0, 255);
+        // fill_color.b = clamp(fill_color.b, 0, 255);
+
         draw_triangle( &RS, width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, RS.line_color);
         
     }//render iterator
 
+
+    
     //framebuffer::savebmp(outfilename , width, height, dpi, output_image);
     BMP new_outfile(width, height);
     new_outfile.dump_rgba_data(0,0,width,height,output_image);
@@ -685,6 +703,9 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     //cout << outfilename << " saved to disk. " << endl;
     cout << "finished rendering." << endl;
     
+    test_vectors->save_obj("3d_obj/testvectors.obj");
+
+    delete(test_vectors);
     delete(OBJ);
 
 }

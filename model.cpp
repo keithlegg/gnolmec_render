@@ -191,10 +191,9 @@ void model::reset_buffers(void)
 }
 
 /**********************************************************/
-// UNTESTED add vector as a line segment  
+// add renderable line segment between two vectors  
 void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2)  
 {
-    //ADD COLOR!!!  
 
     vector<int> newline;
 
@@ -211,13 +210,40 @@ void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2)
     
 
 }
+
+// UNTESTED - same but with RGB added 
+void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2, Vector3 color)  
+{
+
+    vector<int> newline;
+
+    obj_pts[vertex_count] = pt1;
+    vtx_rgb[vertex_count] = color; 
+
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+    
+    //--- 
+
+    obj_pts[vertex_count] = pt2;
+    vtx_rgb[vertex_count] = color; 
+
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+
+    lines[ line_count ] = newline;  
+    line_count++;
+    
+
+}
+
 /**********************************************************/
 /*
     add vector as a line segment, 
     but position it off origin at a position
 */
 
-void model::vec3_as_line_atpos( Vector3 pt1 , Vector3 atpos)
+void model::vec3_as_geom_atpos( Vector3 pt1 , Vector3 atpos)
 {
 
     vector<int> newline;
@@ -235,12 +261,32 @@ void model::vec3_as_line_atpos( Vector3 pt1 , Vector3 atpos)
 
 }
 
+//UNTESTED 
+void model::vec3_as_geom_atpos( Vector3 pt1 , Vector3 atpos, Vector3 color)
+{
+
+    vector<int> newline;
+
+    obj_pts[vertex_count] = atpos;
+    vtx_rgb[vertex_count] = color; 
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+    
+    obj_pts[vertex_count] = atpos+pt1;
+    vtx_rgb[vertex_count] = color;     
+    newline.push_back(vertex_count+1);
+    vertex_count++;
+
+    lines[ line_count ] = newline;  
+    line_count++;
+
+}
+
 /**********************************************************/
 // UNTESTED add vector as a line segment  
-void model::vec3_as_line(Vector3 pt1)
+void model::vec3_as_geom(Vector3 pt1)
 {
-    //ADD COLOR!!!  
- 
+
     vector<int> newline;
 
     obj_pts[vertex_count] = Vector3(0,0,0);
@@ -255,6 +301,42 @@ void model::vec3_as_line(Vector3 pt1)
     line_count++;
     
 
+}
+
+/**********************************************************/
+// UNTESTED add vector as a line segment  
+void model::vec3_as_pt_geom(Vector3 pt1, double siz)
+{
+
+    between_2vecs_as_line(pt1, pt1-Vector3( siz, 0, 0) );
+    between_2vecs_as_line(pt1, pt1+Vector3( siz, 0, 0) );
+    
+    between_2vecs_as_line(pt1, pt1-Vector3( 0, siz, 0) );
+    between_2vecs_as_line(pt1, pt1+Vector3( 0, siz, 0) );
+
+    between_2vecs_as_line(pt1, pt1-Vector3( 0, 0, siz) );
+    between_2vecs_as_line(pt1, pt1+Vector3( 0, 0, siz) );
+
+}
+
+void model::vec3_as_pt_geom(Vector3 pt1, Vector3 color, double siz)
+{
+
+    between_2vecs_as_line(pt1, pt1-Vector3( siz, 0, 0), color );
+    between_2vecs_as_line(pt1, pt1+Vector3( siz, 0, 0), color );
+    
+    between_2vecs_as_line(pt1, pt1-Vector3( 0, siz, 0), color );
+    between_2vecs_as_line(pt1, pt1+Vector3( 0, siz, 0), color );
+
+    between_2vecs_as_line(pt1, pt1-Vector3( 0, 0, siz), color );
+    between_2vecs_as_line(pt1, pt1+Vector3( 0, 0, siz), color );
+
+}
+
+/**********************************************************/
+void model::print(Vector3 in)
+{
+    cout  <<" "<< in.x << " " << in.y << " " << in.z <<" "; 
 }
 
 
@@ -490,8 +572,6 @@ void model::op_zsort(Vector3 campos)
 
     //cout << "triangle count is " << triangle_count << " size of sorted is " << j <<"\n";
 
-    //for debugging
-    model::save_obj("sorted.obj");
 }
 
 
@@ -508,9 +588,17 @@ void model::save_obj( char* filename)
     myfile << "#number of triangles     "<< triangle_count <<"\n";
     myfile <<"\n";
 
-    //DEBUG why is vertex_count an attribute ?? - cant we just get the size of the array - DEBUG!
-    for (int xx=0;xx<model::vertex_count;xx++){
-        myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] <<"\n";
+    
+    for (int xx=0;xx<model::vertex_count;xx++)
+    {
+        if (vtx_rgb[xx][0]) 
+        {
+            myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] 
+                   << " "  << vtx_rgb[xx][0] <<" "<< vtx_rgb[xx][1] <<" "<< vtx_rgb[xx][2] 
+                           <<"\n";
+        }else{
+            myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] <<"\n";
+        }
     }
 
     myfile <<"\n";
