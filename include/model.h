@@ -35,6 +35,7 @@ class model: public polygon_ops {
         int triangle_count; // 3 sided polygons (triangles )
         int quad_count;     // 4 sided polygons 
         int nsided_count;   // all polygons that are not 1,2,3 sided 
+        int vtxrgb_count;   //experimental 
 
         int uv_count;       
         int normal_count;
@@ -42,6 +43,7 @@ class model: public polygon_ops {
         // --- 
         int vtx_cnt;
         int fac_cnt;
+
 
         vector<double> vtx_tmp;
         vector<int>    fac_tmp;  

@@ -59,7 +59,7 @@ void sceneloader::load_file( char* filepath )
             // walk the space delineated tokens 
             for (n=1; n < MAX_TOKENS_PER_LINE; n++)
             {
-                token[n] = strtok(0, " ");
+                token[n] = strtok(NULL, " \t\n");
                 if (!token[n]) break;  
             }
 
@@ -541,7 +541,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     
     //RS.show();
 
-    bool RENDER_SHADED     = false; //shaded (lit) or flat color polygon fill 
+    bool RENDER_SHADED     = true; //shaded (lit) or flat color polygon fill 
 
     //------------------------------
     framebuffer::RGBType* output_image;
@@ -589,8 +589,6 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
 
     model * OBJ = new model;
     OBJ->load_obj( RS.object_path );
-
-    OBJ->showinfo();
     
     if (OBJ->quad_count>0){
         OBJ->op_triangulate();
@@ -693,6 +691,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         
     }//render iterator
 
+    //OBJ->showinfo();
 
     
     //framebuffer::savebmp(outfilename , width, height, dpi, output_image);

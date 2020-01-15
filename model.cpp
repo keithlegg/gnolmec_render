@@ -101,11 +101,12 @@ void model::showinfo(void)
 {
     cout << "\n-----------------------------------------------\n";   
     cout << " loded num vertices    "<< model::vertex_count   << endl;
-    //cout << " total num faces       "<< model::face_count     << endl;
     cout << " loded num lines       "<< model::line_count     << endl;
     cout << " loded num triangles   "<< model::triangle_count << endl;
     cout << " loded num quads       "<< model::quad_count     << endl;
     cout << " loded num Nsided      "<< model::nsided_count   << endl;
+    cout << " loaded num vtxrgb     "<< model::vtxrgb_count   << endl;
+
     //cout << " getnumverts           "<< getnum_verts() << " \n";
     //cout << " getnumfaces           "<< getnum_faces() << " \n";   
 
@@ -218,7 +219,7 @@ void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2, Vector3 color)
     vector<int> newline;
 
     obj_pts[vertex_count] = pt1;
-    vtx_rgb[vertex_count] = color; 
+    vtx_rgb[vertex_count] = color; vtxrgb_count++;
 
     newline.push_back(vertex_count+1);
     vertex_count++;
@@ -226,7 +227,7 @@ void model::between_2vecs_as_line(Vector3 pt1, Vector3 pt2, Vector3 color)
     //--- 
 
     obj_pts[vertex_count] = pt2;
-    vtx_rgb[vertex_count] = color; 
+    vtx_rgb[vertex_count] = color; vtxrgb_count++;
 
     newline.push_back(vertex_count+1);
     vertex_count++;
@@ -268,12 +269,12 @@ void model::vec3_as_geom_atpos( Vector3 pt1 , Vector3 atpos, Vector3 color)
     vector<int> newline;
 
     obj_pts[vertex_count] = atpos;
-    vtx_rgb[vertex_count] = color; 
+    vtx_rgb[vertex_count] = color;vtxrgb_count++; 
     newline.push_back(vertex_count+1);
     vertex_count++;
     
     obj_pts[vertex_count] = atpos+pt1;
-    vtx_rgb[vertex_count] = color;     
+    vtx_rgb[vertex_count] = color; vtxrgb_count++;    
     newline.push_back(vertex_count+1);
     vertex_count++;
 
@@ -591,6 +592,9 @@ void model::save_obj( char* filename)
     
     for (int xx=0;xx<model::vertex_count;xx++)
     {
+        // cout << vtx_rgb[xx] << "\n";
+
+
         if (vtx_rgb[xx][0]) 
         {
             myfile << "v " << obj_pts[xx][0] <<" "<< obj_pts[xx][1] <<" "<< obj_pts[xx][2] 
@@ -699,7 +703,6 @@ void model::load_obj(char* filename){
     vtx_tmp.clear();
     fac_tmp.clear();
 
-
     while (!fin.eof())
     {
         char buf[MAX_CHARS_PER_LINE];
@@ -718,7 +721,7 @@ void model::load_obj(char* filename){
             // walk the space delineated tokens 
             for (n=1; n < MAX_TOKENS_PER_LINE; n++)
             {
-                token[n] = strtok(0, DELIMITER);
+                token[n] = strtok(NULL, " \n\t");
                 if (!token[n]) break;  
             }
 
@@ -857,7 +860,7 @@ void model::load_matrix(char* filename)
             // walk the space delineated tokens 
             for (n=1; n < MAX_TOKENS_PER_LINE; n++)
             {
-                token[n] = strtok(0, DELIMITER);
+                token[n] = strtok(NULL, " \t\n");
                 if (!token[n]) break;  
             }
 
