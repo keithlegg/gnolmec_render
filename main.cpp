@@ -222,7 +222,7 @@ void test_point_ops(void)
 
 
 
-    MOBJ->save_obj("point_ops.obj");
+    MOBJ->save_obj("3d_obj/testpointops.obj");
     //MOBJ2->save_obj("point_ops2.obj");
 
 
@@ -246,7 +246,7 @@ void test_point_ops(void)
 int main(int argc, char *argv[])
 {
 
-    //test_point_ops(); return 0;
+    // test_point_ops(); return 0;
 
     // test_load_save_ngc("3d_obj/arcspiral.ngc",""); return 0;
 

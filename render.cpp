@@ -361,7 +361,9 @@ int raster_clip(   double x1  , double y1  , double x2  , double y2  ,   // inpu
 /*********************************************************/
 
 // core of render engine - draw and fill triangles 
-void draw_triangle( sceneloader* prs, int width, int height, double rscale, framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
+void draw_triangle( sceneloader* prs, int width, int height, double rscale, 
+                    framebuffer* fb, Vector3 p1, Vector3 p2, Vector3 p3 , 
+                    framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
 {
     int RENDER_SCANLINE   = 1; // do the scan line render loop 
     //int RENDER_LINES      = 0; // wireframe edges  
@@ -511,16 +513,85 @@ void draw_triangle( sceneloader* prs, int width, int height, double rscale, fram
 
 
 /*********************************************************/
-//render_model( int width, int height, char* objfilename, char* renderscript, char* outfilename)
-//top render function 
+
+
+void draw_lines( sceneloader* prs, int width, int height, double rscale, 
+                    framebuffer* fb, Vector3 p1, Vector3 p2,  
+                    framebuffer::RGBType linecolor)
+{
+
+    int SHOW_CLIP_AREA    = 0; // show clipping rectangle 
+
+    // DEBUG - NEED TO PULL FROM SCREENSIZE  - THIS IS HARDCODED            
+    // define clipping rectangle 
+    double clp_x1  = 1;
+    double clp_y1  = 1;
+    double clp_x2  = width-1;
+    double clp_y2  = height-1;
+    double clipwidth  = abs(clp_x2-clp_x1);
+    double clipheight = abs(clp_y2-clp_y1);
+
+
+    double cenx = (double)fb->center_x;
+    double ceny = (double)fb->center_y;
+
+    int num_hits = 0;
+    double cit = 0.0;
+
+    //store the hits that raster_clip() finds  
+    double h1x,  h1y,  h2x,  h2y,  h3x,  h3y = 0.0; 
+    double* ph1x = &h1x; 
+    double* ph1y = &h1y; 
+    double* ph2x = &h2x; 
+    double* ph2y = &h2y;
+    double* ph3x = &h3x;
+    double* ph3y = &h3y;
+
+    double scx1, scy1, ecx1, ecy1, 
+           scx2, scy2, ecx2, ecy2; 
+
+    // scale pt1 and translate it to the center of screen  
+    scx1 =  ((double)(p1.x * rscale) + cenx );
+    scy1 =  ((double)(p1.y * rscale) + ceny );
+    ecx1 =  ((double)(p2.x * rscale) + cenx ); 
+    ecy1 =  ((double)(p2.y * rscale) + ceny ); 
+
+
+    // DEBUG - view clip rectangle 
+    //CLipping is not taken into account ... YET 
+    if (SHOW_CLIP_AREA == 1)
+    {
+        fb->draw_line(clp_x1, clp_y1, clp_x2, clp_y1, linecolor);
+        fb->draw_line(clp_x2, clp_y1, clp_x2, clp_y2, linecolor);
+        fb->draw_line(clp_x2, clp_y2, clp_x1, clp_y2, linecolor);
+        fb->draw_line(clp_x1, clp_y2, clp_x1, clp_y1, linecolor);
+    }   
+
+    fb->draw_line(scx1, scy1, ecx1, ecy1, linecolor);
+
+    // for (cit=clp_y1;cit<clp_y2;cit=cit+1)
+    // {   
+    //     //fb->draw_line(clp_x1, cit, clp_x2, cit, linecolor);  //debug - full scanline
+    //     // // intersect the first 2 lines ------------------------------------------------------    
+    //     // num_hits = raster_clip( clp_x1 , cit  , clp_x2  , cit ,      // input line (raster) 
+    //     //                         scx1   , scy1    , ecx1   , ecy1  ,  // line1 to intersect
+    //     //                         scx2   , scy2    , ecx2   , ecy2  ,  // line2 to intersect
+    //     //                         ph1x   , ph1y    , ph2x   , ph2y );  // output line, if any 
+    //     // if (num_hits==2){
+    //     //     //cout << "we have a hit 1! " << (int)*ph1x <<" "<< (int)*ph1y <<" "<< (int)*ph2x << " " << (int)*ph2y <<"\n";
+    //     //     fb->draw_line((int)*ph1x, (int)*ph1y, (int)*ph2x, (int)*ph2y, linecolor); //polygon fill
+    //     // }
+    // }//line clipping loop 
+
+
+}
+
+
+/*********************************************************/
 
 // DEBUG - WIREFRAMES WILL CRASH IF ATTEMPT TO DRAW OFF SCREEN 
 void render_model( int width, int height, char* renderscript, char* outfilename)
 {
-
-
-    /***********/
-    Vector2 thisedge;      //iterator for edges
     Vector4 poly;          //store vertex id's in a vector4 (4 sided poly) 
     Vector3 poly3;         //store vertex id's in a vector3 (3 sided poly) 
     Vector4 vprj[4];       //3 and 4 sided -  projected point coordinates
@@ -541,7 +612,8 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     
     //RS.show();
 
-    bool RENDER_SHADED     = true; //shaded (lit) or flat color polygon fill 
+    bool RENDER_SHADED       = false; //shaded (lit) or flat color polygon fill 
+    bool RENDER_SIMPLESHADE  = true;
 
     //------------------------------
     framebuffer::RGBType* output_image;
@@ -566,7 +638,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     Matrix4 rotate_obj;    //4X4 rotation matrix
     rotate_obj.identity();
   
-    //adjust object rotation
+    // adjust object rotation
     // rotate_obj.rotateX( RX );
     // rotate_obj.rotateY( RY );
     // rotate_obj.rotateZ( RZ );
@@ -649,20 +721,11 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             // light direction vector   
             Vector3 L = RS.lightpos - fcntr; 
 
-            // cout << "tri center ";
-            // test_vectors->print( fcntr);    
-            // cout << "Light ";
-            // test_vectors->print( RS.lightpos);
-            // test_vectors->print( L );
-            // cout << " Normal ";
-            // test_vectors->print(N);
-            // cout << "\n";
-
-
-            
-            test_vectors->vec3_as_pt_geom( RS.lightpos, Vector3(1, 1, 0) );
-            test_vectors->vec3_as_geom_atpos( L ,Vector3(0,0,0), Vector3(0, 1, 0) );
+            //create  3d object for debugging             
+            // test_vectors->vec3_as_pt_geom( RS.lightpos, Vector3(1, 1, 0) );
+            // test_vectors->vec3_as_geom_atpos( L ,Vector3(0,0,0), Vector3(0, 1, 0) );
            
+            //between_2vecs_as_line();
 
             //normalized light direction (messing with color DEBUG ) 
             Vector3 Lnrml = L.normalize();
@@ -681,6 +744,31 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             fill_color.b = clamp((int) color.z ,0 , 255);
 
         }
+        
+        //----------
+
+        //secondary "angle to light" shading  
+        if (RENDER_SIMPLESHADE)
+        {
+            Vector3 fcntr;
+            OBJ->centroid(&fcntr, p1, p2, p3);            
+            Vector3 N = OBJ->three_vec3_to_normal( p1, p2, p3, true);   
+            Vector3 L = RS.lightpos - fcntr; 
+            
+            double angle = -N.angle(L);
+
+            Vector3 color = Vector3(angle, angle, angle);
+
+            //cout << " in color " << color.x << " " << color.y << " " << color.z << " "<< "\n";
+
+            fill_color.r = clamp((int)( abs(color.x) * RS.lightintensity), 0, 255);
+            fill_color.g = clamp((int)( abs(color.y) * RS.lightintensity), 0, 255);
+            fill_color.b = clamp((int)( abs(color.z) * RS.lightintensity), 0, 255);
+   
+            //cout << " final color " << fill_color.r << " " << fill_color.g << " " << fill_color.b << " "<< "\n";
+        }
+        
+        //----------
 
         // //clamp the color before using it 
         // fill_color.r = clamp(fill_color.r, 0, 255);
@@ -690,10 +778,28 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         draw_triangle( &RS, width, height, RSCALE, p_lineart, p1, p2, p3 , fill_color, RS.line_color);
         
     }//render iterator
+    
+    /***********************/
+
 
     //OBJ->showinfo();
 
-    
+    /***********************/
+
+    // void draw_lines( sceneloader* prs, int width, int height, double rscale, 
+    //                     framebuffer* fb, Vector3 p1, Vector3 p2,  
+    //                     framebuffer::RGBType fillcolor, framebuffer::RGBType linecolor)
+
+    // DRAW LINE GEOM 
+    for (i=0;i<OBJ->line_count;i++)
+    {
+        Vector3 p1 = rotate_obj * OBJ->obj_pts[ int(OBJ->lines[i][0])-1];
+        Vector3 p2 = rotate_obj * OBJ->obj_pts[ int(OBJ->lines[i][1])-1];
+
+        draw_lines( &RS, width, height, RSCALE, p_lineart, p1, p2, RS.line_color);        
+    }
+    /***********************/
+
     //framebuffer::savebmp(outfilename , width, height, dpi, output_image);
     BMP new_outfile(width, height);
     new_outfile.dump_rgba_data(0,0,width,height,output_image);
@@ -703,7 +809,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     cout << "finished rendering." << endl;
     
     test_vectors->save_obj("3d_obj/testvectors.obj");
-
+    
     delete(test_vectors);
     delete(OBJ);
 
@@ -711,8 +817,37 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*********************************************************/
 /*********************************************************/
+
+
 
 // old top render function - example of a simple as posible wire renderer (not using any other functions)
 void really_simple_render_model( int width, int height, char* objfilename, char* matrixfile, 
@@ -758,7 +893,6 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
    OBJ.load_obj(objfilename);
 
    /***********/
-   Vector2 thisedge;      //iterator for edges
    Vector4 poly;          //store vertex id's in a vector4 (4 sided poly) 
    Vector3 poly3;         //store vertex id's in a vector3 (3 sided poly) 
    Vector4 vprj[4];       //3 and 4 sided -  projected point coordinates
@@ -777,13 +911,7 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
 
    
    rotate_obj.identity();
-
-   //rotate_obj.show();
-   // printf( "%d", rotate_obj );
-   //rotate_obj.scale(1.8);
-   //rotate_obj.translate(15,15,15);
-   //rotate_obj.show();
-  
+ 
    //adjust object rotation
    rotate_obj.rotateY( RY );
    rotate_obj.rotateX( RX );
@@ -812,6 +940,7 @@ void really_simple_render_model( int width, int height, char* objfilename, char*
 
    rotate_obj = rotate_obj * camera_matrix.m44;
 
+   // DRAW TRIANGLES 
    //set this to number of triangles , or 1 if rendering edges
    for (i=0;i<OBJ.triangle_count;i++)
    {
