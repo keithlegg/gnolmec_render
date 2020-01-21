@@ -612,8 +612,8 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
     
     //RS.show();
 
-    bool RENDER_SHADED       = false; //shaded (lit) or flat color polygon fill 
-    bool RENDER_SIMPLESHADE  = true;
+    bool RENDER_LAMBERT      = true; // lamertian reflection
+    bool RENDER_SIMPLESHADE  = false; // basic phong 
 
     //------------------------------
     framebuffer::RGBType* output_image;
@@ -705,7 +705,7 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
 
 
         //--------------
-        if ( RENDER_SHADED == true)
+        if ( RENDER_LAMBERT == true)
         {
             // get the center of face to move light vector to 
             Vector3 fcntr;
@@ -748,22 +748,22 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
         //----------
 
         //secondary "angle to light" shading  
-        if (RENDER_SIMPLESHADE)
+        if (RENDER_SIMPLESHADE == true)
         {
             Vector3 fcntr;
             OBJ->centroid(&fcntr, p1, p2, p3);            
             Vector3 N = OBJ->three_vec3_to_normal( p1, p2, p3, true);   
             Vector3 L = RS.lightpos - fcntr; 
             
-            double angle = -N.angle(L);
+            double angle = N.angle(L);
 
             Vector3 color = Vector3(angle, angle, angle);
 
             //cout << " in color " << color.x << " " << color.y << " " << color.z << " "<< "\n";
 
-            fill_color.r = clamp((int)( abs(color.x) * RS.lightintensity), 0, 255);
-            fill_color.g = clamp((int)( abs(color.y) * RS.lightintensity), 0, 255);
-            fill_color.b = clamp((int)( abs(color.z) * RS.lightintensity), 0, 255);
+            fill_color.r = clamp((int)( fill_color.r + abs(color.x) * RS.lightintensity), 0, 255);
+            fill_color.g = clamp((int)( fill_color.g + abs(color.y) * RS.lightintensity), 0, 255);
+            fill_color.b = clamp((int)( fill_color.b + abs(color.z) * RS.lightintensity), 0, 255);
    
             //cout << " final color " << fill_color.r << " " << fill_color.g << " " << fill_color.b << " "<< "\n";
         }
