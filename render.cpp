@@ -739,9 +739,9 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
             color.z = dotprod * Lnrml.z * color.z * RS.lightintensity;  
 
             //more ambient, flatter looking 
-            fill_color.r = clamp((int) color.x ,0 , 255);
-            fill_color.g = clamp((int) color.y ,0 , 255);
-            fill_color.b = clamp((int) color.z ,0 , 255);
+            fill_color.r = clamp((int) (5*color.x) ,20 , 255);
+            fill_color.g = clamp((int) (5*color.y) ,20 , 255);
+            fill_color.b = clamp((int) (5*color.z) ,20 , 255);
 
         }
         
@@ -761,9 +761,9 @@ void render_model( int width, int height, char* renderscript, char* outfilename)
 
             //cout << " in color " << color.x << " " << color.y << " " << color.z << " "<< "\n";
 
-            fill_color.r = clamp((int)( fill_color.r + abs(color.x) * RS.lightintensity), 0, 255);
-            fill_color.g = clamp((int)( fill_color.g + abs(color.y) * RS.lightintensity), 0, 255);
-            fill_color.b = clamp((int)( fill_color.b + abs(color.z) * RS.lightintensity), 0, 255);
+            fill_color.r = clamp((int)( fill_color.r + abs(color.x) * RS.lightintensity), 20, 255);
+            fill_color.g = clamp((int)( fill_color.g + abs(color.y) * RS.lightintensity), 20, 255);
+            fill_color.b = clamp((int)( fill_color.b + abs(color.z) * RS.lightintensity), 20, 255);
    
             //cout << " final color " << fill_color.r << " " << fill_color.g << " " << fill_color.b << " "<< "\n";
         }
